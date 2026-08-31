@@ -11,10 +11,7 @@ export async function customerRoutes(app: FastifyInstance): Promise<void> {
   const typedApp = app.withTypeProvider<ZodTypeProvider>();
 
   // List, Summary & Export
-  typedApp.get(
-    "/summary",
-    customerController.getCustomerSummaryHandler,
-  );
+  typedApp.get("/summary", customerController.getCustomerSummaryHandler);
 
   typedApp.get(
     "/",

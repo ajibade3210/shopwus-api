@@ -20,9 +20,11 @@ export const FEATURED_STUDIOS_SEED_DATA: FeaturedStudioSeedData[] = [
     slug: "elan-events",
     name: "Élan Events",
     tagline: "Luxury Event Studio · Lagos",
-    description: "We design unforgettable weddings, corporate events, and private celebrations with timeless elegance.",
+    description:
+      "We design unforgettable weddings, corporate events, and private celebrations with timeless elegance.",
     location: "Victoria Island, Lagos",
-    logoUrl: "https://cdn.accessa.ng/test/accessa/louis-dike-ayskyj/images/c95e52aa48bf676ed0d53f36bb957b81.png",
+    logoUrl:
+      "https://cdn.accessa.ng/test/accessa/louis-dike-ayskyj/images/c95e52aa48bf676ed0d53f36bb957b81.png",
     businessType: "STUDIO",
     currency: "NGN",
     ownerEmail: "director@elan-events.ng",
@@ -33,7 +35,8 @@ export const FEATURED_STUDIOS_SEED_DATA: FeaturedStudioSeedData[] = [
     slug: "maison-bell-events",
     name: "Maison Bell Events",
     tagline: "Haute Couture & Bridal · Paris / London",
-    description: "Editorial wedding design and high-society galas across Europe's finest historical landmarks.",
+    description:
+      "Editorial wedding design and high-society galas across Europe's finest historical landmarks.",
     location: "Paris / London",
     logoUrl: "https://cdn.logosystem.co/logos/the-huntington.webp",
     businessType: "STUDIO",
@@ -46,7 +49,8 @@ export const FEATURED_STUDIOS_SEED_DATA: FeaturedStudioSeedData[] = [
     slug: "lumio-atelier",
     name: "Lumio Atelier",
     tagline: "Spatial Design & Light · Milan",
-    description: "Architectural lighting, experiential banquets, and modern spatial art for corporate galas and exhibitions.",
+    description:
+      "Architectural lighting, experiential banquets, and modern spatial art for corporate galas and exhibitions.",
     location: "Milan, Italy",
     logoUrl: "https://cdn.logosystem.co/logos/hatil.webp",
     businessType: "STUDIO",
@@ -59,7 +63,8 @@ export const FEATURED_STUDIOS_SEED_DATA: FeaturedStudioSeedData[] = [
     slug: "meridian-celebrations",
     name: "Meridian Celebrations",
     tagline: "Destination Galas · Lake Como / Amalfi",
-    description: "Multi-day lakeside celebrations and private yacht receptions for discerning global clientele.",
+    description:
+      "Multi-day lakeside celebrations and private yacht receptions for discerning global clientele.",
     location: "Lake Como / Amalfi, Italy",
     logoUrl: "https://cdn.logosystem.co/logos/mila.webp",
     businessType: "STUDIO",
@@ -72,7 +77,8 @@ export const FEATURED_STUDIOS_SEED_DATA: FeaturedStudioSeedData[] = [
     slug: "arcwell-bespoke",
     name: "Arcwell Bespoke",
     tagline: "Private Estate Soirées · New York",
-    description: "Discreet milestone celebrations, black-tie dinners, and bespoke artistic productions for private estates.",
+    description:
+      "Discreet milestone celebrations, black-tie dinners, and bespoke artistic productions for private estates.",
     location: "Manhattan, New York",
     logoUrl: "https://cdn.logosystem.co/logos/fourthfloor.webp",
     businessType: "STUDIO",
@@ -85,7 +91,8 @@ export const FEATURED_STUDIOS_SEED_DATA: FeaturedStudioSeedData[] = [
     slug: "solace-studios",
     name: "Solace Studios",
     tagline: "Ultra-Luxury Gala Productions · Dubai",
-    description: "Iconic corporate galas and royal wedding productions curated with quiet elegance and cutting-edge stagecraft.",
+    description:
+      "Iconic corporate galas and royal wedding productions curated with quiet elegance and cutting-edge stagecraft.",
     location: "Downtown, Dubai",
     logoUrl: "https://cdn.logosystem.co/logos/renforce.webp",
     businessType: "STUDIO",
@@ -200,5 +207,7 @@ export async function seedFeaturedStudios(prisma: PrismaClient): Promise<void> {
     });
   }
 
-  console.info(`✅ Seeded ${FEATURED_STUDIOS_SEED_DATA.length} featured showcase studios.`);
+  console.info(
+    `✅ Seeded ${FEATURED_STUDIOS_SEED_DATA.length} featured showcase studios.`,
+  );
 }

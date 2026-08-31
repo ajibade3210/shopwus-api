@@ -115,19 +115,29 @@ export async function updateStudioMeService(
   if (input.timeFrom !== undefined)
     dataToUpdate.timeFrom = input.timeFrom?.trim();
   if (input.timeTo !== undefined) dataToUpdate.timeTo = input.timeTo?.trim();
-  if (input.byAppointmentOnly !== undefined)
+  if (
+    input.byAppointmentOnly !== undefined &&
+    input.byAppointmentOnly !== null
+  ) {
     dataToUpdate.byAppointmentOnly = input.byAppointmentOnly;
-  if (input.colors !== undefined) dataToUpdate.colors = input.colors;
+  }
+  if (input.colors !== undefined && input.colors !== null) {
+    dataToUpdate.colors = input.colors;
+  }
   if (input.buttonRadius !== undefined)
     dataToUpdate.buttonRadius = input.buttonRadius?.trim();
-  if (input.showServices !== undefined)
+  if (input.showServices !== undefined && input.showServices !== null) {
     dataToUpdate.showServices = input.showServices;
-  if (input.showPortfolio !== undefined)
+  }
+  if (input.showPortfolio !== undefined && input.showPortfolio !== null) {
     dataToUpdate.showPortfolio = input.showPortfolio;
-  if (input.showReviews !== undefined)
+  }
+  if (input.showReviews !== undefined && input.showReviews !== null) {
     dataToUpdate.showReviews = input.showReviews;
-  if (input.showFooterCta !== undefined)
+  }
+  if (input.showFooterCta !== undefined && input.showFooterCta !== null) {
     dataToUpdate.showFooterCta = input.showFooterCta;
+  }
   if (input.footerEyebrow !== undefined)
     dataToUpdate.footerEyebrow = input.footerEyebrow?.trim();
   if (input.footerTitle !== undefined)
@@ -136,7 +146,10 @@ export async function updateStudioMeService(
     dataToUpdate.footerDescription = input.footerDescription?.trim();
   if (input.googleReviewsLink !== undefined)
     dataToUpdate.googleReviewsLink = input.googleReviewsLink?.trim();
-  if (input.portfolioCategories !== undefined)
+  if (
+    input.portfolioCategories !== undefined &&
+    input.portfolioCategories !== null
+  )
     dataToUpdate.portfolioCategories = input.portfolioCategories;
 
   await prisma.$transaction(async (tx) => {

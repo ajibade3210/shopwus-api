@@ -189,4 +189,3 @@ export async function updateMeService(userId: string, data: UpdateMeInput) {
       : null,
   };
 }
-

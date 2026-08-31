@@ -5,10 +5,9 @@ import { env } from "../config/env";
 
 export const registerCors = fp(async (app: FastifyInstance) => {
   const origins = env.CORS
-  
-  ? env.CORS.split(",").map(o => o.trim())
-  : [env.FRONTEND_URL];
-  
+    ? env.CORS.split(",").map((o) => o.trim())
+    : [env.FRONTEND_URL];
+
   await app.register(cors, {
     origin: origins,
     methods: ["GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS"],

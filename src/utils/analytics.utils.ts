@@ -12,7 +12,7 @@ export function formatCompact(val: number): string {
 
 export function calculateNiceCeiling(maxVal: number): number {
   if (maxVal <= 0) return 1000;
-  const power = Math.pow(10, Math.floor(Math.log10(maxVal)));
+  const power = 10 ** Math.floor(Math.log10(maxVal));
   const normalized = maxVal / power;
   let multiple: number;
   if (normalized <= 1) multiple = 1;

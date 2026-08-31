@@ -4,7 +4,10 @@ import { env } from "../config/env";
 
 export async function registerRateLimit(app: FastifyInstance): Promise<void> {
   await app.register(rateLimit, {
-    max: env.NODE_ENV === "development" ? Math.max(env.RATE_LIMIT_MAX, 2000) : env.RATE_LIMIT_MAX,
+    max:
+      env.NODE_ENV === "development"
+        ? Math.max(env.RATE_LIMIT_MAX, 2000)
+        : env.RATE_LIMIT_MAX,
     timeWindow: env.RATE_LIMIT_TIME_WINDOW,
     errorResponseBuilder: (_req, context) => {
       return {

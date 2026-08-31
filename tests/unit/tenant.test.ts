@@ -3,9 +3,9 @@ import { tenantExtensionDefinition } from "../../src/lib/prisma-tenant-extension
 import { requestContext } from "../../src/utils/requestContext";
 
 interface CapturedQueryArgs {
-  where?: Record<string, any>;
-  data?: Record<string, any>;
-  create?: Record<string, any>;
+  where?: Record<string, unknown>;
+  data?: Record<string, unknown> | Array<Record<string, unknown>>;
+  create?: Record<string, unknown>;
 }
 
 describe("Tenant Isolation Prisma Extension Unit Tests", () => {
@@ -170,7 +170,9 @@ describe("Tenant Isolation Prisma Extension Unit Tests", () => {
       });
     });
 
-    expect(capturedArgs.data?.businessId).toBe("biz_tenant_gamma");
+    expect(
+      (capturedArgs.data as Record<string, unknown> | undefined)?.businessId,
+    ).toBe("biz_tenant_gamma");
   });
 
   it("auto-injects businessId across createMany entries", async () => {
@@ -194,8 +196,9 @@ describe("Tenant Isolation Prisma Extension Unit Tests", () => {
       });
     });
 
-    expect(capturedArgs.data?.[0]?.businessId).toBe("biz_tenant_gamma");
-    expect(capturedArgs.data?.[1]?.businessId).toBe("biz_tenant_gamma");
+    const dataArray = capturedArgs.data as Array<Record<string, unknown>>;
+    expect(dataArray?.[0]?.businessId).toBe("biz_tenant_gamma");
+    expect(dataArray?.[1]?.businessId).toBe("biz_tenant_gamma");
   });
 
   it("ignores non-tenant models", async () => {

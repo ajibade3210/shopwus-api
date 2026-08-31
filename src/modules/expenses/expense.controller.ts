@@ -46,7 +46,10 @@ export async function getExpenseHandler(
   request: FastifyRequest<{ Params: ExpenseIdParams }>,
   reply: FastifyReply,
 ) {
-  const result = await getExpenseByIdService(request.params.id, request.businessId);
+  const result = await getExpenseByIdService(
+    request.params.id,
+    request.businessId,
+  );
   return reply.success(result, "Expense retrieved");
 }
 
@@ -77,7 +80,10 @@ export async function deleteExpenseHandler(
   request: FastifyRequest<{ Params: ExpenseIdParams }>,
   reply: FastifyReply,
 ) {
-  const result = await deleteExpenseService(request.params.id, request.businessId);
+  const result = await deleteExpenseService(
+    request.params.id,
+    request.businessId,
+  );
   return reply.success(result, "Expense deleted successfully");
 }
 
@@ -101,4 +107,3 @@ export async function exportExpensesHandler(
   );
   return reply.send(csv);
 }
-

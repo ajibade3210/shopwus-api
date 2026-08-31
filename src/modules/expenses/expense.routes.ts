@@ -19,15 +19,9 @@ export async function expenseRoutes(app: FastifyInstance): Promise<void> {
     expenseController.listExpensesHandler,
   );
 
-  typedApp.get(
-    "/summary",
-    expenseController.getExpenseSummaryHandler,
-  );
+  typedApp.get("/summary", expenseController.getExpenseSummaryHandler);
 
-  typedApp.get(
-    "/categories",
-    expenseController.getExpenseCategoriesHandler,
-  );
+  typedApp.get("/categories", expenseController.getExpenseCategoriesHandler);
 
   typedApp.get(
     "/export",

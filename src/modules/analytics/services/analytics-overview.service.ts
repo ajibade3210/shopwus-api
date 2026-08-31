@@ -29,7 +29,15 @@ export async function getAnalyticsOverviewService(
   let timeframeLabel: string;
 
   if (timeframe === "daily") {
-    startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+    startDate = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+      0,
+      0,
+      0,
+      0,
+    );
     prevStartDate = new Date(startDate.getTime() - 24 * 60 * 60 * 1000);
     timeframeLabel = "Today";
   } else if (timeframe === "weekly") {
@@ -185,7 +193,12 @@ export async function getAnalyticsOverviewService(
 
   const revProgress =
     prevRevenue > 0
-      ? Math.min(100, Math.round((currentRevenue / Math.max(prevRevenue, currentRevenue, 1)) * 100))
+      ? Math.min(
+          100,
+          Math.round(
+            (currentRevenue / Math.max(prevRevenue, currentRevenue, 1)) * 100,
+          ),
+        )
       : currentRevenue > 0
         ? 100
         : 0;
@@ -218,9 +231,7 @@ export async function getAnalyticsOverviewService(
   const netProfit = currentRevenue - currentExpenseTotal;
   const isProfitable = netProfit >= 0;
   const profitMargin =
-    currentRevenue > 0
-      ? Math.round((netProfit / currentRevenue) * 100)
-      : 0;
+    currentRevenue > 0 ? Math.round((netProfit / currentRevenue) * 100) : 0;
 
   // Compute Leads / Inquiries
   const totalLeadsCount = periodLeads.length;
@@ -424,7 +435,12 @@ export async function getAnalyticsOverviewService(
       isPositive: viewsGrowth >= 0,
       progressPercent:
         prevPeriodViews > 0
-          ? Math.min(100, Math.round((currentPeriodViews / Math.max(prevPeriodViews, 1)) * 100))
+          ? Math.min(
+              100,
+              Math.round(
+                (currentPeriodViews / Math.max(prevPeriodViews, 1)) * 100,
+              ),
+            )
           : currentPeriodViews > 0
             ? 100
             : 0,

@@ -24,4 +24,3 @@ export async function getBroadcastHistoryHandler(
   const result = await getBroadcastHistoryService(request.businessId);
   return reply.success(result, "Broadcast campaign history retrieved");
 }
-

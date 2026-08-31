@@ -148,4 +148,3 @@ export function getBusinessId(request: FastifyRequest): string {
   }
   return businessId;
 }
-

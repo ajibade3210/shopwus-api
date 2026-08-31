@@ -54,7 +54,10 @@ export async function getCustomerHandler(
   request: FastifyRequest<{ Params: CustomerIdParams }>,
   reply: FastifyReply,
 ) {
-  const result = await getCustomerByIdService(request.params.id, request.businessId);
+  const result = await getCustomerByIdService(
+    request.params.id,
+    request.businessId,
+  );
   return reply.success(result, "Customer retrieved");
 }
 
@@ -100,7 +103,10 @@ export async function deleteCustomerHandler(
   request: FastifyRequest<{ Params: CustomerIdParams }>,
   reply: FastifyReply,
 ) {
-  const result = await deleteCustomerService(request.params.id, request.businessId);
+  const result = await deleteCustomerService(
+    request.params.id,
+    request.businessId,
+  );
   return reply.success(result, "Customer deleted successfully");
 }
 
@@ -185,7 +191,10 @@ export async function exportCustomersHandler(
   request: FastifyRequest<{ Querystring: { q?: string; isActive?: boolean } }>,
   reply: FastifyReply,
 ) {
-  const csv = await exportCustomersCsvService(request.businessId, request.query);
+  const csv = await exportCustomersCsvService(
+    request.businessId,
+    request.query,
+  );
 
   reply.header("Content-Type", "text/csv; charset=utf-8");
   reply.header(
@@ -194,4 +203,3 @@ export async function exportCustomersHandler(
   );
   return reply.send(csv);
 }
-

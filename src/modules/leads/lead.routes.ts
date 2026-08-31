@@ -25,10 +25,7 @@ export async function leadRoutes(app: FastifyInstance): Promise<void> {
 
     const typedAuthApp = authApp.withTypeProvider<ZodTypeProvider>();
 
-    typedAuthApp.get(
-      "/summary",
-      leadController.getLeadSummaryHandler,
-    );
+    typedAuthApp.get("/summary", leadController.getLeadSummaryHandler);
 
     typedAuthApp.get(
       "/",

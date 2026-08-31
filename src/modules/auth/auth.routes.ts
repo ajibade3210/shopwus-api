@@ -96,4 +96,3 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
     authController.updateMe,
   );
 }
-

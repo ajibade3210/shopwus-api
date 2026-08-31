@@ -44,5 +44,3 @@ export async function getServicesPerformanceHandler(
   const result = await getServicesPerformanceService(request.businessId);
   return reply.success(result, "Services performance ranking retrieved");
 }
-
-

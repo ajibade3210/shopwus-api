@@ -43,7 +43,15 @@ export const tenantExtensionDefinition = {
           return query(args);
         }
 
-        const currentArgs = (args || {}) as Record<string, any>;
+        type TenantOperationArgs = {
+          where?: Record<string, unknown>;
+          data?: Record<string, unknown> | Array<Record<string, unknown>>;
+          create?: Record<string, unknown>;
+          update?: Record<string, unknown>;
+          [key: string]: unknown;
+        };
+
+        const currentArgs = (args || {}) as TenantOperationArgs;
 
         // 1. Read operations: findFirst, findMany, count, aggregate, groupBy
         if (
@@ -82,7 +90,7 @@ export const tenantExtensionDefinition = {
 
         // 3. Create operations: create, createMany
         if (operation === "create") {
-          if (currentArgs.data) {
+          if (currentArgs.data && !Array.isArray(currentArgs.data)) {
             currentArgs.data.businessId = tenantId;
           }
           return query(currentArgs);

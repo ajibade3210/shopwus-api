@@ -52,7 +52,10 @@ export async function getLeadHandler(
   request: FastifyRequest<{ Params: LeadIdParams }>,
   reply: FastifyReply,
 ) {
-  const result = await getLeadByIdService(request.params.id, request.businessId);
+  const result = await getLeadByIdService(
+    request.params.id,
+    request.businessId,
+  );
   return reply.success(result, "Lead retrieved");
 }
 
@@ -115,4 +118,3 @@ export async function deleteLeadHandler(
   const result = await deleteLeadService(request.params.id, request.businessId);
   return reply.success(result, "Lead deleted successfully");
 }
-

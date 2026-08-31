@@ -26,4 +26,3 @@ export async function calculateAdvancedValuationHandler(
   );
   return reply.success(result, "Studio valuation computed successfully");
 }
-

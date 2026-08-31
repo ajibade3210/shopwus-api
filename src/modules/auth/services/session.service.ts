@@ -86,7 +86,7 @@ export async function loginService(
     },
   });
 
-  if (!user || !user.passwordHash) {
+  if (!user?.passwordHash) {
     throw new UnauthorizedError(
       "Invalid email or password",
       DomainErrorCode.AUTH_FAILED,

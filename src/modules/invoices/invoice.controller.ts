@@ -49,7 +49,10 @@ export async function getInvoiceHandler(
   request: FastifyRequest<{ Params: InvoiceIdParams }>,
   reply: FastifyReply,
 ) {
-  const result = await getInvoiceByIdService(request.params.id, request.businessId);
+  const result = await getInvoiceByIdService(
+    request.params.id,
+    request.businessId,
+  );
   return reply.success(result, "Invoice retrieved");
 }
 
@@ -95,7 +98,10 @@ export async function deleteInvoiceHandler(
   request: FastifyRequest<{ Params: InvoiceIdParams }>,
   reply: FastifyReply,
 ) {
-  const result = await deleteInvoiceService(request.params.id, request.businessId);
+  const result = await deleteInvoiceService(
+    request.params.id,
+    request.businessId,
+  );
   return reply.success(result, "Invoice deleted successfully");
 }
 
@@ -103,7 +109,10 @@ export async function sendInvoiceHandler(
   request: FastifyRequest<{ Params: InvoiceIdParams }>,
   reply: FastifyReply,
 ) {
-  const result = await sendInvoiceService(request.params.id, request.businessId);
+  const result = await sendInvoiceService(
+    request.params.id,
+    request.businessId,
+  );
   return reply.success(result, "Invoice dispatched to client successfully");
 }
 
@@ -111,7 +120,10 @@ export async function resendInvoiceHandler(
   request: FastifyRequest<{ Params: InvoiceIdParams }>,
   reply: FastifyReply,
 ) {
-  const result = await resendInvoiceService(request.params.id, request.businessId);
+  const result = await resendInvoiceService(
+    request.params.id,
+    request.businessId,
+  );
   return reply.success(result, "Invoice resent to client successfully");
 }
 
@@ -201,4 +213,3 @@ export async function sendQuickCustomerInvoiceHandler(
     201,
   );
 }
-

@@ -55,4 +55,3 @@ export function getCurrencySymbol(currency?: string | null): string {
   const normalized = currency.toUpperCase().trim();
   return CURRENCY_SYMBOLS[normalized] || "₦";
 }
-

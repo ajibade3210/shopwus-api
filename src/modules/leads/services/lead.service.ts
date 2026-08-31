@@ -398,8 +398,7 @@ export async function getLeadSummaryService(businessId: string) {
     (l) => l.status === "new" || l.createdAt >= today,
   ).length;
   const convertedCount = leads.filter((l) => l.status === "converted").length;
-  const conversion =
-    total > 0 ? Math.round((convertedCount / total) * 100) : 0;
+  const conversion = total > 0 ? Math.round((convertedCount / total) * 100) : 0;
 
   return {
     total,

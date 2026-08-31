@@ -167,4 +167,3 @@ export async function updateMe(
   const result = await authService.updateMeService(req.user.userId, req.body);
   return reply.success(result, "User profile updated successfully");
 }
-

@@ -95,7 +95,7 @@ describe("Analytics Module Unit Tests", () => {
 
       jest.spyOn(prisma.business, "findUnique").mockResolvedValue({
         currency: "NGN",
-      } as any);
+      } as unknown as Awaited<ReturnType<typeof prisma.business.findUnique>>);
       jest.spyOn(prisma.invoice, "findMany").mockResolvedValue([]);
       jest.spyOn(prisma.expense, "findMany").mockResolvedValue([]);
       jest.spyOn(prisma.lead, "findMany").mockResolvedValue([]);
@@ -103,7 +103,9 @@ describe("Analytics Module Unit Tests", () => {
       jest.spyOn(prisma.customerActivity, "count").mockResolvedValue(0);
       jest.spyOn(prisma.broadcastCampaign, "aggregate").mockResolvedValue({
         _sum: { recipientCount: 0 },
-      } as any);
+      } as unknown as Awaited<
+        ReturnType<typeof prisma.broadcastCampaign.aggregate>
+      >);
       jest.spyOn(prisma.customerService, "findMany").mockResolvedValue([]);
       jest.spyOn(prisma.service, "findMany").mockResolvedValue([]);
 
@@ -133,54 +135,60 @@ describe("Analytics Module Unit Tests", () => {
 
       jest.spyOn(prisma.business, "findUnique").mockResolvedValue({
         currency: "USD",
-      } as any);
+      } as unknown as Awaited<ReturnType<typeof prisma.business.findUnique>>);
       jest.spyOn(prisma.invoice, "findMany").mockResolvedValue([
         {
           id: "inv-1",
-          total: 1000 as any,
+          total: 1000,
           status: "paid",
           createdAt: mockDate,
-        } as any,
+        },
         {
           id: "inv-2",
-          total: 500 as any,
+          total: 500,
           status: "sent",
           createdAt: mockDate,
-        } as any,
-      ]);
+        },
+      ] as unknown as Awaited<ReturnType<typeof prisma.invoice.findMany>>);
       jest.spyOn(prisma.expense, "findMany").mockResolvedValue([
         {
           id: "exp-1",
-          amount: 300 as any,
+          amount: 300,
           category: "Software",
           date: mockDate,
-        } as any,
-      ]);
+        },
+      ] as unknown as Awaited<ReturnType<typeof prisma.expense.findMany>>);
       jest.spyOn(prisma.lead, "findMany").mockResolvedValue([
-        { id: "lead-1", status: "converted", createdAt: mockDate } as any,
-        { id: "lead-2", status: "new", createdAt: mockDate } as any,
-      ]);
+        { id: "lead-1", status: "converted", createdAt: mockDate },
+        { id: "lead-2", status: "new", createdAt: mockDate },
+      ] as unknown as Awaited<ReturnType<typeof prisma.lead.findMany>>);
       jest.spyOn(prisma.customerActivity, "findMany").mockResolvedValue([
         {
           id: "act-1",
           type: "service",
           description: "Project started",
           timestamp: mockDate,
-        } as any,
-      ]);
+        },
+      ] as unknown as Awaited<
+        ReturnType<typeof prisma.customerActivity.findMany>
+      >);
       jest.spyOn(prisma.customerActivity, "count").mockResolvedValue(1);
       jest.spyOn(prisma.broadcastCampaign, "aggregate").mockResolvedValue({
         _sum: { recipientCount: 50 },
-      } as any);
+      } as unknown as Awaited<
+        ReturnType<typeof prisma.broadcastCampaign.aggregate>
+      >);
       jest.spyOn(prisma.customerService, "findMany").mockResolvedValue([
         {
           id: "cs-1",
           name: "Brand Design",
           service: "Identity",
-          amount: 1000 as any,
+          amount: 1000,
           status: "active",
-        } as any,
-      ]);
+        },
+      ] as unknown as Awaited<
+        ReturnType<typeof prisma.customerService.findMany>
+      >);
       jest.spyOn(prisma.service, "findMany").mockResolvedValue([]);
 
       const { getAnalyticsOverviewService } = await import(
@@ -198,7 +206,12 @@ describe("Analytics Module Unit Tests", () => {
       expect(result.leads.rawNumber).toBe(2);
       expect(result.leads.change).toBe("+50% conv.");
       expect(result.expenseCategoryBreakdown).toEqual([
-        { category: "Software", label: "Software", amount: 300, percentage: 100 },
+        {
+          category: "Software",
+          label: "Software",
+          amount: 300,
+          percentage: 100,
+        },
       ]);
       expect(result.trendingServices).toEqual([
         { name: "Brand Design", category: "Identity", price: 1000, volume: 1 },

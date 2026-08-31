@@ -26,7 +26,7 @@ const s3 = new S3Client({
 
 function parseDataUri(dataUri: string) {
   const matches = dataUri.match(/^data:([^;,]+)(?:;[^,]*)?;base64,([\s\S]+)$/);
-  if (!matches || matches.length !== 3) {
+  if (matches?.length !== 3) {
     throw new Error("Invalid data URI string");
   }
   return {

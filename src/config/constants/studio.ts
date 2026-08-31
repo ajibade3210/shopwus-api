@@ -34,14 +34,44 @@ export const DEFAULT_VISIBILITY_SETTINGS = {
 };
 
 export const DEFAULT_SOCIAL_CHANNELS = [
-  { type: "instagram", label: "Instagram", connected: false, handle: "", url: "" },
-  { type: "facebook", label: "Facebook", connected: false, handle: "", url: "" },
-  { type: "linkedin", label: "LinkedIn", connected: false, handle: "", url: "" },
+  {
+    type: "instagram",
+    label: "Instagram",
+    connected: false,
+    handle: "",
+    url: "",
+  },
+  {
+    type: "facebook",
+    label: "Facebook",
+    connected: false,
+    handle: "",
+    url: "",
+  },
+  {
+    type: "linkedin",
+    label: "LinkedIn",
+    connected: false,
+    handle: "",
+    url: "",
+  },
   { type: "tiktok", label: "TikTok", connected: false, handle: "", url: "" },
   { type: "x", label: "X", connected: false, handle: "", url: "" },
   { type: "youtube", label: "YouTube", connected: false, handle: "", url: "" },
-  { type: "whatsapp", label: "WhatsApp", connected: false, handle: "", url: "" },
+  {
+    type: "whatsapp",
+    label: "WhatsApp",
+    connected: false,
+    handle: "",
+    url: "",
+  },
   { type: "threads", label: "Threads", connected: false, handle: "", url: "" },
-  { type: "pinterest", label: "Pinterest", connected: false, handle: "", url: "" },
+  {
+    type: "pinterest",
+    label: "Pinterest",
+    connected: false,
+    handle: "",
+    url: "",
+  },
   { type: "website", label: "Website", connected: false, handle: "", url: "" },
 ] as const;

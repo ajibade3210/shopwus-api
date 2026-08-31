@@ -330,3 +330,33 @@ export async function deleteCustomerService(
 
   return { id: existing.id, deleted: true };
 }
+
+export async function getCustomerSummaryService(businessId: string) {
+  const customers = await prisma.customer.findMany({
+    where: { businessId },
+    select: {
+      id: true,
+      totalRevenue: true,
+      services: {
+        select: { status: true },
+      },
+    },
+  });
+
+  const total = customers.length;
+  let activeServicesCount = 0;
+  let totalRevenue = 0;
+
+  for (const c of customers) {
+    totalRevenue += Number(c.totalRevenue || 0);
+    activeServicesCount += (c.services || []).filter(
+      (s) => s.status === "active" || s.status === "pending",
+    ).length;
+  }
+
+  return {
+    total,
+    activeServicesCount,
+    totalRevenue,
+  };
+}

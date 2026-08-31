@@ -383,3 +383,27 @@ export async function deleteLeadService(leadId: string, businessId: string) {
 
   return { id: lead.id, deleted: true };
 }
+
+export async function getLeadSummaryService(businessId: string) {
+  const leads = await prisma.lead.findMany({
+    where: { businessId },
+    select: { id: true, status: true, createdAt: true },
+  });
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const total = leads.length;
+  const newToday = leads.filter(
+    (l) => l.status === "new" || l.createdAt >= today,
+  ).length;
+  const convertedCount = leads.filter((l) => l.status === "converted").length;
+  const conversion =
+    total > 0 ? Math.round((convertedCount / total) * 100) : 0;
+
+  return {
+    total,
+    newToday,
+    conversion,
+  };
+}

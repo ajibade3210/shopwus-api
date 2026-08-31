@@ -20,6 +20,14 @@ export async function leadRoutes(app: FastifyInstance): Promise<void> {
 
   // Authenticated Lead Pipeline & Management
   typedApp.get(
+    "/summary",
+    {
+      preHandler: [authenticate],
+    },
+    leadController.getLeadSummaryHandler,
+  );
+
+  typedApp.get(
     "/",
     {
       schema: leadSchema.listLeadsRouteSchema,

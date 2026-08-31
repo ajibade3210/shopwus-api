@@ -7,7 +7,15 @@ import * as invoiceSchema from "./schema/invoice.schema";
 export async function invoiceRoutes(app: FastifyInstance): Promise<void> {
   const typedApp = app.withTypeProvider<ZodTypeProvider>();
 
-  // List & Export
+  // List, Summary & Export
+  typedApp.get(
+    "/summary",
+    {
+      preHandler: [authenticate],
+    },
+    invoiceController.getInvoiceSummaryHandler,
+  );
+
   typedApp.get(
     "/",
     {

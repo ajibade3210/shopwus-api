@@ -7,7 +7,15 @@ import * as customerSchema from "./schema/customer.schema";
 export async function customerRoutes(app: FastifyInstance): Promise<void> {
   const typedApp = app.withTypeProvider<ZodTypeProvider>();
 
-  // List & Export
+  // List, Summary & Export
+  typedApp.get(
+    "/summary",
+    {
+      preHandler: [authenticate],
+    },
+    customerController.getCustomerSummaryHandler,
+  );
+
   typedApp.get(
     "/",
     {

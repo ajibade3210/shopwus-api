@@ -16,6 +16,7 @@ import {
   createCustomerService,
   deleteCustomerService,
   getCustomerByIdService,
+  getCustomerSummaryService,
   listCustomersService,
   toggleCustomerStatusService,
   updateCustomerService,
@@ -33,6 +34,17 @@ import {
   deleteCustomerServiceService,
   updateCustomerServiceStatusService,
 } from "./services/customer-service.service";
+
+export async function getCustomerSummaryHandler(
+  request: FastifyRequest,
+  reply: FastifyReply,
+) {
+  const businessId = request.user.businessId;
+  if (!businessId)
+    throw new ForbiddenError("Account is not linked to a business");
+  const result = await getCustomerSummaryService(businessId);
+  return reply.success(result, "Customer summary retrieved");
+}
 
 export async function listCustomersHandler(
   request: FastifyRequest<{ Querystring: ListCustomersQuery }>,

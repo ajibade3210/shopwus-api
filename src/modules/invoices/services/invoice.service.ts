@@ -463,3 +463,39 @@ export async function exportInvoicesCsvService(
 
   return [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
 }
+
+export async function getInvoiceSummaryService(businessId: string) {
+  const invoices = await prisma.invoice.findMany({
+    where: { businessId },
+    select: { total: true, status: true },
+  });
+
+  const totalCount = invoices.length;
+  let totalInvoiced = 0;
+  let paidRevenue = 0;
+  let outstandingRevenue = 0;
+  let paidCount = 0;
+
+  for (const inv of invoices) {
+    const total = Number(inv.total || 0);
+    totalInvoiced += total;
+    if (inv.status === "paid") {
+      paidRevenue += total;
+      paidCount += 1;
+    } else if (inv.status !== "cancelled") {
+      outstandingRevenue += total;
+    }
+  }
+
+  const collectionRate =
+    totalInvoiced > 0 ? Math.round((paidRevenue / totalInvoiced) * 100) : 0;
+
+  return {
+    totalInvoiced,
+    paidRevenue,
+    outstandingRevenue,
+    totalCount,
+    paidCount,
+    collectionRate,
+  };
+}

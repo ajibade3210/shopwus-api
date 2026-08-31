@@ -15,6 +15,7 @@ import {
   deleteLeadService,
   exportLeadsCsvService,
   getLeadByIdService,
+  getLeadSummaryService,
   listLeadsService,
   submitPublicInquiryService,
   updateLeadStatusService,
@@ -30,6 +31,17 @@ export async function submitPublicInquiryHandler(
   const { slug } = request.params;
   const result = await submitPublicInquiryService(slug, request.body);
   return reply.success(result, "Inquiry submitted successfully", 201);
+}
+
+export async function getLeadSummaryHandler(
+  request: FastifyRequest,
+  reply: FastifyReply,
+) {
+  const businessId = request.user.businessId;
+  if (!businessId)
+    throw new ForbiddenError("Account is not linked to a business");
+  const result = await getLeadSummaryService(businessId);
+  return reply.success(result, "Lead summary retrieved");
 }
 
 export async function listLeadsHandler(

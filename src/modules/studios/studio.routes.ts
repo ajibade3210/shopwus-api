@@ -12,7 +12,6 @@ import * as studioController from "./studio.controller";
 export async function studioRoutes(app: FastifyInstance): Promise<void> {
   const typedApp = app.withTypeProvider<ZodTypeProvider>();
 
-  // Public: Check slug availability
   typedApp.get(
     "/check-slug",
     {

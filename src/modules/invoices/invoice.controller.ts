@@ -15,6 +15,7 @@ import {
   deleteInvoiceService,
   exportInvoicesCsvService,
   getInvoiceByIdService,
+  getInvoiceSummaryService,
   listInvoicesService,
   updateInvoiceService,
   updateInvoiceStatusService,
@@ -28,6 +29,17 @@ import {
   getInvoicePdfDownloadService,
   triggerInvoicePdfRegenerationService,
 } from "./services/invoice-pdf.service";
+
+export async function getInvoiceSummaryHandler(
+  request: FastifyRequest,
+  reply: FastifyReply,
+) {
+  const businessId = request.user.businessId;
+  if (!businessId)
+    throw new ForbiddenError("Account is not linked to a business");
+  const result = await getInvoiceSummaryService(businessId);
+  return reply.success(result, "Invoice summary retrieved");
+}
 
 export async function listInvoicesHandler(
   request: FastifyRequest<{ Querystring: ListInvoicesQuery }>,

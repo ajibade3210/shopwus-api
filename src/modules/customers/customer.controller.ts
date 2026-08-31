@@ -1,5 +1,4 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
-import { ForbiddenError } from "../../lib/errors";
 import type {
   AddCustomerActivityInput,
   AddCustomerServiceInput,
@@ -39,10 +38,7 @@ export async function getCustomerSummaryHandler(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const businessId = request.user.businessId;
-  if (!businessId)
-    throw new ForbiddenError("Account is not linked to a business");
-  const result = await getCustomerSummaryService(businessId);
+  const result = await getCustomerSummaryService(request.businessId);
   return reply.success(result, "Customer summary retrieved");
 }
 
@@ -50,10 +46,7 @@ export async function listCustomersHandler(
   request: FastifyRequest<{ Querystring: ListCustomersQuery }>,
   reply: FastifyReply,
 ) {
-  const businessId = request.user.businessId;
-  if (!businessId)
-    throw new ForbiddenError("Account is not linked to a business");
-  const result = await listCustomersService(businessId, request.query);
+  const result = await listCustomersService(request.businessId, request.query);
   return reply.success(result, "Customers retrieved");
 }
 
@@ -61,10 +54,7 @@ export async function getCustomerHandler(
   request: FastifyRequest<{ Params: CustomerIdParams }>,
   reply: FastifyReply,
 ) {
-  const businessId = request.user.businessId;
-  if (!businessId)
-    throw new ForbiddenError("Account is not linked to a business");
-  const result = await getCustomerByIdService(request.params.id, businessId);
+  const result = await getCustomerByIdService(request.params.id, request.businessId);
   return reply.success(result, "Customer retrieved");
 }
 
@@ -72,10 +62,7 @@ export async function createCustomerHandler(
   request: FastifyRequest<{ Body: CreateCustomerInput }>,
   reply: FastifyReply,
 ) {
-  const businessId = request.user.businessId;
-  if (!businessId)
-    throw new ForbiddenError("Account is not linked to a business");
-  const result = await createCustomerService(businessId, request.body);
+  const result = await createCustomerService(request.businessId, request.body);
   return reply.success(result, "Customer created successfully", 201);
 }
 
@@ -86,12 +73,9 @@ export async function updateCustomerHandler(
   }>,
   reply: FastifyReply,
 ) {
-  const businessId = request.user.businessId;
-  if (!businessId)
-    throw new ForbiddenError("Account is not linked to a business");
   const result = await updateCustomerService(
     request.params.id,
-    businessId,
+    request.businessId,
     request.body,
   );
   return reply.success(result, "Customer updated successfully");
@@ -104,12 +88,9 @@ export async function toggleCustomerStatusHandler(
   }>,
   reply: FastifyReply,
 ) {
-  const businessId = request.user.businessId;
-  if (!businessId)
-    throw new ForbiddenError("Account is not linked to a business");
   const result = await toggleCustomerStatusService(
     request.params.id,
-    businessId,
+    request.businessId,
     request.body.isActive,
   );
   return reply.success(result, "Customer status updated");
@@ -119,10 +100,7 @@ export async function deleteCustomerHandler(
   request: FastifyRequest<{ Params: CustomerIdParams }>,
   reply: FastifyReply,
 ) {
-  const businessId = request.user.businessId;
-  if (!businessId)
-    throw new ForbiddenError("Account is not linked to a business");
-  const result = await deleteCustomerService(request.params.id, businessId);
+  const result = await deleteCustomerService(request.params.id, request.businessId);
   return reply.success(result, "Customer deleted successfully");
 }
 
@@ -133,12 +111,9 @@ export async function addCustomerServiceHandler(
   }>,
   reply: FastifyReply,
 ) {
-  const businessId = request.user.businessId;
-  if (!businessId)
-    throw new ForbiddenError("Account is not linked to a business");
   const result = await addCustomerServiceService(
     request.params.id,
-    businessId,
+    request.businessId,
     request.body,
   );
   return reply.success(result, "Service added to customer", 201);
@@ -151,13 +126,10 @@ export async function updateCustomerServiceStatusHandler(
   }>,
   reply: FastifyReply,
 ) {
-  const businessId = request.user.businessId;
-  if (!businessId)
-    throw new ForbiddenError("Account is not linked to a business");
   const result = await updateCustomerServiceStatusService(
     request.params.id,
     request.params.serviceId,
-    businessId,
+    request.businessId,
     request.body.status,
   );
   return reply.success(result, "Service status updated");
@@ -167,13 +139,10 @@ export async function deleteCustomerServiceHandler(
   request: FastifyRequest<{ Params: CustomerServiceParams }>,
   reply: FastifyReply,
 ) {
-  const businessId = request.user.businessId;
-  if (!businessId)
-    throw new ForbiddenError("Account is not linked to a business");
   const result = await deleteCustomerServiceService(
     request.params.id,
     request.params.serviceId,
-    businessId,
+    request.businessId,
   );
   return reply.success(result, "Service deleted from customer");
 }
@@ -182,12 +151,9 @@ export async function getCustomerActivitiesHandler(
   request: FastifyRequest<{ Params: CustomerIdParams }>,
   reply: FastifyReply,
 ) {
-  const businessId = request.user.businessId;
-  if (!businessId)
-    throw new ForbiddenError("Account is not linked to a business");
   const result = await getCustomerActivitiesService(
     request.params.id,
-    businessId,
+    request.businessId,
   );
   return reply.success(result, "Customer activities retrieved");
 }
@@ -199,12 +165,9 @@ export async function addCustomerActivityHandler(
   }>,
   reply: FastifyReply,
 ) {
-  const businessId = request.user.businessId;
-  if (!businessId)
-    throw new ForbiddenError("Account is not linked to a business");
   const result = await addCustomerActivityService(
     request.params.id,
-    businessId,
+    request.businessId,
     request.body,
   );
   return reply.success(result, "Activity logged successfully", 201);
@@ -214,10 +177,7 @@ export async function importCustomersHandler(
   request: FastifyRequest<{ Body: ImportCustomersInput }>,
   reply: FastifyReply,
 ) {
-  const businessId = request.user.businessId;
-  if (!businessId)
-    throw new ForbiddenError("Account is not linked to a business");
-  const result = await importCustomersService(businessId, request.body);
+  const result = await importCustomersService(request.businessId, request.body);
   return reply.success(result, "Customers imported successfully");
 }
 
@@ -225,10 +185,7 @@ export async function exportCustomersHandler(
   request: FastifyRequest<{ Querystring: { q?: string; isActive?: boolean } }>,
   reply: FastifyReply,
 ) {
-  const businessId = request.user.businessId;
-  if (!businessId)
-    throw new ForbiddenError("Account is not linked to a business");
-  const csv = await exportCustomersCsvService(businessId, request.query);
+  const csv = await exportCustomersCsvService(request.businessId, request.query);
 
   reply.header("Content-Type", "text/csv; charset=utf-8");
   reply.header(
@@ -237,3 +194,4 @@ export async function exportCustomersHandler(
   );
   return reply.send(csv);
 }
+

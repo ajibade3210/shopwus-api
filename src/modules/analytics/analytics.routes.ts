@@ -1,10 +1,13 @@
 import type { FastifyInstance } from "fastify";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
-import { authenticate } from "../../middlewares/auth";
+import { authenticate, requireBusiness } from "../../middlewares/auth";
 import * as analyticsController from "./analytics.controller";
 import * as analyticsSchema from "./schema/analytics.schema";
 
 export async function analyticsRoutes(app: FastifyInstance): Promise<void> {
+  app.addHook("preHandler", authenticate);
+  app.addHook("preHandler", requireBusiness);
+
   const typedApp = app.withTypeProvider<ZodTypeProvider>();
 
   // Studio Overview Metrics
@@ -12,7 +15,6 @@ export async function analyticsRoutes(app: FastifyInstance): Promise<void> {
     "/overview",
     {
       schema: analyticsSchema.getAnalyticsOverviewRouteSchema,
-      preHandler: [authenticate],
     },
     analyticsController.getAnalyticsOverviewHandler,
   );
@@ -22,7 +24,6 @@ export async function analyticsRoutes(app: FastifyInstance): Promise<void> {
     "/",
     {
       schema: analyticsSchema.getAnalyticsOverviewRouteSchema,
-      preHandler: [authenticate],
     },
     analyticsController.getAnalyticsOverviewHandler,
   );
@@ -32,7 +33,6 @@ export async function analyticsRoutes(app: FastifyInstance): Promise<void> {
     "/revenue",
     {
       schema: analyticsSchema.getRevenueChartRouteSchema,
-      preHandler: [authenticate],
     },
     analyticsController.getRevenueChartHandler,
   );
@@ -41,7 +41,6 @@ export async function analyticsRoutes(app: FastifyInstance): Promise<void> {
     "/revenue-chart",
     {
       schema: analyticsSchema.getRevenueChartRouteSchema,
-      preHandler: [authenticate],
     },
     analyticsController.getRevenueChartHandler,
   );
@@ -51,7 +50,6 @@ export async function analyticsRoutes(app: FastifyInstance): Promise<void> {
     "/funnel",
     {
       schema: analyticsSchema.getFunnelRouteSchema,
-      preHandler: [authenticate],
     },
     analyticsController.getFunnelHandler,
   );
@@ -61,7 +59,6 @@ export async function analyticsRoutes(app: FastifyInstance): Promise<void> {
     "/services-performance",
     {
       schema: analyticsSchema.getServicesPerformanceRouteSchema,
-      preHandler: [authenticate],
     },
     analyticsController.getServicesPerformanceHandler,
   );

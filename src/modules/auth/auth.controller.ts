@@ -27,9 +27,11 @@ export async function signup(
     refreshToken: result.refreshToken,
   });
 
-  // Omit raw tokens from JSON payload — they are delivered via HttpOnly cookies
-  const { accessToken: _at, refreshToken: _rt, token: _t, ...payload } = result;
-  return reply.success(payload, "Studio director registered successfully", 201);
+  return reply.success(
+    { user: result.user, studio: result.studio },
+    "Studio director registered successfully",
+    201,
+  );
 }
 
 export async function login(
@@ -48,8 +50,10 @@ export async function login(
     rememberMe: req.body.rememberMe,
   });
 
-  const { accessToken: _at, refreshToken: _rt, token: _t, ...payload } = result;
-  return reply.success(payload, "Logged in successfully");
+  return reply.success(
+    { user: result.user, studio: result.studio },
+    "Logged in successfully",
+  );
 }
 
 export async function googleAuth(
@@ -68,9 +72,8 @@ export async function googleAuth(
     rememberMe: req.body.rememberMe,
   });
 
-  const { accessToken: _at, refreshToken: _rt, token: _t, ...payload } = result;
   return reply.success(
-    payload,
+    { user: result.user, studio: result.studio },
     result.isNewUser ? "Studio created successfully" : "Signed in successfully",
     result.isNewUser ? 201 : 200,
   );
@@ -103,9 +106,7 @@ export async function refresh(
     refreshToken: result.refreshToken,
   });
 
-  // Return minimal payload; tokens delivered via cookies
-  const { accessToken: _at, refreshToken: _rt, token: _t, ...payload } = result;
-  return reply.success(payload, "Token refreshed successfully");
+  return reply.success([], "Token refreshed successfully");
 }
 
 export async function logout(

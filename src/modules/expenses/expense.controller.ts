@@ -1,5 +1,4 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
-import { ForbiddenError } from "../../lib/errors";
 import type {
   CreateExpenseInput,
   ExpenseIdParams,
@@ -23,10 +22,7 @@ export async function listExpensesHandler(
   request: FastifyRequest<{ Querystring: ListExpensesQuery }>,
   reply: FastifyReply,
 ) {
-  const businessId = request.user.businessId;
-  if (!businessId)
-    throw new ForbiddenError("Account is not linked to a business");
-  const result = await listExpensesService(businessId, request.query);
+  const result = await listExpensesService(request.businessId, request.query);
   return reply.success(result, "Expenses retrieved");
 }
 
@@ -34,10 +30,7 @@ export async function getExpenseSummaryHandler(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const businessId = request.user.businessId;
-  if (!businessId)
-    throw new ForbiddenError("Account is not linked to a business");
-  const result = await getExpenseSummaryService(businessId);
+  const result = await getExpenseSummaryService(request.businessId);
   return reply.success(result, "Expense summary retrieved");
 }
 
@@ -45,10 +38,7 @@ export async function getExpenseCategoriesHandler(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const businessId = request.user.businessId;
-  if (!businessId)
-    throw new ForbiddenError("Account is not linked to a business");
-  const result = await getExpenseCategoryBreakdownService(businessId);
+  const result = await getExpenseCategoryBreakdownService(request.businessId);
   return reply.success(result, "Expense categories retrieved");
 }
 
@@ -56,10 +46,7 @@ export async function getExpenseHandler(
   request: FastifyRequest<{ Params: ExpenseIdParams }>,
   reply: FastifyReply,
 ) {
-  const businessId = request.user.businessId;
-  if (!businessId)
-    throw new ForbiddenError("Account is not linked to a business");
-  const result = await getExpenseByIdService(request.params.id, businessId);
+  const result = await getExpenseByIdService(request.params.id, request.businessId);
   return reply.success(result, "Expense retrieved");
 }
 
@@ -67,10 +54,7 @@ export async function createExpenseHandler(
   request: FastifyRequest<{ Body: CreateExpenseInput }>,
   reply: FastifyReply,
 ) {
-  const businessId = request.user.businessId;
-  if (!businessId)
-    throw new ForbiddenError("Account is not linked to a business");
-  const result = await createExpenseService(businessId, request.body);
+  const result = await createExpenseService(request.businessId, request.body);
   return reply.success(result, "Expense created successfully", 201);
 }
 
@@ -81,12 +65,9 @@ export async function updateExpenseHandler(
   }>,
   reply: FastifyReply,
 ) {
-  const businessId = request.user.businessId;
-  if (!businessId)
-    throw new ForbiddenError("Account is not linked to a business");
   const result = await updateExpenseService(
     request.params.id,
-    businessId,
+    request.businessId,
     request.body,
   );
   return reply.success(result, "Expense updated successfully");
@@ -96,10 +77,7 @@ export async function deleteExpenseHandler(
   request: FastifyRequest<{ Params: ExpenseIdParams }>,
   reply: FastifyReply,
 ) {
-  const businessId = request.user.businessId;
-  if (!businessId)
-    throw new ForbiddenError("Account is not linked to a business");
-  const result = await deleteExpenseService(request.params.id, businessId);
+  const result = await deleteExpenseService(request.params.id, request.businessId);
   return reply.success(result, "Expense deleted successfully");
 }
 
@@ -114,10 +92,7 @@ export async function exportExpensesHandler(
   }>,
   reply: FastifyReply,
 ) {
-  const businessId = request.user.businessId;
-  if (!businessId)
-    throw new ForbiddenError("Account is not linked to a business");
-  const csv = await exportExpensesCsvService(businessId, request.query);
+  const csv = await exportExpensesCsvService(request.businessId, request.query);
 
   reply.header("Content-Type", "text/csv; charset=utf-8");
   reply.header(
@@ -126,3 +101,4 @@ export async function exportExpensesHandler(
   );
   return reply.send(csv);
 }
+

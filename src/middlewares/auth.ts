@@ -20,6 +20,7 @@ export interface JwtPayload {
 declare module "fastify" {
   interface FastifyRequest {
     user: JwtPayload;
+    businessId: string;
   }
 }
 
@@ -61,6 +62,9 @@ export const authenticate = async <RouteGeneric extends RouteGenericInterface>(
   }
 
   request.user = decoded;
+  if (decoded.businessId) {
+    request.businessId = decoded.businessId;
+  }
 
   const context = requestContext.getStore();
   if (context) {
@@ -119,3 +123,29 @@ export const requireStudioOwner = async <
     );
   }
 };
+
+export const requireBusiness = async <
+  RouteGeneric extends RouteGenericInterface,
+>(
+  request: FastifyRequest<RouteGeneric>,
+  _reply: FastifyReply,
+): Promise<void> => {
+  if (!request.user) {
+    throw new UnauthorizedError("Authentication required");
+  }
+  if (!request.user.businessId) {
+    throw new ForbiddenError("Account is not linked to a business");
+  }
+  request.businessId = request.user.businessId;
+};
+
+export const authenticateBusiness = [authenticate, requireBusiness];
+
+export function getBusinessId(request: FastifyRequest): string {
+  const businessId = request.user?.businessId;
+  if (!businessId) {
+    throw new ForbiddenError("Account is not linked to a business");
+  }
+  return businessId;
+}
+

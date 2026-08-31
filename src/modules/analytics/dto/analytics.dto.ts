@@ -23,6 +23,13 @@ export interface TrendingServiceDto {
   image?: string;
 }
 
+export interface ExpenseCategorySummaryDto {
+  category: string;
+  label: string;
+  amount: number;
+  percentage: number;
+}
+
 export interface AnalyticsOverviewDto {
   timeframe: string;
   timeframeLabel: string;
@@ -31,6 +38,7 @@ export interface AnalyticsOverviewDto {
   revenue: MetricCardDto;
   expenses: MetricCardDto;
   netProfit: MetricCardDto;
+  expenseCategoryBreakdown?: ExpenseCategorySummaryDto[];
   chart: ChartDataDto;
   trendingServices: TrendingServiceDto[];
   recentActivities?: Array<{

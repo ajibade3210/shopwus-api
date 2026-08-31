@@ -1,6 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
-import { authenticate } from "../../middlewares/auth";
+import { authenticate, requireBusiness } from "../../middlewares/auth";
 import { rateLimit } from "../../utils";
 import * as valuationSchema from "./schema/valuation.schema";
 import * as valuationController from "./valuation.controller";
@@ -23,7 +23,7 @@ export async function valuationRoutes(app: FastifyInstance): Promise<void> {
     "/calculate-advanced",
     {
       schema: valuationSchema.advancedValuationRouteSchema,
-      preHandler: [authenticate],
+      preHandler: [authenticate, requireBusiness],
     },
     valuationController.calculateAdvancedValuationHandler,
   );

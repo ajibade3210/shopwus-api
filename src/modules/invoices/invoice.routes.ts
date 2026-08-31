@@ -1,18 +1,18 @@
 import type { FastifyInstance } from "fastify";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
-import { authenticate } from "../../middlewares/auth";
+import { authenticate, requireBusiness } from "../../middlewares/auth";
 import * as invoiceController from "./invoice.controller";
 import * as invoiceSchema from "./schema/invoice.schema";
 
 export async function invoiceRoutes(app: FastifyInstance): Promise<void> {
+  app.addHook("preHandler", authenticate);
+  app.addHook("preHandler", requireBusiness);
+
   const typedApp = app.withTypeProvider<ZodTypeProvider>();
 
   // List, Summary & Export
   typedApp.get(
     "/summary",
-    {
-      preHandler: [authenticate],
-    },
     invoiceController.getInvoiceSummaryHandler,
   );
 
@@ -20,7 +20,6 @@ export async function invoiceRoutes(app: FastifyInstance): Promise<void> {
     "/",
     {
       schema: invoiceSchema.listInvoicesRouteSchema,
-      preHandler: [authenticate],
     },
     invoiceController.listInvoicesHandler,
   );
@@ -29,7 +28,6 @@ export async function invoiceRoutes(app: FastifyInstance): Promise<void> {
     "/export",
     {
       schema: invoiceSchema.exportInvoicesRouteSchema,
-      preHandler: [authenticate],
     },
     invoiceController.exportInvoicesHandler,
   );
@@ -39,7 +37,6 @@ export async function invoiceRoutes(app: FastifyInstance): Promise<void> {
     "/",
     {
       schema: invoiceSchema.createInvoiceRouteSchema,
-      preHandler: [authenticate],
     },
     invoiceController.createInvoiceHandler,
   );
@@ -49,7 +46,6 @@ export async function invoiceRoutes(app: FastifyInstance): Promise<void> {
     "/:id",
     {
       schema: invoiceSchema.getInvoiceRouteSchema,
-      preHandler: [authenticate],
     },
     invoiceController.getInvoiceHandler,
   );
@@ -58,7 +54,6 @@ export async function invoiceRoutes(app: FastifyInstance): Promise<void> {
     "/:id",
     {
       schema: invoiceSchema.updateInvoiceRouteSchema,
-      preHandler: [authenticate],
     },
     invoiceController.updateInvoiceHandler,
   );
@@ -67,7 +62,6 @@ export async function invoiceRoutes(app: FastifyInstance): Promise<void> {
     "/:id/status",
     {
       schema: invoiceSchema.updateInvoiceStatusRouteSchema,
-      preHandler: [authenticate],
     },
     invoiceController.updateInvoiceStatusHandler,
   );
@@ -76,7 +70,6 @@ export async function invoiceRoutes(app: FastifyInstance): Promise<void> {
     "/:id",
     {
       schema: invoiceSchema.deleteInvoiceRouteSchema,
-      preHandler: [authenticate],
     },
     invoiceController.deleteInvoiceHandler,
   );
@@ -86,7 +79,6 @@ export async function invoiceRoutes(app: FastifyInstance): Promise<void> {
     "/:id/send",
     {
       schema: invoiceSchema.sendInvoiceRouteSchema,
-      preHandler: [authenticate],
     },
     invoiceController.sendInvoiceHandler,
   );
@@ -95,7 +87,6 @@ export async function invoiceRoutes(app: FastifyInstance): Promise<void> {
     "/:id/resend",
     {
       schema: invoiceSchema.sendInvoiceRouteSchema,
-      preHandler: [authenticate],
     },
     invoiceController.resendInvoiceHandler,
   );
@@ -105,7 +96,6 @@ export async function invoiceRoutes(app: FastifyInstance): Promise<void> {
     "/:id/pdf",
     {
       schema: invoiceSchema.getInvoiceRouteSchema,
-      preHandler: [authenticate],
     },
     invoiceController.getInvoicePdfHandler,
   );
@@ -115,7 +105,6 @@ export async function invoiceRoutes(app: FastifyInstance): Promise<void> {
     "/:id/pdf/regenerate",
     {
       schema: invoiceSchema.getInvoiceRouteSchema,
-      preHandler: [authenticate],
     },
     invoiceController.triggerInvoicePdfRegenerationHandler,
   );

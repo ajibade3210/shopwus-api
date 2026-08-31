@@ -1,6 +1,5 @@
 import type { InvoiceStatus } from "@prisma/client";
 import type { FastifyReply, FastifyRequest } from "fastify";
-import { ForbiddenError } from "../../lib/errors";
 import type {
   CreateInvoiceInput,
   InvoiceIdParams,
@@ -34,10 +33,7 @@ export async function getInvoiceSummaryHandler(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const businessId = request.user.businessId;
-  if (!businessId)
-    throw new ForbiddenError("Account is not linked to a business");
-  const result = await getInvoiceSummaryService(businessId);
+  const result = await getInvoiceSummaryService(request.businessId);
   return reply.success(result, "Invoice summary retrieved");
 }
 
@@ -45,10 +41,7 @@ export async function listInvoicesHandler(
   request: FastifyRequest<{ Querystring: ListInvoicesQuery }>,
   reply: FastifyReply,
 ) {
-  const businessId = request.user.businessId;
-  if (!businessId)
-    throw new ForbiddenError("Account is not linked to a business");
-  const result = await listInvoicesService(businessId, request.query);
+  const result = await listInvoicesService(request.businessId, request.query);
   return reply.success(result, "Invoices retrieved");
 }
 
@@ -56,10 +49,7 @@ export async function getInvoiceHandler(
   request: FastifyRequest<{ Params: InvoiceIdParams }>,
   reply: FastifyReply,
 ) {
-  const businessId = request.user.businessId;
-  if (!businessId)
-    throw new ForbiddenError("Account is not linked to a business");
-  const result = await getInvoiceByIdService(request.params.id, businessId);
+  const result = await getInvoiceByIdService(request.params.id, request.businessId);
   return reply.success(result, "Invoice retrieved");
 }
 
@@ -67,10 +57,7 @@ export async function createInvoiceHandler(
   request: FastifyRequest<{ Body: CreateInvoiceInput }>,
   reply: FastifyReply,
 ) {
-  const businessId = request.user.businessId;
-  if (!businessId)
-    throw new ForbiddenError("Account is not linked to a business");
-  const result = await createInvoiceService(businessId, request.body);
+  const result = await createInvoiceService(request.businessId, request.body);
   return reply.success(result, "Invoice created successfully", 201);
 }
 
@@ -81,12 +68,9 @@ export async function updateInvoiceHandler(
   }>,
   reply: FastifyReply,
 ) {
-  const businessId = request.user.businessId;
-  if (!businessId)
-    throw new ForbiddenError("Account is not linked to a business");
   const result = await updateInvoiceService(
     request.params.id,
-    businessId,
+    request.businessId,
     request.body,
   );
   return reply.success(result, "Invoice updated successfully");
@@ -99,12 +83,9 @@ export async function updateInvoiceStatusHandler(
   }>,
   reply: FastifyReply,
 ) {
-  const businessId = request.user.businessId;
-  if (!businessId)
-    throw new ForbiddenError("Account is not linked to a business");
   const result = await updateInvoiceStatusService(
     request.params.id,
-    businessId,
+    request.businessId,
     request.body.status,
   );
   return reply.success(result, "Invoice status updated");
@@ -114,10 +95,7 @@ export async function deleteInvoiceHandler(
   request: FastifyRequest<{ Params: InvoiceIdParams }>,
   reply: FastifyReply,
 ) {
-  const businessId = request.user.businessId;
-  if (!businessId)
-    throw new ForbiddenError("Account is not linked to a business");
-  const result = await deleteInvoiceService(request.params.id, businessId);
+  const result = await deleteInvoiceService(request.params.id, request.businessId);
   return reply.success(result, "Invoice deleted successfully");
 }
 
@@ -125,10 +103,7 @@ export async function sendInvoiceHandler(
   request: FastifyRequest<{ Params: InvoiceIdParams }>,
   reply: FastifyReply,
 ) {
-  const businessId = request.user.businessId;
-  if (!businessId)
-    throw new ForbiddenError("Account is not linked to a business");
-  const result = await sendInvoiceService(request.params.id, businessId);
+  const result = await sendInvoiceService(request.params.id, request.businessId);
   return reply.success(result, "Invoice dispatched to client successfully");
 }
 
@@ -136,10 +111,7 @@ export async function resendInvoiceHandler(
   request: FastifyRequest<{ Params: InvoiceIdParams }>,
   reply: FastifyReply,
 ) {
-  const businessId = request.user.businessId;
-  if (!businessId)
-    throw new ForbiddenError("Account is not linked to a business");
-  const result = await resendInvoiceService(request.params.id, businessId);
+  const result = await resendInvoiceService(request.params.id, request.businessId);
   return reply.success(result, "Invoice resent to client successfully");
 }
 
@@ -147,12 +119,9 @@ export async function getInvoicePdfHandler(
   request: FastifyRequest<{ Params: InvoiceIdParams }>,
   reply: FastifyReply,
 ) {
-  const businessId = request.user.businessId;
-  if (!businessId)
-    throw new ForbiddenError("Account is not linked to a business");
   const result = await getInvoicePdfDownloadService(
     request.params.id,
-    businessId,
+    request.businessId,
   );
 
   if (!result.ready || !result.downloadUrl) {
@@ -191,12 +160,9 @@ export async function triggerInvoicePdfRegenerationHandler(
   request: FastifyRequest<{ Params: InvoiceIdParams }>,
   reply: FastifyReply,
 ) {
-  const businessId = request.user.businessId;
-  if (!businessId)
-    throw new ForbiddenError("Account is not linked to a business");
   const result = await triggerInvoicePdfRegenerationService(
     request.params.id,
-    businessId,
+    request.businessId,
   );
   return reply.success(result, result.message, 202);
 }
@@ -207,10 +173,7 @@ export async function exportInvoicesHandler(
   }>,
   reply: FastifyReply,
 ) {
-  const businessId = request.user.businessId;
-  if (!businessId)
-    throw new ForbiddenError("Account is not linked to a business");
-  const csv = await exportInvoicesCsvService(businessId, request.query);
+  const csv = await exportInvoicesCsvService(request.businessId, request.query);
 
   reply.header("Content-Type", "text/csv; charset=utf-8");
   reply.header(
@@ -227,12 +190,9 @@ export async function sendQuickCustomerInvoiceHandler(
   }>,
   reply: FastifyReply,
 ) {
-  const businessId = request.user.businessId;
-  if (!businessId)
-    throw new ForbiddenError("Account is not linked to a business");
   const result = await sendQuickCustomerInvoiceService(
     request.params.customerId,
-    businessId,
+    request.businessId,
     request.body,
   );
   return reply.success(
@@ -241,3 +201,4 @@ export async function sendQuickCustomerInvoiceHandler(
     201,
   );
 }
+

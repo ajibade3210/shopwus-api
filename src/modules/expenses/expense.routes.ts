@@ -1,10 +1,13 @@
 import type { FastifyInstance } from "fastify";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
-import { authenticate } from "../../middlewares/auth";
+import { authenticate, requireBusiness } from "../../middlewares/auth";
 import * as expenseController from "./expense.controller";
 import * as expenseSchema from "./schema/expense.schema";
 
 export async function expenseRoutes(app: FastifyInstance): Promise<void> {
+  app.addHook("preHandler", authenticate);
+  app.addHook("preHandler", requireBusiness);
+
   const typedApp = app.withTypeProvider<ZodTypeProvider>();
 
   // List & Export
@@ -12,24 +15,17 @@ export async function expenseRoutes(app: FastifyInstance): Promise<void> {
     "/",
     {
       schema: expenseSchema.listExpensesRouteSchema,
-      preHandler: [authenticate],
     },
     expenseController.listExpensesHandler,
   );
 
   typedApp.get(
     "/summary",
-    {
-      preHandler: [authenticate],
-    },
     expenseController.getExpenseSummaryHandler,
   );
 
   typedApp.get(
     "/categories",
-    {
-      preHandler: [authenticate],
-    },
     expenseController.getExpenseCategoriesHandler,
   );
 
@@ -37,7 +33,6 @@ export async function expenseRoutes(app: FastifyInstance): Promise<void> {
     "/export",
     {
       schema: expenseSchema.exportExpensesRouteSchema,
-      preHandler: [authenticate],
     },
     expenseController.exportExpensesHandler,
   );
@@ -47,7 +42,6 @@ export async function expenseRoutes(app: FastifyInstance): Promise<void> {
     "/",
     {
       schema: expenseSchema.createExpenseRouteSchema,
-      preHandler: [authenticate],
     },
     expenseController.createExpenseHandler,
   );
@@ -56,7 +50,6 @@ export async function expenseRoutes(app: FastifyInstance): Promise<void> {
     "/:id",
     {
       schema: expenseSchema.getExpenseRouteSchema,
-      preHandler: [authenticate],
     },
     expenseController.getExpenseHandler,
   );
@@ -65,7 +58,6 @@ export async function expenseRoutes(app: FastifyInstance): Promise<void> {
     "/:id",
     {
       schema: expenseSchema.updateExpenseRouteSchema,
-      preHandler: [authenticate],
     },
     expenseController.updateExpenseHandler,
   );
@@ -74,7 +66,6 @@ export async function expenseRoutes(app: FastifyInstance): Promise<void> {
     "/:id",
     {
       schema: expenseSchema.deleteExpenseRouteSchema,
-      preHandler: [authenticate],
     },
     expenseController.deleteExpenseHandler,
   );

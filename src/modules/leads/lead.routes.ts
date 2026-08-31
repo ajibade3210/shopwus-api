@@ -1,6 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
-import { authenticate } from "../../middlewares/auth";
+import { authenticate, requireBusiness } from "../../middlewares/auth";
 import { rateLimit } from "../../utils";
 import * as leadController from "./lead.controller";
 import * as leadSchema from "./schema/lead.schema";
@@ -19,74 +19,71 @@ export async function leadRoutes(app: FastifyInstance): Promise<void> {
   );
 
   // Authenticated Lead Pipeline & Management
-  typedApp.get(
-    "/summary",
-    {
-      preHandler: [authenticate],
-    },
-    leadController.getLeadSummaryHandler,
-  );
+  typedApp.register(async (authApp) => {
+    authApp.addHook("preHandler", authenticate);
+    authApp.addHook("preHandler", requireBusiness);
 
-  typedApp.get(
-    "/",
-    {
-      schema: leadSchema.listLeadsRouteSchema,
-      preHandler: [authenticate],
-    },
-    leadController.listLeadsHandler,
-  );
+    const typedAuthApp = authApp.withTypeProvider<ZodTypeProvider>();
 
-  typedApp.get(
-    "/export",
-    {
-      schema: leadSchema.exportLeadsRouteSchema,
-      preHandler: [authenticate],
-    },
-    leadController.exportLeadsHandler,
-  );
+    typedAuthApp.get(
+      "/summary",
+      leadController.getLeadSummaryHandler,
+    );
 
-  typedApp.get(
-    "/:id",
-    {
-      schema: leadSchema.getLeadRouteSchema,
-      preHandler: [authenticate],
-    },
-    leadController.getLeadHandler,
-  );
+    typedAuthApp.get(
+      "/",
+      {
+        schema: leadSchema.listLeadsRouteSchema,
+      },
+      leadController.listLeadsHandler,
+    );
 
-  typedApp.post(
-    "/",
-    {
-      schema: leadSchema.createLeadRouteSchema,
-      preHandler: [authenticate],
-    },
-    leadController.createLeadHandler,
-  );
+    typedAuthApp.get(
+      "/export",
+      {
+        schema: leadSchema.exportLeadsRouteSchema,
+      },
+      leadController.exportLeadsHandler,
+    );
 
-  typedApp.patch(
-    "/:id/status",
-    {
-      schema: leadSchema.updateLeadStatusRouteSchema,
-      preHandler: [authenticate],
-    },
-    leadController.updateLeadStatusHandler,
-  );
+    typedAuthApp.get(
+      "/:id",
+      {
+        schema: leadSchema.getLeadRouteSchema,
+      },
+      leadController.getLeadHandler,
+    );
 
-  typedApp.post(
-    "/:id/convert",
-    {
-      schema: leadSchema.convertLeadRouteSchema,
-      preHandler: [authenticate],
-    },
-    leadController.convertLeadHandler,
-  );
+    typedAuthApp.post(
+      "/",
+      {
+        schema: leadSchema.createLeadRouteSchema,
+      },
+      leadController.createLeadHandler,
+    );
 
-  typedApp.delete(
-    "/:id",
-    {
-      schema: leadSchema.getLeadRouteSchema,
-      preHandler: [authenticate],
-    },
-    leadController.deleteLeadHandler,
-  );
+    typedAuthApp.patch(
+      "/:id/status",
+      {
+        schema: leadSchema.updateLeadStatusRouteSchema,
+      },
+      leadController.updateLeadStatusHandler,
+    );
+
+    typedAuthApp.post(
+      "/:id/convert",
+      {
+        schema: leadSchema.convertLeadRouteSchema,
+      },
+      leadController.convertLeadHandler,
+    );
+
+    typedAuthApp.delete(
+      "/:id",
+      {
+        schema: leadSchema.getLeadRouteSchema,
+      },
+      leadController.deleteLeadHandler,
+    );
+  });
 }

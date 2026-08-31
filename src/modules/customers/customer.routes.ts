@@ -1,18 +1,18 @@
 import type { FastifyInstance } from "fastify";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
-import { authenticate } from "../../middlewares/auth";
+import { authenticate, requireBusiness } from "../../middlewares/auth";
 import * as customerController from "./customer.controller";
 import * as customerSchema from "./schema/customer.schema";
 
 export async function customerRoutes(app: FastifyInstance): Promise<void> {
+  app.addHook("preHandler", authenticate);
+  app.addHook("preHandler", requireBusiness);
+
   const typedApp = app.withTypeProvider<ZodTypeProvider>();
 
   // List, Summary & Export
   typedApp.get(
     "/summary",
-    {
-      preHandler: [authenticate],
-    },
     customerController.getCustomerSummaryHandler,
   );
 
@@ -20,7 +20,6 @@ export async function customerRoutes(app: FastifyInstance): Promise<void> {
     "/",
     {
       schema: customerSchema.listCustomersRouteSchema,
-      preHandler: [authenticate],
     },
     customerController.listCustomersHandler,
   );
@@ -29,7 +28,6 @@ export async function customerRoutes(app: FastifyInstance): Promise<void> {
     "/export",
     {
       schema: customerSchema.exportCustomersRouteSchema,
-      preHandler: [authenticate],
     },
     customerController.exportCustomersHandler,
   );
@@ -39,7 +37,6 @@ export async function customerRoutes(app: FastifyInstance): Promise<void> {
     "/import",
     {
       schema: customerSchema.importCustomersRouteSchema,
-      preHandler: [authenticate],
     },
     customerController.importCustomersHandler,
   );
@@ -49,7 +46,6 @@ export async function customerRoutes(app: FastifyInstance): Promise<void> {
     "/",
     {
       schema: customerSchema.createCustomerRouteSchema,
-      preHandler: [authenticate],
     },
     customerController.createCustomerHandler,
   );
@@ -59,7 +55,6 @@ export async function customerRoutes(app: FastifyInstance): Promise<void> {
     "/:id",
     {
       schema: customerSchema.getCustomerRouteSchema,
-      preHandler: [authenticate],
     },
     customerController.getCustomerHandler,
   );
@@ -68,7 +63,6 @@ export async function customerRoutes(app: FastifyInstance): Promise<void> {
     "/:id",
     {
       schema: customerSchema.updateCustomerRouteSchema,
-      preHandler: [authenticate],
     },
     customerController.updateCustomerHandler,
   );
@@ -77,7 +71,6 @@ export async function customerRoutes(app: FastifyInstance): Promise<void> {
     "/:id/status",
     {
       schema: customerSchema.toggleCustomerStatusRouteSchema,
-      preHandler: [authenticate],
     },
     customerController.toggleCustomerStatusHandler,
   );
@@ -86,7 +79,6 @@ export async function customerRoutes(app: FastifyInstance): Promise<void> {
     "/:id",
     {
       schema: customerSchema.deleteCustomerRouteSchema,
-      preHandler: [authenticate],
     },
     customerController.deleteCustomerHandler,
   );
@@ -96,7 +88,6 @@ export async function customerRoutes(app: FastifyInstance): Promise<void> {
     "/:id/services",
     {
       schema: customerSchema.addCustomerServiceRouteSchema,
-      preHandler: [authenticate],
     },
     customerController.addCustomerServiceHandler,
   );
@@ -105,7 +96,6 @@ export async function customerRoutes(app: FastifyInstance): Promise<void> {
     "/:id/services/:serviceId/status",
     {
       schema: customerSchema.updateCustomerServiceStatusRouteSchema,
-      preHandler: [authenticate],
     },
     customerController.updateCustomerServiceStatusHandler,
   );
@@ -114,7 +104,6 @@ export async function customerRoutes(app: FastifyInstance): Promise<void> {
     "/:id/services/:serviceId",
     {
       schema: customerSchema.updateCustomerServiceStatusRouteSchema,
-      preHandler: [authenticate],
     },
     customerController.updateCustomerServiceStatusHandler,
   );
@@ -123,7 +112,6 @@ export async function customerRoutes(app: FastifyInstance): Promise<void> {
     "/:id/services/:serviceId",
     {
       schema: customerSchema.deleteCustomerServiceRouteSchema,
-      preHandler: [authenticate],
     },
     customerController.deleteCustomerServiceHandler,
   );
@@ -133,7 +121,6 @@ export async function customerRoutes(app: FastifyInstance): Promise<void> {
     "/:id/activities",
     {
       schema: customerSchema.getCustomerActivitiesRouteSchema,
-      preHandler: [authenticate],
     },
     customerController.getCustomerActivitiesHandler,
   );
@@ -142,7 +129,6 @@ export async function customerRoutes(app: FastifyInstance): Promise<void> {
     "/:id/activities",
     {
       schema: customerSchema.addCustomerActivityRouteSchema,
-      preHandler: [authenticate],
     },
     customerController.addCustomerActivityHandler,
   );
@@ -159,7 +145,6 @@ export async function customerRoutes(app: FastifyInstance): Promise<void> {
     "/:customerId/invoices/send",
     {
       schema: quickCustomerInvoiceRouteSchema,
-      preHandler: [authenticate],
     },
     sendQuickCustomerInvoiceHandler,
   );

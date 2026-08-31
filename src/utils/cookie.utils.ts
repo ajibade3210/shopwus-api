@@ -42,7 +42,7 @@ export function setAuthCookies(
   reply.setCookie("shopwus_refresh_token", refreshToken, {
     ...baseOptions,
     maxAge: rememberMe ? REMEMBER_ME_MAX_AGE_SECONDS : REFRESH_MAX_AGE_SECONDS,
-    path: "/api/v1/auth", // Scope refresh token to auth paths only
+    path: "/",
   });
 }
 
@@ -62,6 +62,13 @@ export function clearAuthCookies(reply: FastifyReply): void {
     maxAge: 0,
   });
 
+  reply.setCookie("shopwus_refresh_token", "", {
+    ...baseOptions,
+    path: "/",
+    maxAge: 0,
+  });
+
+  // Also clear legacy /api/v1/auth scoped cookie if present
   reply.setCookie("shopwus_refresh_token", "", {
     ...baseOptions,
     path: "/api/v1/auth",

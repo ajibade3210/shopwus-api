@@ -65,6 +65,14 @@ export const resetPasswordSchema = z.object({
   newPassword: z.string().min(6, "New password must be at least 6 characters"),
 });
 
+export const updateMeSchema = z.object({
+  firstName: z.string().min(1).optional(),
+  lastName: z.string().optional(),
+  name: z.string().optional(),
+  phone: z.string().optional(),
+  avatarUrl: z.string().url().optional().or(z.literal("")),
+});
+
 export type SignupInput = z.infer<typeof signupSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type SocialSignInInput = z.infer<typeof socialSignInSchema>;
@@ -72,6 +80,7 @@ export type RefreshInput = z.infer<typeof refreshSchema>;
 export type LogoutInput = z.infer<typeof logoutSchema>;
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
+export type UpdateMeInput = z.infer<typeof updateMeSchema>;
 
 const withHeaders = <T extends z.ZodTypeAny>(body: T) => ({
   headers: ReqHeaderSchema,
@@ -86,3 +95,4 @@ export const logoutRouteSchema = withHeaders(logoutSchema);
 export const forgotPasswordRouteSchema = withHeaders(forgotPasswordSchema);
 export const resetPasswordRouteSchema = withHeaders(resetPasswordSchema);
 export const meRouteSchema = { headers: ReqHeaderSchema };
+export const updateMeRouteSchema = withHeaders(updateMeSchema);

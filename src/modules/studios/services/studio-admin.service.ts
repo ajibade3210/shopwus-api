@@ -120,6 +120,24 @@ export async function updateStudioMeService(
   if (input.colors !== undefined) dataToUpdate.colors = input.colors;
   if (input.buttonRadius !== undefined)
     dataToUpdate.buttonRadius = input.buttonRadius?.trim();
+  if (input.showServices !== undefined)
+    dataToUpdate.showServices = input.showServices;
+  if (input.showPortfolio !== undefined)
+    dataToUpdate.showPortfolio = input.showPortfolio;
+  if (input.showReviews !== undefined)
+    dataToUpdate.showReviews = input.showReviews;
+  if (input.showFooterCta !== undefined)
+    dataToUpdate.showFooterCta = input.showFooterCta;
+  if (input.footerEyebrow !== undefined)
+    dataToUpdate.footerEyebrow = input.footerEyebrow?.trim();
+  if (input.footerTitle !== undefined)
+    dataToUpdate.footerTitle = input.footerTitle?.trim();
+  if (input.footerDescription !== undefined)
+    dataToUpdate.footerDescription = input.footerDescription?.trim();
+  if (input.googleReviewsLink !== undefined)
+    dataToUpdate.googleReviewsLink = input.googleReviewsLink?.trim();
+  if (input.portfolioCategories !== undefined)
+    dataToUpdate.portfolioCategories = input.portfolioCategories;
 
   await prisma.$transaction(async (tx) => {
     if (Object.keys(dataToUpdate).length > 0) {
@@ -186,11 +204,11 @@ export async function updateStudioMeService(
           data: input.socialChannels.map((c) => ({
             businessId: business.id,
             type: c.type.trim(),
-            connected: c.connected,
-            label: c.label?.trim(),
-            handle: c.handle?.trim(),
-            url: c.url?.trim(),
-            description: c.description?.trim(),
+            connected: c.connected ?? false,
+            label: c.label?.trim() || null,
+            handle: c.handle?.trim() || null,
+            url: c.url?.trim() || null,
+            description: c.description?.trim() || null,
           })),
         });
       }

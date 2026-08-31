@@ -4,6 +4,7 @@ import {
   formatCompact,
   generateSvgChartPaths,
   generateTimeBuckets,
+  getCurrencySymbol,
 } from "../../../utils";
 import { calculateAdvancedStudioValuationService } from "../../valuation/services/valuation.service";
 import type {
@@ -164,14 +165,7 @@ export async function getAnalyticsOverviewService(
     calculateAdvancedStudioValuationService(businessId).catch(() => null),
   ]);
 
-  const currencySymbol =
-    business?.currency === "USD"
-      ? "$"
-      : business?.currency === "EUR"
-        ? "€"
-        : business?.currency === "GBP"
-          ? "£"
-          : "₦";
+  const currencySymbol = getCurrencySymbol(business?.currency);
 
   // Compute Revenue
   const currentRevenue = periodInvoices

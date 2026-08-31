@@ -14,13 +14,22 @@ model Business {
   timeTo            String?
   byAppointmentOnly Boolean            @default(false)
   logoUrl           String?
-  businessType      String             @default("STUDIO")
+  businessType      String             @default("sales")
   currency          String             @default("NGN")
-  colors            Json?
-  buttonRadius      String?            @default("8px")
-  isPublished       Boolean            @default(false)
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
+  colors              Json?
+  buttonRadius        String?            @default("Subtle")
+  showServices        Boolean            @default(true)
+  showPortfolio       Boolean            @default(true)
+  showReviews         Boolean            @default(true)
+  showFooterCta       Boolean            @default(true)
+  footerEyebrow       String?
+  footerTitle         String?
+  footerDescription   String?
+  googleReviewsLink   String?
+  portfolioCategories String[]           @default([])
+  isPublished         Boolean            @default(false)
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
 
   businessUsers      BusinessUser[]
   socialChannels     SocialChannel[]

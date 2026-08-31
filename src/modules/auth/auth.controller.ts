@@ -9,6 +9,7 @@ import type {
   ResetPasswordInput,
   SignupInput,
   SocialSignInInput,
+  UpdateMeInput,
 } from "./schema/auth.schema";
 import * as authService from "./services";
 
@@ -158,3 +159,12 @@ export async function me(
   const result = await authService.meService(req.user.userId);
   return reply.success(result, "User details retrieved successfully");
 }
+
+export async function updateMe(
+  req: TypedRequest<UpdateMeInput, unknown, unknown, ReqHeaders>,
+  reply: FastifyReply,
+) {
+  const result = await authService.updateMeService(req.user.userId, req.body);
+  return reply.success(result, "User profile updated successfully");
+}
+

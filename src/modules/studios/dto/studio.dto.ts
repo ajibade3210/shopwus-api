@@ -83,6 +83,15 @@ export interface StudioStorefrontResponseDto {
   timeFrom?: string | null;
   timeTo?: string | null;
   byAppointmentOnly: boolean;
+  showServices: boolean;
+  showPortfolio: boolean;
+  showReviews: boolean;
+  showFooterCta: boolean;
+  footerEyebrow?: string | null;
+  footerTitle?: string | null;
+  footerDescription?: string | null;
+  googleReviewsLink?: string | null;
+  portfolioCategories?: string[];
   isPublished: boolean;
   services: ServiceItemDto[];
   portfolio: PortfolioProjectDto[];

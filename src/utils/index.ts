@@ -11,5 +11,6 @@ export * from "./rateLimit";
 export * from "./requestContext";
 export * from "./sequence.utils";
 export * from "./string.utils";
+export * from "./valuation.utils";
 export * from "./whatsapp.util";
 export * from "./zodHelper";

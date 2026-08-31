@@ -42,3 +42,17 @@ export function toFinancialAmount<T extends string = "amount">(
     [`${prefix}Kobo`]: kobo,
   } as { [K in T]: number } & { [K in `${T}Kobo`]: number };
 }
+
+export const CURRENCY_SYMBOLS: Record<string, string> = {
+  USD: "$",
+  GBP: "£",
+  EUR: "€",
+  NGN: "₦",
+};
+
+export function getCurrencySymbol(currency?: string | null): string {
+  if (!currency) return "₦";
+  const normalized = currency.toUpperCase().trim();
+  return CURRENCY_SYMBOLS[normalized] || "₦";
+}
+

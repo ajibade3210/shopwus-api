@@ -1,4 +1,13 @@
 import argon2 from "argon2";
+import {
+  DEFAULT_BUSINESS_TYPE,
+  DEFAULT_BUTTON_RADIUS,
+  DEFAULT_COLOR_SCHEME,
+  DEFAULT_FOOTER_SETTINGS,
+  DEFAULT_PORTFOLIO_CATEGORIES,
+  DEFAULT_SOCIAL_CHANNELS,
+  DEFAULT_VISIBILITY_SETTINGS,
+} from "../../../config/constants/studio";
 import { ConflictError } from "../../../lib/errors";
 import { prisma } from "../../../lib/prisma";
 import { sendWelcomeEmail, slugify } from "../../../utils";
@@ -61,9 +70,30 @@ export async function signupService(
         slug: resolvedSlug,
         email,
         phone: data.phone?.trim(),
-        businessType: "STUDIO",
+        businessType: DEFAULT_BUSINESS_TYPE,
+        colors: DEFAULT_COLOR_SCHEME,
+        buttonRadius: DEFAULT_BUTTON_RADIUS,
+        showServices: DEFAULT_VISIBILITY_SETTINGS.showServices,
+        showPortfolio: DEFAULT_VISIBILITY_SETTINGS.showPortfolio,
+        showReviews: DEFAULT_VISIBILITY_SETTINGS.showReviews,
+        showFooterCta: DEFAULT_VISIBILITY_SETTINGS.showFooterCta,
+        footerEyebrow: DEFAULT_FOOTER_SETTINGS.footerEyebrow,
+        footerTitle: DEFAULT_FOOTER_SETTINGS.footerTitle,
+        footerDescription: DEFAULT_FOOTER_SETTINGS.footerDescription,
+        portfolioCategories: DEFAULT_PORTFOLIO_CATEGORIES,
         isPublished: true,
       },
+    });
+
+    await tx.socialChannel.createMany({
+      data: DEFAULT_SOCIAL_CHANNELS.map((ch) => ({
+        businessId: business.id,
+        type: ch.type,
+        label: ch.label,
+        connected: false,
+        handle: ch.handle,
+        url: ch.url,
+      })),
     });
 
     const businessUser = await tx.businessUser.create({

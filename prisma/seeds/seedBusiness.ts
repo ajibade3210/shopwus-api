@@ -48,7 +48,7 @@ export async function seedBusiness(prisma: PrismaClient) {
       byAppointmentOnly: false,
       logoUrl:
         "https://cdn.accessa.ng/test/accessa/louis-dike-ayskyj/images/c95e52aa48bf676ed0d53f36bb957b81.png",
-      businessType: "STUDIO",
+      businessType: "sales",
       currency: "NGN",
       colors: {
         primary: "#000000",
@@ -78,7 +78,7 @@ export async function seedBusiness(prisma: PrismaClient) {
       byAppointmentOnly: false,
       logoUrl:
         "https://cdn.accessa.ng/test/accessa/louis-dike-ayskyj/images/c95e52aa48bf676ed0d53f36bb957b81.png",
-      businessType: "STUDIO",
+      businessType: "sales",
       currency: "NGN",
       colors: {
         primary: "#000000",

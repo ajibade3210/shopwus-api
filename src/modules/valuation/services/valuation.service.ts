@@ -1,41 +1,19 @@
+import {
+  VALUATION_GROWTH_LEVERS,
+  VALUATION_TIER_CONFIG,
+} from "../../../config/constants/valuation";
 import { prisma } from "../../../lib/prisma";
+import {
+  determinePublicValuationTier,
+  determineStudioValuationTier,
+  getCurrencySymbol,
+} from "../../../utils";
 import type {
   BusinessValuationDto,
   PublicValuationResultDto,
   ValuationDriverDto,
 } from "../dto/valuation.dto";
 import type { PublicValuationInputs } from "../schema/valuation.schema";
-
-const VALUATION_TIER_CONFIG = {
-  emerging: {
-    label: "Emerging Studio",
-    description:
-      "Early-stage creative workshop establishing market presence and core client relationships.",
-    minMultiple: 1.8,
-    maxMultiple: 2.6,
-  },
-  established: {
-    label: "Established Atelier",
-    description:
-      "Proven studio with steady contract volume, predictable cashflow, and strong repeat client retention.",
-    minMultiple: 2.7,
-    maxMultiple: 3.6,
-  },
-  flagship: {
-    label: "Flagship Agency",
-    description:
-      "High-margin creative powerhouse commanding premium project fees and executive brand trust.",
-    minMultiple: 3.7,
-    maxMultiple: 4.8,
-  },
-  haute: {
-    label: "Haute Maison",
-    description:
-      "Iconic luxury studio with elite VIP exclusivity, diversified revenue, and institutional enterprise value.",
-    minMultiple: 4.9,
-    maxMultiple: 6.2,
-  },
-};
 
 export async function calculatePublicValuationService(
   inputs: PublicValuationInputs,
@@ -87,16 +65,11 @@ export async function calculatePublicValuationService(
       ? Math.round(averageNetProfit * (multiple * 1.15) + netAssets * 1.05)
       : Math.round(netAssets * 1.1);
 
-  let tier: "emerging" | "established" | "flagship" | "haute" = "emerging";
-  if (averageNetProfit === 0 && customerRetentionRate < 30) {
-    tier = "emerging";
-  } else if (profitMargin >= 40 && customerRetentionRate >= 60) {
-    tier = "haute";
-  } else if (profitMargin >= 25 && customerRetentionRate >= 40) {
-    tier = "flagship";
-  } else if (profitMargin >= 10 || customerRetentionRate >= 25) {
-    tier = "established";
-  }
+  const tier = determinePublicValuationTier(
+    averageNetProfit,
+    profitMargin,
+    customerRetentionRate,
+  );
 
   const tierConfig = VALUATION_TIER_CONFIG[tier];
 
@@ -178,7 +151,8 @@ export async function calculateAdvancedStudioValuationService(
   businessId: string,
   options?: { monthlyRevenueOverride?: number },
 ): Promise<BusinessValuationDto> {
-  const [customers, expenses, leads, invoices] = await Promise.all([
+  const [business, customers, expenses, leads, invoices] = await Promise.all([
+    prisma.business.findUnique({ where: { id: businessId } }),
     prisma.customer.findMany({ where: { businessId } }),
     prisma.expense.findMany({ where: { businessId } }),
     prisma.lead.findMany({ where: { businessId } }),
@@ -196,62 +170,66 @@ export async function calculateAdvancedStudioValuationService(
   );
 
   const baselineRev = Math.max(totalPaidInvoices, totalCustomerRevenue);
-  const monthlyRevenue =
-    options?.monthlyRevenueOverride ||
-    (baselineRev > 0 ? Math.round(baselineRev / 2) : 250000);
-
   const totalExpenses = expenses.reduce((acc, e) => acc + Number(e.amount), 0);
-  const monthlyExpenses =
-    totalExpenses > 0 ? Math.round(totalExpenses / 2) : 85000;
 
-  const annualRunRate = monthlyRevenue * 12;
-  const annualExpenses = monthlyExpenses * 12;
-  const annualNetProfit = Math.max(
-    annualRunRate - annualExpenses,
-    Math.round(annualRunRate * 0.4),
-  );
-  const profitMargin = Math.round(
-    (annualNetProfit / Math.max(annualRunRate, 1)) * 100,
+  const annualRunRate =
+    options?.monthlyRevenueOverride !== undefined
+      ? options.monthlyRevenueOverride * 12
+      : baselineRev;
+  const annualExpenses = totalExpenses;
+  const annualNetProfit = Math.max(0, annualRunRate - annualExpenses);
+  const profitMargin =
+    annualRunRate > 0 ? Math.round((annualNetProfit / annualRunRate) * 100) : 0;
+
+  const tier = determineStudioValuationTier(
+    annualRunRate,
+    activeCustomers.length,
   );
 
-  let tier: "emerging" | "established" | "flagship" | "haute" = "emerging";
-  if (annualRunRate >= 10000000 || activeCustomers.length >= 25) {
-    tier = "haute";
-  } else if (annualRunRate >= 5000000 || activeCustomers.length >= 10) {
-    tier = "flagship";
-  } else if (annualRunRate >= 2000000 || activeCustomers.length >= 5) {
-    tier = "established";
-  }
+  const currencySymbol = getCurrencySymbol(business?.currency);
 
   const tierConfig = VALUATION_TIER_CONFIG[tier];
 
-  let baseMultiple = (tierConfig.minMultiple + tierConfig.maxMultiple) / 2;
-  if (profitMargin > 50) baseMultiple += 0.3;
-  if (activeCustomers.length > 5) baseMultiple += 0.2;
+  let multiple = 0;
+  let estimatedLow = 0;
+  let estimatedHigh = 0;
+  let midpoint = 0;
 
-  const multiple = Number(baseMultiple.toFixed(1));
-  const clientEquity = activeCustomers.length * 25000;
+  if (annualRunRate > 0 || activeCustomers.length > 0) {
+    let baseMultiple = (tierConfig.minMultiple + tierConfig.maxMultiple) / 2;
+    if (profitMargin >= 50) baseMultiple += 0.3;
+    if (activeCustomers.length >= 5) baseMultiple += 0.2;
 
-  const rawEstimatedLow = Math.max(
-    annualNetProfit * (multiple * 0.88) + clientEquity * 0.8,
-    1500000,
-  );
-  const rawEstimatedHigh = Math.max(
-    annualNetProfit * (multiple * 1.15) + clientEquity * 1.4,
-    2500000,
-  );
+    multiple = Number(baseMultiple.toFixed(1));
+    const clientEquity = activeCustomers.length * 25000;
 
-  const estimatedLow = Math.round(rawEstimatedLow / 10000) * 10000;
-  const estimatedHigh = Math.round(rawEstimatedHigh / 10000) * 10000;
-  const midpoint =
-    Math.round((estimatedLow + estimatedHigh) / 2 / 10000) * 10000;
+    const rawEstimatedLow = Math.max(
+      0,
+      annualNetProfit * (multiple * 0.88) + clientEquity * 0.8,
+    );
+    const rawEstimatedHigh = Math.max(
+      0,
+      annualNetProfit * (multiple * 1.15) + clientEquity * 1.4,
+    );
+
+    estimatedLow = Math.round(rawEstimatedLow / 1000) * 1000;
+    estimatedHigh = Math.round(rawEstimatedHigh / 1000) * 1000;
+    midpoint = Math.round((estimatedLow + estimatedHigh) / 2 / 1000) * 1000;
+  }
+
+  const formattedArr =
+    annualRunRate >= 1000000
+      ? `${currencySymbol}${(annualRunRate / 1000000).toFixed(2)}M`
+      : annualRunRate >= 1000
+        ? `${currencySymbol}${(annualRunRate / 1000).toFixed(1)}k`
+        : `${currencySymbol}${annualRunRate}`;
 
   const drivers: ValuationDriverDto[] = [
     {
       id: "arr",
       name: "Annual Revenue Run-Rate",
-      value: `₦${(annualRunRate / 1000000).toFixed(2)}M`,
-      impact: "high",
+      value: formattedArr,
+      impact: annualRunRate > 0 ? "high" : "neutral",
       detail: "Annualized gross inflow from paid invoices & client retainers",
     },
     {
@@ -272,31 +250,12 @@ export async function calculateAdvancedStudioValuationService(
       id: "pipeline",
       name: "Lead Conversion Pipeline",
       value: `${leads.length} Inquiries`,
-      impact: "positive",
+      impact: leads.length > 0 ? "positive" : "neutral",
       detail: "Inbound quote demand from public storefront and 3D card",
     },
   ];
 
-  const growthLevers = [
-    {
-      title: "Establish Structured Recurring Retainers",
-      description:
-        "Convert ad-hoc project scopes into contractual recurring monthly retainer agreements.",
-      impactMultiple: "+0.4x Multiple",
-    },
-    {
-      title: "Automate Client Onboarding & Invoicing",
-      description:
-        "Systematize delivery workflows to reduce overhead and enhance client retention.",
-      impactMultiple: "+0.3x Multiple",
-    },
-    {
-      title: "Expand High-Yield Bespoke Packages",
-      description:
-        "Package signature identity and scenography engagements at premium price tiers.",
-      impactMultiple: "+0.5x Multiple",
-    },
-  ];
+  const growthLevers = [...VALUATION_GROWTH_LEVERS];
 
   return {
     estimatedLow,

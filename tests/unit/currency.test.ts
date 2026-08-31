@@ -1,5 +1,6 @@
 import { describe, expect, it } from "@jest/globals";
 import {
+  getCurrencySymbol,
   koboToNaira,
   nairaToKobo,
   toFinancialAmount,
@@ -68,6 +69,23 @@ describe("Currency & Financial Amount Utility Tests", () => {
         total: 0,
         totalKobo: 0,
       });
+    });
+  });
+
+  describe("getCurrencySymbol", () => {
+    it("returns correct symbols for standard currencies", () => {
+      expect(getCurrencySymbol("USD")).toBe("$");
+      expect(getCurrencySymbol("GBP")).toBe("£");
+      expect(getCurrencySymbol("EUR")).toBe("€");
+      expect(getCurrencySymbol("NGN")).toBe("₦");
+    });
+
+    it("handles lowercase, whitespace, and defaults to ₦ for null/unrecognized", () => {
+      expect(getCurrencySymbol("usd")).toBe("$");
+      expect(getCurrencySymbol(" gbp ")).toBe("£");
+      expect(getCurrencySymbol(null)).toBe("₦");
+      expect(getCurrencySymbol(undefined)).toBe("₦");
+      expect(getCurrencySymbol("UNKNOWN")).toBe("₦");
     });
   });
 });

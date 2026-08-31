@@ -7,6 +7,7 @@ import { generateOtp, getDateTime, sendEmailHandler } from "../../../utils";
 import type {
   ForgotPasswordInput,
   ResetPasswordInput,
+  UpdateMeInput,
 } from "../schema/auth.schema";
 
 export async function forgotPasswordService(data: ForgotPasswordInput) {
@@ -128,3 +129,64 @@ export async function meService(userId: string) {
     })),
   };
 }
+
+export async function updateMeService(userId: string, data: UpdateMeInput) {
+  let firstName = data.firstName?.trim();
+  let lastName = data.lastName?.trim();
+
+  if (data.name && !firstName) {
+    const parts = data.name.trim().split(" ");
+    firstName = parts[0];
+    lastName = parts.slice(1).join(" ") || lastName;
+  }
+
+  const updatedUser = await prisma.user.update({
+    where: { id: userId },
+    data: {
+      ...(firstName !== undefined ? { firstName } : {}),
+      ...(lastName !== undefined ? { lastName } : {}),
+      ...(data.phone !== undefined ? { phone: data.phone.trim() } : {}),
+      ...(data.avatarUrl !== undefined ? { avatarUrl: data.avatarUrl } : {}),
+    },
+    include: {
+      businessUsers: {
+        include: {
+          business: true,
+        },
+      },
+    },
+  });
+
+  const primaryBusinessUser = updatedUser.businessUsers[0];
+
+  return {
+    user: {
+      id: updatedUser.id,
+      email: updatedUser.email,
+      firstName: updatedUser.firstName,
+      lastName: updatedUser.lastName,
+      name: `${updatedUser.firstName} ${updatedUser.lastName}`.trim(),
+      phone: updatedUser.phone,
+      role: updatedUser.role,
+      avatarUrl: updatedUser.avatarUrl,
+      isActive: updatedUser.isActive,
+      studioId: primaryBusinessUser?.business.id,
+      studioName: primaryBusinessUser?.business.name,
+      studioSlug: primaryBusinessUser?.business.slug,
+      createdAt: updatedUser.createdAt,
+    },
+    studio: primaryBusinessUser
+      ? {
+          id: primaryBusinessUser.business.id,
+          slug: primaryBusinessUser.business.slug,
+          name: primaryBusinessUser.business.name,
+          tagline: primaryBusinessUser.business.tagline,
+          logoUrl: primaryBusinessUser.business.logoUrl,
+          currency: primaryBusinessUser.business.currency,
+          isPublished: primaryBusinessUser.business.isPublished,
+          role: primaryBusinessUser.role,
+        }
+      : null,
+  };
+}
+

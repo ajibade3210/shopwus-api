@@ -86,4 +86,14 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
     },
     authController.me,
   );
+
+  typedApp.patch(
+    "/me",
+    {
+      preHandler: [authenticate],
+      schema: authSchema.updateMeRouteSchema,
+    },
+    authController.updateMe,
+  );
 }
+

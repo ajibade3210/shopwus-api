@@ -1,3 +1,12 @@
+import {
+  DEFAULT_BUSINESS_TYPE,
+  DEFAULT_BUTTON_RADIUS,
+  DEFAULT_COLOR_SCHEME,
+  DEFAULT_FOOTER_SETTINGS,
+  DEFAULT_PORTFOLIO_CATEGORIES,
+  DEFAULT_SOCIAL_CHANNELS,
+  DEFAULT_VISIBILITY_SETTINGS,
+} from "../../../config/constants/studio";
 import { ForbiddenError } from "../../../lib/errors";
 import { prisma } from "../../../lib/prisma";
 import { verifySocialToken } from "../../../lib/socialAuth";
@@ -77,9 +86,30 @@ export async function socialSignInService(
           name: studioName,
           slug: resolvedSlug,
           email,
-          businessType: "STUDIO",
+          businessType: DEFAULT_BUSINESS_TYPE,
+          colors: DEFAULT_COLOR_SCHEME,
+          buttonRadius: DEFAULT_BUTTON_RADIUS,
+          showServices: DEFAULT_VISIBILITY_SETTINGS.showServices,
+          showPortfolio: DEFAULT_VISIBILITY_SETTINGS.showPortfolio,
+          showReviews: DEFAULT_VISIBILITY_SETTINGS.showReviews,
+          showFooterCta: DEFAULT_VISIBILITY_SETTINGS.showFooterCta,
+          footerEyebrow: DEFAULT_FOOTER_SETTINGS.footerEyebrow,
+          footerTitle: DEFAULT_FOOTER_SETTINGS.footerTitle,
+          footerDescription: DEFAULT_FOOTER_SETTINGS.footerDescription,
+          portfolioCategories: DEFAULT_PORTFOLIO_CATEGORIES,
           isPublished: true,
         },
+      });
+
+      await tx.socialChannel.createMany({
+        data: DEFAULT_SOCIAL_CHANNELS.map((ch) => ({
+          businessId: newBusiness.id,
+          type: ch.type,
+          label: ch.label,
+          connected: false,
+          handle: ch.handle,
+          url: ch.url,
+        })),
       });
 
       await tx.businessUser.create({

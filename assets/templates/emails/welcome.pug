@@ -22,23 +22,36 @@ html(lang="en")
             tr
               td.email-header(style="background-color:#0f172a;padding:32px 32px 28px;text-align:center;")
                 h1(style="font-size:24px;font-weight:800;color:#ffffff;letter-spacing:-0.5px;margin:0 0 6px 0;") Shopwus
-                p(style="font-size:13px;color:#94a3b8;margin:0;") Creative Studio & Client Operations Platform
+                p(style="font-size:13px;color:#94a3b8;margin:0;") Creative Storefront & Customer Management Platform
 
             tr
-              td(style="background-color:#f8fafc;padding:24px 32px;border-bottom:1px solid #e2e8f0;text-align:center;")
-                p.hero-title(style="font-size:20px;font-weight:700;color:#0f172a;margin:0 0 6px 0;") Welcome to Shopwus! 🎉
-                if studioName
-                  p(style="font-size:14px;color:#64748b;margin:0;") Your studio #[strong #{studioName}] is ready.
+              td(style="background-color:#f8fafc;padding:12px 32px;border-bottom:1px solid #e2e8f0;")
+                table(role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 auto;")
+                  tr
+                    td(style="vertical-align:middle;padding-right:8px;width:72px;")
+                      img(src="https://pub-d89922cb03b54e33ae779d915f49c77f.r2.dev/test/shopwus/cmthln8870016xh9ksmaolx1d/images/a89a5f1a51ed6abfc7e3a1a347577f83.png" alt="Shopwus" width="72" height="72" style="display:block;width:72px;height:72px;object-fit:contain;")
+                    td(style="vertical-align:middle;text-align:left;")
+                      p.hero-title(style="font-size:20px;font-weight:700;color:#0f172a;margin:0 0 4px 0;") Welcome to Shopwus!
+                      if studioName
+                        p(style="font-size:14px;color:#64748b;margin:0;") Your Storefront #[strong #{studioName}] is ready.
 
             tr
               td.email-body(style="padding:32px;font-size:15px;color:#334155;line-height:1.6;")
-                p(style="margin:0 0 16px;") Hi #{name},
-                p(style="margin:0 0 24px;") Welcome aboard! Your studio workspace has been created. You can now showcase your portfolio, manage client leads, create service scopes, and dispatch invoices seamlessly.
+                p(style="margin:0 0 16px;font-size:16px;color:#0f172a;") Hi #[strong #{name}],
+                p(style="margin:0 0 20px;") Welcome to Shopwus! Your storefront workspace is officially live and ready for your customers.
+                
+                p(style="margin:0 0 12px;font-weight:600;color:#0f172a;") Here is what you can do right away:
+                ul(style="margin:0 0 24px 0;padding-left:20px;color:#475569;")
+                  li(style="margin-bottom:8px;") #[strong Showcase your offerings] &mdash; publish your products and services.
+                  li(style="margin-bottom:8px;") #[strong Capture client leads] &mdash; receive booking and quote inquiries directly through your storefront.
+                  li(style="margin-bottom:8px;") #[strong Send invoices & get paid] &mdash; create professional invoices and collect payments seamlessly.
 
-                table(role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:24px 0;")
+                table(role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:28px 0 0 0;")
                   tr
                     td
-                      a.btn(href=url style="display:inline-block;padding:12px 28px;background-color:#0f172a;color:#ffffff;text-decoration:none;font-weight:600;font-size:14px;border-radius:6px;") Go to Dashboard
+                      a.btn(href=url style="display:inline-block;padding:14px 32px;background-color:#0f172a;color:#ffffff;text-decoration:none;font-weight:600;font-size:14px;border-radius:8px;letter-spacing:0.2px;") Go to Your Dashboard &rarr;
+
+                p(style="margin:24px 0 0;font-size:13px;color:#64748b;line-height:1.5;") Need help getting started? Contact us at #[a(href="mailto:contact@shopwus.com" style="color:#0f172a;font-weight:600;text-decoration:underline;") contact@shopwus.com] &mdash; we&rsquo;re here to assist you.
 
             tr
               td(style="background-color:#f8fafc;padding:20px 32px;border-top:1px solid #e2e8f0;text-align:center;font-size:12px;color:#94a3b8;")

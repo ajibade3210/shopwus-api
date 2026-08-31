@@ -4,6 +4,8 @@ import type { SendEmailOptions } from "../types";
 import { logger } from "./logger";
 
 const resend = new Resend(env.RESEND_API_KEY);
+console.log("🔍 ~ resend: ---", resend);
+
 
 export async function sendEmail(options: SendEmailOptions) {
   try {

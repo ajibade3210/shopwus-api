@@ -78,7 +78,7 @@ export async function sendNewLeadNotificationEmail(
     template: EmailTemplateNames.NEW_LEAD,
     context: {
       ...options,
-      url: `${env.FRONTEND_URL}/admin/leads`,
+      url: `${env.FRONTEND_URL}/vendor/leads`,
     },
   });
 }

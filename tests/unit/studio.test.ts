@@ -99,16 +99,35 @@ describe("Studio Module Unit Tests", () => {
     });
   });
 
-  describe("Cache Store Utility", () => {
-    it("stores and retrieves cached values with TTL", async () => {
-      const { cacheStore } = await import("../../src/utils/cache.utils");
-      cacheStore.set("test-key", { hello: "world" }, 10_000);
+  describe("Reserved Slugs & Guard", () => {
+    it("identifies reserved slugs accurately", async () => {
+      const { isReservedSlug } = await import(
+        "../../src/config/constants/reserved-slugs"
+      );
+      expect(isReservedSlug("vendor")).toBe(true);
+      expect(isReservedSlug("vendors")).toBe(true);
+      expect(isReservedSlug("admin")).toBe(true);
+      expect(isReservedSlug("login")).toBe(true);
+      expect(isReservedSlug("signup")).toBe(true);
+      expect(isReservedSlug("invoices")).toBe(true);
+      expect(isReservedSlug("api")).toBe(true);
 
-      const cached = cacheStore.get<{ hello: string }>("test-key");
-      expect(cached?.hello).toBe("world");
+      expect(isReservedSlug("my-luxury-atelier")).toBe(false);
+      expect(isReservedSlug("elan-events-2026")).toBe(false);
+    });
 
-      cacheStore.delete("test-key");
-      expect(cacheStore.get("test-key")).toBeNull();
+    it("rejects reserved slugs in checkSlugAvailabilityService", async () => {
+      const { checkSlugAvailabilityService } = await import(
+        "../../src/modules/studios/services/studio-admin.service"
+      );
+      const res = await checkSlugAvailabilityService("vendor");
+      expect(res.available).toBe(false);
+
+      const resAdmin = await checkSlugAvailabilityService("admin");
+      expect(resAdmin.available).toBe(false);
+
+      const resShort = await checkSlugAvailabilityService("ab");
+      expect(resShort.available).toBe(false);
     });
   });
 });

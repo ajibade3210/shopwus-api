@@ -12,6 +12,7 @@ import { ConflictError } from "../../../lib/errors";
 import { logger } from "../../../lib/logger";
 import { prisma } from "../../../lib/prisma";
 import { sendWelcomeEmail, slugify } from "../../../utils";
+import { isReservedSlug } from "../../../config/constants/reserved-slugs";
 import type { SignupInput } from "../schema/auth.schema";
 import { issueAuthTokens } from "./session.service";
 
@@ -45,7 +46,10 @@ export async function signupService(
   let resolvedSlug = baseSlug;
   let counter = 1;
 
-  while (await prisma.business.findUnique({ where: { slug: resolvedSlug } })) {
+  while (
+    isReservedSlug(resolvedSlug) ||
+    (await prisma.business.findUnique({ where: { slug: resolvedSlug } }))
+  ) {
     resolvedSlug = `${baseSlug}-${counter}`;
     counter++;
   }

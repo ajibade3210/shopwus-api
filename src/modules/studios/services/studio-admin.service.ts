@@ -1,3 +1,4 @@
+import { isReservedSlug } from "../../../config/constants/reserved-slugs";
 import type { Prisma } from "@prisma/client";
 import { NotFoundError } from "../../../lib/errors";
 import { prisma } from "../../../lib/prisma";
@@ -8,38 +9,13 @@ import {
   invalidateStorefrontCache,
 } from "./storefront.service";
 
-const RESERVED_SLUGS = [
-  "admin",
-  "api",
-  "auth",
-  "login",
-  "signup",
-  "dashboard",
-  "settings",
-  "profile",
-  "invoices",
-  "expenses",
-  "customers",
-  "leads",
-  "analytics",
-  "valuation",
-  "broadcasts",
-  "feedback",
-  "pricing",
-  "terms",
-  "privacy",
-  "help",
-  "support",
-  "explore",
-];
-
 export async function checkSlugAvailabilityService(
   rawSlug: string,
   excludeBusinessId?: string,
 ): Promise<{ available: boolean; slug: string }> {
   const normalized = slugify(rawSlug);
 
-  if (normalized.length < 3 || RESERVED_SLUGS.includes(normalized)) {
+  if (normalized.length < 3 || isReservedSlug(normalized)) {
     return { available: false, slug: normalized };
   }
 

@@ -146,6 +146,10 @@ export async function getStorefrontBySlug(
       category: s.category,
       description: s.description,
       price: s.price ? Number(s.price) : null,
+      minPrice: s.minPrice ? Number(s.minPrice) : null,
+      maxPrice: s.maxPrice ? Number(s.maxPrice) : null,
+      priceType:
+        (s.priceType as "fixed" | "range") || (s.maxPrice ? "range" : "fixed"),
       isFeatured: s.isFeatured,
     })),
     portfolio: business.portfolioProjects.map((p) => ({

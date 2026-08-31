@@ -72,6 +72,9 @@ model Service {
   category    String?
   description String?
   price       Decimal? @db.Decimal(12, 2)
+  minPrice    Decimal? @db.Decimal(12, 2)
+  maxPrice    Decimal? @db.Decimal(12, 2)
+  priceType   String?  @default("fixed")
   isFeatured  Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

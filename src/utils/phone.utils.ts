@@ -64,4 +64,3 @@ export function cleanPhoneForWhatsApp(phone: string): string {
   const normalized = normalizePhoneNumber(phone);
   return normalized.replace(/\D/g, "");
 }
-

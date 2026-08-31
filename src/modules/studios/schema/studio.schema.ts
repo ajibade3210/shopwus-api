@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ReqHeaderSchema, isValidPhone } from "../../../utils";
+import { isValidPhone, ReqHeaderSchema } from "../../../utils";
 
 export const checkSlugSchema = z.object({
   slug: z.string().min(1, "Slug is required"),
@@ -33,6 +33,9 @@ export const serviceItemInputSchema = z.object({
   category: z.string().nullish(),
   description: z.string().nullish(),
   price: z.number().nullish(),
+  minPrice: z.number().nullish(),
+  maxPrice: z.number().nullish(),
+  priceType: z.string().nullish(),
   isFeatured: z.boolean().nullish(),
 });
 

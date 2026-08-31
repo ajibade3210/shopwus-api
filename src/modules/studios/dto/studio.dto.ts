@@ -13,6 +13,9 @@ export interface ServiceItemDto {
   category?: string | null;
   description?: string | null;
   price?: number | null;
+  minPrice?: number | null;
+  maxPrice?: number | null;
+  priceType?: string | null;
   isFeatured?: boolean;
 }
 

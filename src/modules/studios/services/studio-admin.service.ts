@@ -174,6 +174,9 @@ export async function updateStudioMeService(
             category: s.category?.trim(),
             description: s.description?.trim(),
             price: s.price !== undefined ? s.price : null,
+            minPrice: s.minPrice !== undefined ? s.minPrice : null,
+            maxPrice: s.maxPrice !== undefined ? s.maxPrice : null,
+            priceType: s.priceType || (s.maxPrice ? "range" : "fixed"),
             isFeatured: s.isFeatured ?? false,
           })),
         });

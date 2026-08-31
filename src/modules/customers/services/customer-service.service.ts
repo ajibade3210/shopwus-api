@@ -24,7 +24,7 @@ export async function addCustomerServiceService(
         businessId,
         customerId: customer.id,
         name: data.name.trim(),
-        service: data.service?.trim() || "Bespoke Service",
+        service: data.service?.trim() || "",
         amount: rawAmount,
         status: data.status || "pending",
       },

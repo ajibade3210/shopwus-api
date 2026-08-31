@@ -119,7 +119,7 @@ export async function getServicesPerformanceService(
     const existing = performanceMap.get(key) || {
       id: cs.id,
       name: cs.name,
-      category: cs.service || "Bespoke Service",
+      category: cs.service || "",
       price: Number(cs.amount),
       dealsCount: 0,
       totalRevenue: 0,

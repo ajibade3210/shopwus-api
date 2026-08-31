@@ -114,7 +114,7 @@ export async function sendQuickCustomerInvoiceService(
         : Number(customer.totalRevenue) || 50000;
 
   const invoiceNumber = await generateNextInvoiceNumber(businessId);
-  const serviceTitle = targetService?.name || "Bespoke Creative Engagement";
+  const serviceTitle = targetService?.name || "";
 
   const invoice = await prisma.invoice.create({
     data: {

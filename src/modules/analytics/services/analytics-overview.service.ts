@@ -316,7 +316,7 @@ export async function getAnalyticsOverviewService(
     const existing = serviceStatsMap.get(key) || {
       price: Number(cs.amount),
       volume: 0,
-      category: cs.service || "Bespoke Service",
+      category: cs.service || "",
     };
     existing.volume += 1;
     serviceStatsMap.set(key, existing);

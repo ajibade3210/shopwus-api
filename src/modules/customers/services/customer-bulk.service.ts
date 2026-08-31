@@ -141,7 +141,7 @@ export async function exportCustomersCsvService(
     `"${(c.company || "").replace(/"/g, '""')}"`,
     Number(c.totalRevenue),
     c.services.length,
-    `"${(c.services[0]?.service || "Bespoke").replace(/"/g, '""')}"`,
+    `"${(c.services[0]?.service || "").replace(/"/g, '""')}"`,
     `"${c.services[0]?.status || "active"}"`,
     `"${c.createdAt.toISOString()}"`,
   ]);

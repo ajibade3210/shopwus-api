@@ -166,19 +166,25 @@ export async function updateStudioMeService(
         where: { businessId: business.id },
       });
 
-      if (input.services.length > 0) {
+      const validServices = input.services
+        .filter((s) => s.name && s.name.trim().length > 0)
+        .map((s) => ({
+          businessId: business.id,
+          name: s.name.trim(),
+          category: s.category?.trim() || null,
+          description: s.description?.trim() || null,
+          price: s.price !== undefined && s.price !== null ? s.price : null,
+          minPrice:
+            s.minPrice !== undefined && s.minPrice !== null ? s.minPrice : null,
+          maxPrice:
+            s.maxPrice !== undefined && s.maxPrice !== null ? s.maxPrice : null,
+          priceType: s.priceType || (s.maxPrice ? "range" : "fixed"),
+          isFeatured: s.isFeatured ?? false,
+        }));
+
+      if (validServices.length > 0) {
         await tx.service.createMany({
-          data: input.services.map((s) => ({
-            businessId: business.id,
-            name: s.name.trim(),
-            category: s.category?.trim(),
-            description: s.description?.trim(),
-            price: s.price !== undefined ? s.price : null,
-            minPrice: s.minPrice !== undefined ? s.minPrice : null,
-            maxPrice: s.maxPrice !== undefined ? s.maxPrice : null,
-            priceType: s.priceType || (s.maxPrice ? "range" : "fixed"),
-            isFeatured: s.isFeatured ?? false,
-          })),
+          data: validServices,
         });
       }
     }
@@ -189,22 +195,26 @@ export async function updateStudioMeService(
         where: { businessId: business.id },
       });
 
-      if (input.portfolio.length > 0) {
+      const validProjects = input.portfolio
+        .filter((p) => p.title && p.title.trim().length > 0)
+        .map((p, idx) => ({
+          businessId: business.id,
+          title: p.title.trim(),
+          category: p.category?.trim() || null,
+          location: p.location?.trim() || null,
+          description: p.description?.trim() || null,
+          image: p.image?.trim() || null,
+          order: p.order ?? idx,
+          isCover: p.isCover ?? idx === 0,
+          gallery: Array.isArray(p.gallery) ? p.gallery : [],
+          stats: p.stats?.trim() || null,
+          client: p.client?.trim() || null,
+          year: p.year?.trim() || null,
+        }));
+
+      if (validProjects.length > 0) {
         await tx.portfolioProject.createMany({
-          data: input.portfolio.map((p, idx) => ({
-            businessId: business.id,
-            title: p.title.trim(),
-            category: p.category?.trim(),
-            location: p.location?.trim(),
-            description: p.description?.trim(),
-            image: p.image?.trim(),
-            order: p.order ?? idx,
-            isCover: p.isCover ?? idx === 0,
-            gallery: p.gallery || [],
-            stats: p.stats?.trim(),
-            client: p.client?.trim(),
-            year: p.year?.trim(),
-          })),
+          data: validProjects,
         });
       }
     }
@@ -215,17 +225,21 @@ export async function updateStudioMeService(
         where: { businessId: business.id },
       });
 
-      if (input.socialChannels.length > 0) {
+      const validChannels = input.socialChannels
+        .filter((c) => c.type && c.type.trim().length > 0)
+        .map((c) => ({
+          businessId: business.id,
+          type: c.type.trim(),
+          connected: c.connected ?? false,
+          label: c.label?.trim() || null,
+          handle: c.handle?.trim() || null,
+          url: c.url?.trim() || null,
+          description: c.description?.trim() || null,
+        }));
+
+      if (validChannels.length > 0) {
         await tx.socialChannel.createMany({
-          data: input.socialChannels.map((c) => ({
-            businessId: business.id,
-            type: c.type.trim(),
-            connected: c.connected ?? false,
-            label: c.label?.trim() || null,
-            handle: c.handle?.trim() || null,
-            url: c.url?.trim() || null,
-            description: c.description?.trim() || null,
-          })),
+          data: validChannels,
         });
       }
     }

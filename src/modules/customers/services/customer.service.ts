@@ -180,7 +180,7 @@ export async function createCustomerService(
           businessId,
           customerId: customer.id,
           name: initialServiceName,
-          service: data.service?.trim() || "Bespoke Service",
+          service: data.service?.trim() || "",
           amount: rawAmount,
           status: data.status || "active",
         },

@@ -218,7 +218,7 @@ export async function convertLeadToCustomerService(
       ? Number(options.amount)
       : Number(lead.budget) || 50000;
   const serviceTitle =
-    options.serviceName || lead.service || "Bespoke Creative Direction";
+    options.serviceName || lead.service || "";
   const serviceCategory = options.service || lead.service || "Design";
 
   return prisma.$transaction(async (tx) => {
@@ -357,7 +357,7 @@ export async function exportLeadsCsvService(
     `"${l.name.replace(/"/g, '""')}"`,
     `"${l.email}"`,
     `"${l.phone || ""}"`,
-    `"${(l.service || "Bespoke").replace(/"/g, '""')}"`,
+    `"${(l.service || "").replace(/"/g, '""')}"`,
     `"${l.eventDate || "Flexible"}"`,
     `"${l.budget || ""}"`,
     `"${l.status}"`,

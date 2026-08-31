@@ -9,7 +9,6 @@ export const registerCors = fp(async (app: FastifyInstance) => {
   ? env.CORS.split(",").map(o => o.trim())
   : [env.FRONTEND_URL];
   
-  console.log("🔍 ~ fp---- ----", origins);
   await app.register(cors, {
     origin: origins,
     methods: ["GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS"],

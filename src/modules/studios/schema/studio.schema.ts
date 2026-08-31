@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ReqHeaderSchema } from "../../../utils";
+import { ReqHeaderSchema, isValidPhone } from "../../../utils";
 
 export const checkSlugSchema = z.object({
   slug: z.string().min(1, "Slug is required"),
@@ -51,16 +51,33 @@ export const portfolioProjectInputSchema = z.object({
   year: z.string().nullish(),
 });
 
-export const socialChannelInputSchema = z.object({
-  id: z.string().nullish(),
-  type: z.string(),
-  connected: z.boolean().default(false),
-  label: z.string().nullish(),
-  handle: z.string().nullish(),
-  url: z.string().nullish(),
-  description: z.string().nullish(),
-  lastSynced: z.union([z.string(), z.date()]).nullish(),
-});
+export const socialChannelInputSchema = z
+  .object({
+    id: z.string().nullish(),
+    type: z.string(),
+    connected: z.boolean().default(false),
+    label: z.string().nullish(),
+    handle: z.string().nullish(),
+    url: z.string().nullish(),
+    description: z.string().nullish(),
+    lastSynced: z.union([z.string(), z.date()]).nullish(),
+  })
+  .refine(
+    (data) => {
+      if (
+        data.type?.toLowerCase() === "whatsapp" &&
+        data.handle &&
+        data.handle.trim()
+      ) {
+        return isValidPhone(data.handle);
+      }
+      return true;
+    },
+    {
+      message: "Invalid WhatsApp phone number format",
+      path: ["handle"],
+    },
+  );
 
 export const updateStudioProfileSchema = z.object({
   businessName: z.string().nullish(),
@@ -72,7 +89,12 @@ export const updateStudioProfileSchema = z.object({
   email: z.string().nullish(),
   emailAddress: z.string().nullish(),
   phone: z.string().nullish(),
-  whatsAppNumber: z.string().nullish(),
+  whatsAppNumber: z
+    .string()
+    .nullish()
+    .refine((val) => !val || !val.trim() || isValidPhone(val), {
+      message: "Invalid WhatsApp phone number format",
+    }),
   logoUrl: z.string().nullish(),
   businessType: z.string().nullish(),
   currency: z.string().nullish(),

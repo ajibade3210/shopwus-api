@@ -1,0 +1,75 @@
+enum InvoiceStatus {
+  draft
+  sent
+  paid
+  overdue
+  cancelled
+}
+
+model Invoice {
+  id             String        @id @default(cuid())
+  businessId     String
+  customerId     String
+  invoiceNumber  String        @unique
+  customerName   String
+  customerEmail  String
+  billingAddress String?
+  issueDate      DateTime      @default(now())
+  dueDate        DateTime
+  paymentTerms   String?
+  currency       String        @default("NGN")
+  subtotal       Decimal       @default(0) @db.Decimal(12, 2)
+  discount       Decimal       @default(0) @db.Decimal(12, 2)
+  taxRate        Decimal       @default(0) @db.Decimal(5, 2)
+  taxAmount      Decimal       @default(0) @db.Decimal(12, 2)
+  total          Decimal       @default(0) @db.Decimal(12, 2)
+  notes          String?
+  status         InvoiceStatus @default(draft)
+  sentAt         DateTime?
+  pdfUrl         String?
+  pdfKey         String?
+  pdfGeneratedAt DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  business       Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  customer       Customer      @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  items          InvoiceItem[]
+
+  @@unique([id, businessId])
+  @@index([businessId])
+  @@index([customerId])
+  @@index([status])
+}
+
+model InvoiceItem {
+  id          String   @id @default(cuid())
+  invoiceId   String
+  description String
+  quantity    Decimal  @default(1) @db.Decimal(10, 2)
+  unit        String?
+  unitPrice   Decimal  @default(0) @db.Decimal(12, 2)
+  amount      Decimal  @default(0) @db.Decimal(12, 2)
+  createdAt   DateTime @default(now())
+
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId])
+}
+
+model DocumentSequence {
+  id         String   @id @default(cuid())
+  businessId String
+  type       String   @default("INVOICE")
+  year       Int
+  lastNumber Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@unique([businessId, type, year])
+  @@unique([id, businessId])
+  @@index([businessId])
+}
+

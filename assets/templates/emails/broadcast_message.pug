@@ -1,0 +1,32 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    meta(http-equiv="X-UA-Compatible" content="IE=edge")
+    title= title + " | Accessa"
+    style.
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { margin: 0 !important; padding: 0 !important; width: 100% !important; background-color: #f8fafc; }
+      .email-wrapper { max-width: 600px; margin: 40px auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+      .header { padding: 32px; border-bottom: 1px solid #f1f5f9; text-align: center; }
+      .content { padding: 40px 32px; font-family: 'Inter', sans-serif; color: #1e293b; line-height: 1.6; }
+      .title { font-size: 22px; font-weight: 700; color: #0f172a; margin-bottom: 16px; }
+      .footer { padding: 32px; background: #f8fafc; text-align: center; font-family: 'Inter', sans-serif; color: #64748b; font-size: 13px; }
+
+  body
+    div.email-wrapper
+      div.header
+        img(src="https://res.cloudinary.com/dbyxa5mev/image/upload/v1774002433/accessa_logo_rekkfp.jpg" alt="Accessa" height="40")
+      
+      div.content
+        if name
+          p Hi #{name},
+        
+        div(style="margin-top: 16px;")
+          != body
+
+      div.footer
+        p &copy; #{currentYear} Accessa Tech Ltd. All rights reserved.
+        p FCT Nigeria.

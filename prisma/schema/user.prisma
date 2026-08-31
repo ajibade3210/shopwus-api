@@ -1,0 +1,46 @@
+enum Role {
+  OWNER
+  DIRECTOR
+  STAFF
+  SUPER_ADMIN
+}
+
+model User {
+  id              String            @id @default(cuid())
+  email           String            @unique
+  passwordHash    String?
+  firstName       String
+  lastName        String
+  avatarUrl       String?
+  phone           String?
+  role            Role              @default(OWNER)
+  isActive        Boolean           @default(true)
+  googleId        String?           @unique
+  resetToken      String?
+  resetExpiringAt DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  businessUsers    BusinessUser[]
+  refreshTokens    RefreshToken[]
+  feedbackRequests FeedbackRequest[]
+
+  @@index([email])
+}
+
+model RefreshToken {
+  id         String    @id @default(cuid())
+  userId     String
+  tokenHash  String    @unique
+  deviceId   String?
+  deviceName String?
+  ipAddress  String?
+  userAgent  String?
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  createdAt  DateTime  @default(now())
+
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}

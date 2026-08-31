@@ -1,0 +1,20 @@
+model Expense {
+  id            String   @id @default(cuid())
+  businessId    String
+  description   String
+  category      String
+  amount        Decimal  @default(0) @db.Decimal(12, 2)
+  date          DateTime @default(now())
+  paymentMethod String?
+  vendor        String?
+  receiptUrl    String?
+  taxDeductible Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  business      Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@unique([id, businessId])
+  @@index([businessId])
+  @@index([category])
+}

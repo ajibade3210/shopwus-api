@@ -1,0 +1,14 @@
+#!/bin/bash
+set -e
+
+echo "[Husky] Running type check..."
+pnpm run check
+
+echo "[Husky] Running linter..."
+pnpm run lint
+
+echo "[Husky] Checking for console.log statements..."
+bash scripts/check-console-logs.sh
+
+echo "[Husky] Running formatter..."
+pnpm run format

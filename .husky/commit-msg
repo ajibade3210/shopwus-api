@@ -1,0 +1,4 @@
+#!/bin/sh
+
+echo "[Husky] Validating commit message format"
+npx --no -- commitlint --edit $1

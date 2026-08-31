@@ -1,0 +1,196 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    title= "Invoice " + invoiceNumber + " | " + studioName
+    style.
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body {
+        font-family: 'Inter', Arial, sans-serif;
+        background-color: #ffffff;
+        color: #0f172a;
+        padding: 40px;
+        line-height: 1.5;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 40px;
+        border-bottom: 2px solid #f1f5f9;
+        padding-bottom: 24px;
+      }
+      .studio-info h1 {
+        font-size: 24px;
+        font-weight: 800;
+        color: #0f172a;
+        margin-bottom: 4px;
+      }
+      .studio-info p {
+        font-size: 13px;
+        color: #64748b;
+      }
+      .invoice-meta {
+        text-align: right;
+      }
+      .invoice-meta h2 {
+        font-size: 28px;
+        font-weight: 800;
+        color: #0f172a;
+        letter-spacing: -0.5px;
+        margin-bottom: 4px;
+      }
+      .invoice-meta p {
+        font-size: 13px;
+        color: #64748b;
+      }
+      .details-grid {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 32px;
+      }
+      .bill-to h3, .invoice-dates h3 {
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #94a3b8;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+      }
+      .bill-to p, .invoice-dates p {
+        font-size: 14px;
+        color: #334155;
+        margin-bottom: 4px;
+      }
+      table.items {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 32px;
+      }
+      table.items th {
+        background-color: #f8fafc;
+        padding: 12px 16px;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #64748b;
+        text-align: left;
+        border-bottom: 1px solid #e2e8f0;
+      }
+      table.items td {
+        padding: 14px 16px;
+        font-size: 14px;
+        color: #334155;
+        border-bottom: 1px solid #f1f5f9;
+      }
+      .text-right {
+        text-align: right !important;
+      }
+      .summary-section {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 40px;
+      }
+      .summary-table {
+        width: 320px;
+      }
+      .summary-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        font-size: 14px;
+        color: #64748b;
+      }
+      .summary-row.total {
+        border-top: 2px solid #0f172a;
+        margin-top: 8px;
+        padding-top: 12px;
+        font-size: 18px;
+        font-weight: 800;
+        color: #0f172a;
+      }
+      .notes-section {
+        border-top: 1px solid #f1f5f9;
+        padding-top: 24px;
+        font-size: 13px;
+        color: #64748b;
+      }
+      .footer {
+        margin-top: 48px;
+        text-align: center;
+        font-size: 12px;
+        color: #94a3b8;
+      }
+
+  body
+    .container
+      .header
+        .studio-info
+          h1= studioName
+          if studioEmail
+            p= studioEmail
+          if studioPhone
+            p= studioPhone
+          if studioAddress
+            p= studioAddress
+        .invoice-meta
+          h2 INVOICE
+          p #{invoiceNumber}
+
+      .details-grid
+        .bill-to
+          h3 Billed To
+          p #[strong #{customerName}]
+          p #{customerEmail}
+          if billingAddress
+            p #{billingAddress}
+
+        .invoice-dates
+          h3 Invoice Details
+          p #[strong Issue Date:] #{issueDate}
+          p #[strong Due Date:] #{dueDate}
+          p #[strong Currency:] #{currency}
+
+      table.items
+        thead
+          tr
+            th Description
+            th.text-right Qty
+            th.text-right Unit Price
+            th.text-right Amount
+        tbody
+          each item in items
+            tr
+              td= item.description
+              td.text-right= item.quantity
+              td.text-right= item.unitPrice
+              td.text-right= item.amount
+
+      .summary-section
+        .summary-table
+          .summary-row
+            span Subtotal
+            span= subtotal
+          if discount
+            .summary-row
+              span Discount
+              span -#{discount}
+          if taxAmount
+            .summary-row
+              span Tax (#{taxRate || '0'}%)
+              span= taxAmount
+          .summary-row.total
+            span Total
+            span= total
+
+      if notes
+        .notes-section
+          h3(style="font-size:12px;text-transform:uppercase;color:#94a3b8;margin-bottom:6px;") Notes & Terms
+          p= notes
+
+      .footer
+        p Thank you for your business &middot; Powered by Shopwus

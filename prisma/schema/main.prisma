@@ -1,0 +1,10 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions", "views"]
+  engineType      = "library"
+}
+
+datasource db {
+  provider   = "postgresql"
+  extensions = [pg_stat_statements, pgcrypto, postgis, uuid_ossp(map: "uuid-ossp")]
+}

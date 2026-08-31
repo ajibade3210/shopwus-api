@@ -1,12 +1,19 @@
 import path from "node:path";
 import pug from "pug";
-import { EmailTemplateNames } from "../config/constants/emailTemplateInputs";
+import {
+  APPNAME,
+  EmailTemplateNames,
+} from "../config/constants/emailTemplateInputs";
 import { env } from "../config/env";
 import { JOB_NAMES } from "../jobs/job.types";
 import { sendEmail } from "../lib/email";
 import { getBoss } from "../lib/pgboss";
-import type { SendTemplateOptions } from "../types";
+import type {
+  SendNewLeadNotificationOptions,
+  SendTemplateOptions,
+} from "../types";
 import { getDateTime } from "./date.utils";
+import { getBusinessTypeSubjectPrefix } from "./studio.utils";
 
 /**
  * Enqueues an email to be sent asynchronously.
@@ -56,6 +63,22 @@ export async function sendWelcomeEmail(
       email: to,
       studioName,
       url: `${env.FRONTEND_URL}/login`,
+    },
+  });
+}
+
+export async function sendNewLeadNotificationEmail(
+  options: SendNewLeadNotificationOptions,
+) {
+  const subjectPrefix = getBusinessTypeSubjectPrefix(options.businessType);
+
+  return sendEmailHandler({
+    to: options.vendorEmail,
+    subject: `${subjectPrefix}: ${options.customerName} on ${options.studioName || APPNAME}`,
+    template: EmailTemplateNames.NEW_LEAD,
+    context: {
+      ...options,
+      url: `${env.FRONTEND_URL}/admin/leads`,
     },
   });
 }

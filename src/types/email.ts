@@ -27,3 +27,17 @@ export interface SendTemplateOptions extends Omit<SendEmailOptions, "html"> {
   template: string;
   context: Record<string, unknown>;
 }
+
+export interface SendNewLeadNotificationOptions {
+  vendorEmail: string;
+  vendorName?: string;
+  studioName?: string;
+  businessType?: string | null;
+  customerName: string;
+  customerEmail: string;
+  customerPhone?: string | null;
+  services?: string | null;
+  eventDate?: string | null;
+  budget?: string | null;
+  message?: string | null;
+}

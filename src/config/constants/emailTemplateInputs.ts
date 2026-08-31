@@ -7,7 +7,10 @@ export enum EmailTemplateNames {
   ACTION_CONFIRMATION = "action_confirmation",
   BROADCAST_MESSAGE = "broadcast_message",
   INVOICE = "invoice",
+  NEW_LEAD = "new_lead",
 }
+
+export const APPNAME = "Shopwus";
 
 export enum DeliveryChannel {
   EMAIL = "email",

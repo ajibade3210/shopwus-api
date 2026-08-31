@@ -6,6 +6,7 @@ import {
   publicInquiryInputSchema,
   updateLeadStatusSchema,
 } from "../../src/modules/leads/schema/lead.schema";
+import { getBusinessTypeSubjectPrefix } from "../../src/utils/studio.utils";
 
 describe("Leads Module Unit Tests", () => {
   describe("Leads Validation Schemas", () => {
@@ -74,6 +75,21 @@ describe("Leads Module Unit Tests", () => {
         createDraftInvoice: true,
       });
       expect(convert.success).toBe(true);
+    });
+  });
+
+  describe("getBusinessTypeSubjectPrefix", () => {
+    it("returns correct prefix for each business type", () => {
+      expect(getBusinessTypeSubjectPrefix("service")).toBe(
+        "New Consultation Request",
+      );
+      expect(getBusinessTypeSubjectPrefix("retail")).toBe(
+        "New Purchase Request",
+      );
+      expect(getBusinessTypeSubjectPrefix("ecommerce")).toBe("New Store Order");
+      expect(getBusinessTypeSubjectPrefix("sales")).toBe("New Order Request");
+      expect(getBusinessTypeSubjectPrefix(null)).toBe("New Order Request");
+      expect(getBusinessTypeSubjectPrefix(undefined)).toBe("New Order Request");
     });
   });
 });

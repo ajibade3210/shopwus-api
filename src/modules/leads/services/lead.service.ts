@@ -1,6 +1,8 @@
 import type { LeadStatus, Prisma } from "@prisma/client";
 import { NotFoundError } from "../../../lib/errors";
+import { logger } from "../../../lib/logger";
 import { prisma } from "../../../lib/prisma";
+import { sendNewLeadNotificationEmail } from "../../../utils";
 import { generateNextInvoiceNumber } from "../../invoices/services/invoice.service";
 import type {
   ConvertLeadInput,
@@ -17,7 +19,23 @@ export async function submitPublicInquiryService(
 
   const business = await prisma.business.findUnique({
     where: { slug: normalizedSlug },
-    select: { id: true, name: true, email: true },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      businessType: true,
+      businessUsers: {
+        select: {
+          user: {
+            select: {
+              email: true,
+              firstName: true,
+            },
+          },
+        },
+        take: 1,
+      },
+    },
   });
 
   if (!business) {
@@ -41,6 +59,38 @@ export async function submitPublicInquiryService(
       status: "new",
     },
   });
+
+  // Notify the business vendor via email
+  const vendorEmail =
+    business.email?.trim() || business.businessUsers[0]?.user?.email;
+  const vendorName =
+    business.businessUsers[0]?.user?.firstName || business.name;
+
+  if (vendorEmail) {
+    const servicesText =
+      lead.services && lead.services.length > 0
+        ? lead.services.join(", ")
+        : lead.service || undefined;
+
+    sendNewLeadNotificationEmail({
+      vendorEmail,
+      vendorName,
+      studioName: business.name,
+      businessType: business.businessType || "sales",
+      customerName: lead.name,
+      customerEmail: lead.email,
+      customerPhone: lead.phone,
+      services: servicesText,
+      eventDate: lead.eventDate,
+      budget: lead.budget,
+      message: lead.message,
+    }).catch((err) => {
+      logger.error(
+        { err, leadId: lead.id, vendorEmail },
+        "Failed to dispatch new lead notification email",
+      );
+    });
+  }
 
   return {
     id: lead.id,
@@ -217,8 +267,7 @@ export async function convertLeadToCustomerService(
     options.amount !== undefined
       ? Number(options.amount)
       : Number(lead.budget) || 50000;
-  const serviceTitle =
-    options.serviceName || lead.service || "";
+  const serviceTitle = options.serviceName || lead.service || "";
   const serviceCategory = options.service || lead.service || "Design";
 
   return prisma.$transaction(async (tx) => {

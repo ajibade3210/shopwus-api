@@ -2,6 +2,7 @@ import argon2 from "argon2";
 import { EmailTemplateNames } from "../../../config/constants/emailTemplateInputs";
 import { env } from "../../../config/env";
 import { NotFoundError, UnauthorizedError } from "../../../lib/errors";
+import { logger } from "../../../lib/logger";
 import { prisma } from "../../../lib/prisma";
 import { generateOtp, getDateTime, sendEmailHandler } from "../../../utils";
 import type {
@@ -44,7 +45,12 @@ export async function forgotPasswordService(data: ForgotPasswordInput) {
       title: "Password Reset Code",
       purpose: "reset your Shopwus password",
     },
-  }).catch(() => {});
+  }).catch((err) => {
+    logger.error(
+      { err, email: user.email },
+      "Failed to dispatch password reset email",
+    );
+  });
 
   return response;
 }

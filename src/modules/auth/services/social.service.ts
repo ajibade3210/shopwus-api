@@ -8,6 +8,7 @@ import {
   DEFAULT_VISIBILITY_SETTINGS,
 } from "../../../config/constants/studio";
 import { ForbiddenError } from "../../../lib/errors";
+import { logger } from "../../../lib/logger";
 import { prisma } from "../../../lib/prisma";
 import { verifySocialToken } from "../../../lib/socialAuth";
 import { sendWelcomeEmail, slugify } from "../../../utils";
@@ -130,11 +131,17 @@ export async function socialSignInService(
       });
     });
 
+    const userEmail = user.email;
     sendWelcomeEmail(
-      user.email,
+      userEmail,
       user.firstName,
       data.studioName || user.businessUsers[0]?.business.name,
-    ).catch(() => {});
+    ).catch((err) => {
+      logger.error(
+        { err, email: userEmail },
+        "Failed to dispatch Google sign-in welcome email",
+      );
+    });
   } else if (!user.googleId) {
     // Link googleId to existing user
     user = await prisma.user.update({

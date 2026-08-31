@@ -10,7 +10,6 @@ import type {
   StudioStorefrontResponseDto,
 } from "../dto/studio.dto";
 
-
 export async function getStorefrontBySlug(
   slug: string,
 ): Promise<StudioStorefrontResponseDto> {

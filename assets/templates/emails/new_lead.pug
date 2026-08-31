@@ -1,0 +1,84 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    meta(http-equiv="X-UA-Compatible" content="IE=edge")
+    title New Customer Inquiry | Shopwus
+    style.
+      @media only screen and (max-width: 600px) {
+        .email-container { width: 100% !important; padding: 12px !important; }
+        .email-header { padding: 0 !important; }
+        .email-body { padding: 24px 20px !important; }
+        .hero-title { font-size: 20px !important; }
+        .btn { display: block !important; width: 100% !important; text-align: center !important; box-sizing: border-box !important; }
+        .detail-cell { display: block !important; width: 100% !important; padding: 6px 0 !important; }
+      }
+
+  body(style="margin:0;padding:0;background-color:#f4f6f9;font-family:'Inter',Arial,sans-serif;-webkit-font-smoothing:antialiased;")
+    table(role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#f4f6f9;padding:32px 0;")
+      tr
+        td(align="center")
+          table.email-container(role="presentation" cellpadding="0" cellspacing="0" border="0" width="580" style="max-width:580px;width:100%;background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.06);border:1px solid #e9ecef;")
+            tr
+              td.email-header(style="padding:0;line-height:0;font-size:0;background-color:#0f172a;")
+                img(src="https://pub-d89922cb03b54e33ae779d915f49c77f.r2.dev/test/accessa/cmtgyit0u00006g9ko2ifxfh3/images/48cb6dca8f7327b62ed89883ef9f535d.png" alt="Shopwus" width="580" style="display:block;width:100%;max-width:100%;height:auto;border:0;")
+
+            - var bType = businessType || 'sales'
+            - var heroTitle = (bType === 'service') ? 'New Consultation Request! 🔔' : ((bType === 'retail') ? 'New Purchase Request! 🔔' : ((bType === 'ecommerce') ? 'New Store Order! 🔔' : 'New Order Request! 🔔'))
+            - var heroSubtitle = (bType === 'service') ? 'You have a new booking or consultation request on' : ((bType === 'retail') ? 'You have a new purchase or in-store pickup request on' : ((bType === 'ecommerce') ? 'You have a new order placed on' : 'You have a new order request on'))
+            - var inquiryType = (bType === 'service') ? 'consultation inquiry' : ((bType === 'retail') ? 'purchase request' : 'order request')
+            - var itemHeading = (bType === 'service') ? 'Requested Service:' : 'Requested Product / Item:'
+            - var dateHeading = (bType === 'service') ? 'Estimated Event Date:' : ((bType === 'retail') ? 'Collection Date:' : 'Delivery Date:')
+
+            tr
+              td(style="background-color:#f8fafc;padding:16px 32px;border-bottom:1px solid #e2e8f0;text-align:center;")
+                p.hero-title(style="font-size:20px;font-weight:700;color:#0f172a;margin:0 0 4px 0;") #{heroTitle}
+                p(style="font-size:14px;color:#64748b;margin:0;") #{heroSubtitle} #[strong #{studioName || 'your Storefront'}].
+
+            tr
+              td.email-body(style="padding:32px;font-size:15px;color:#334155;line-height:1.6;")
+                p(style="margin:0 0 16px;font-size:16px;color:#0f172a;") Hi #[strong #{vendorName || 'there'}],
+                p(style="margin:0 0 20px;") #[strong #{customerName}] just submitted a #{inquiryType} through your storefront. Here are the details:
+
+                table(role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:16px 20px;margin:0 0 24px 0;")
+                  tr
+                    td(style="padding:6px 0;font-size:14px;color:#64748b;width:35%;") Customer Name:
+                    td(style="padding:6px 0;font-size:14px;font-weight:600;color:#0f172a;") #{customerName}
+                  tr
+                    td(style="padding:6px 0;font-size:14px;color:#64748b;") Email Address:
+                    td(style="padding:6px 0;font-size:14px;font-weight:600;color:#0f172a;")
+                      a(href=`mailto:${customerEmail}` style="color:#0f172a;text-decoration:none;") #{customerEmail}
+                  if customerPhone
+                    tr
+                      td(style="padding:6px 0;font-size:14px;color:#64748b;") Phone Number:
+                      td(style="padding:6px 0;font-size:14px;font-weight:600;color:#0f172a;")
+                        a(href=`tel:${customerPhone}` style="color:#0f172a;text-decoration:none;") #{customerPhone}
+                  if services
+                    tr
+                      td(style="padding:6px 0;font-size:14px;color:#64748b;") #{itemHeading}
+                      td(style="padding:6px 0;font-size:14px;font-weight:600;color:#0f172a;") #{services}
+                  if eventDate
+                    tr
+                      td(style="padding:6px 0;font-size:14px;color:#64748b;") #{dateHeading}
+                      td(style="padding:6px 0;font-size:14px;font-weight:600;color:#0f172a;") #{eventDate}
+                  if budget
+                    tr
+                      td(style="padding:6px 0;font-size:14px;color:#64748b;") Estimated Budget:
+                      td(style="padding:6px 0;font-size:14px;font-weight:600;color:#0f172a;") #{budget}
+                  if message
+                    tr
+                      td(style="padding:10px 0 4px 0;font-size:14px;color:#64748b;vertical-align:top;" colspan="2")
+                        strong(style="color:#0f172a;") Message / Notes:
+                        div(style="margin-top:4px;padding:10px 12px;background-color:#ffffff;border:1px solid #e2e8f0;border-radius:6px;font-size:13px;color:#334155;white-space:pre-wrap;") #{message}
+
+                table(role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:28px 0 0 0;")
+                  tr
+                    td
+                      a.btn(href=url style="display:inline-block;padding:14px 32px;background-color:#0f172a;color:#ffffff;text-decoration:none;font-weight:600;font-size:14px;border-radius:8px;letter-spacing:0.2px;") View & Manage Lead &rarr;
+
+                p(style="margin:20px 0 0;font-size:13px;color:#64748b;line-height:1.5;") Quick response tip: Getting back to inquiries within 1 hour significantly boosts booking and quote conversion rates!
+
+            tr
+              td(style="background-color:#f8fafc;padding:20px 32px;border-top:1px solid #e2e8f0;text-align:center;font-size:12px;color:#94a3b8;")
+                p(style="margin:0;") &copy; #{currentYear} Shopwus. All rights reserved.

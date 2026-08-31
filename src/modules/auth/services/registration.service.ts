@@ -9,6 +9,7 @@ import {
   DEFAULT_VISIBILITY_SETTINGS,
 } from "../../../config/constants/studio";
 import { ConflictError } from "../../../lib/errors";
+import { logger } from "../../../lib/logger";
 import { prisma } from "../../../lib/prisma";
 import { sendWelcomeEmail, slugify } from "../../../utils";
 import type { SignupInput } from "../schema/auth.schema";
@@ -121,7 +122,12 @@ export async function signupService(
     result.user.email,
     result.user.firstName,
     result.business.name,
-  ).catch(() => {});
+  ).catch((err) => {
+    logger.error(
+      { err, email: result.user.email },
+      "Failed to dispatch welcome email",
+    );
+  });
 
   return {
     token: accessToken,

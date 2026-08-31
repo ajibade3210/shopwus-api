@@ -17,3 +17,20 @@ export function normalizeButtonRadius(radius?: string | null): string {
       return "Subtle";
   }
 }
+
+export function getBusinessTypeSubjectPrefix(
+  businessType?: string | null,
+): string {
+  const bType = businessType?.toLowerCase().trim() || "sales";
+  switch (bType) {
+    case "service":
+      return "New Consultation Request";
+    case "retail":
+      return "New Purchase Request";
+    case "ecommerce":
+      return "New Store Order";
+    default:
+      return "New Order Request";
+  }
+}
+

@@ -96,9 +96,11 @@ export interface StudioStorefrontResponseDto {
   googleReviewsLink?: string | null;
   portfolioCategories?: string[];
   isPublished: boolean;
+  isVerified: boolean;
   services: ServiceItemDto[];
   portfolio: PortfolioProjectDto[];
   reviews: ReviewItemDto[];
   socialChannels: SocialChannelDto[];
+  totalCustomers: number;
   updatedAt: string;
 }

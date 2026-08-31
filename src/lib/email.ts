@@ -11,8 +11,8 @@ export async function sendEmail(options: SendEmailOptions) {
       options;
 
     const defaultFrom = from
-      ? `Accessa <${from}>`
-      : `Accessa <${env.RESEND_FROM_EMAIL}>`;
+      ? `Shopwus <${from}>`
+      : `Shopwus <${env.RESEND_FROM_EMAIL}>`;
 
     const { data, error } = await resend.emails.send({
       from: defaultFrom,

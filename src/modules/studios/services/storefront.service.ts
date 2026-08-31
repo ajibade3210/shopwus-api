@@ -1,40 +1,15 @@
-import { DEFAULT_SOCIAL_CHANNELS } from "../../../config/constants/studio";
+import {
+  DEFAULT_COLOR_SCHEME,
+  DEFAULT_SOCIAL_CHANNELS,
+} from "../../../config/constants/studio";
 import { NotFoundError } from "../../../lib/errors";
 import { prisma } from "../../../lib/prisma";
-import { cacheStore } from "../../../utils";
+import { cacheStore, normalizeButtonRadius } from "../../../utils";
 import type {
   OrganizationPreviewDto,
   StudioStorefrontResponseDto,
 } from "../dto/studio.dto";
 
-const DEFAULT_COLORS = {
-  primary: "#000000",
-  secondary: "#0058BE",
-  button: "#000000",
-  pageBackground: "#faf8f5",
-  cardBackground: "#faf6f0",
-  text: "#191C1D",
-};
-
-export function normalizeButtonRadius(radius?: string | null): string {
-  if (!radius) return "Subtle";
-  switch (radius.toLowerCase().trim()) {
-    case "0px":
-    case "square":
-    case "none":
-      return "Square";
-    case "12px":
-    case "16px":
-    case "rounded":
-      return "Rounded";
-    case "9999px":
-    case "pill":
-    case "full":
-      return "Pill";
-    default:
-      return "Subtle";
-  }
-}
 
 export async function getStorefrontBySlug(
   slug: string,
@@ -63,6 +38,9 @@ export async function getStorefrontBySlug(
       socialChannels: {
         orderBy: { createdAt: "asc" },
       },
+      _count: {
+        select: { customers: true },
+      },
     },
   });
 
@@ -72,8 +50,8 @@ export async function getStorefrontBySlug(
 
   const colors =
     business.colors && typeof business.colors === "object"
-      ? (business.colors as unknown as typeof DEFAULT_COLORS)
-      : DEFAULT_COLORS;
+      ? (business.colors as unknown as typeof DEFAULT_COLOR_SCHEME)
+      : DEFAULT_COLOR_SCHEME;
 
   const existingChannelsMap = new Map(
     business.socialChannels.map((c) => [c.type.toLowerCase().trim(), c]),
@@ -140,6 +118,7 @@ export async function getStorefrontBySlug(
     googleReviewsLink: business.googleReviewsLink,
     portfolioCategories: business.portfolioCategories ?? [],
     isPublished: business.isPublished,
+    isVerified: Boolean(business.isVerified),
     services: business.services.map((s) => ({
       id: s.id,
       name: s.name,
@@ -183,6 +162,7 @@ export async function getStorefrontBySlug(
       avatar: r.avatar,
     })),
     socialChannels,
+    totalCustomers: business._count?.customers ?? 0,
     updatedAt: business.updatedAt.toISOString(),
   };
 

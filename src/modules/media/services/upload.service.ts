@@ -114,7 +114,7 @@ export async function uploadMediaService(
     file.mimetype,
   );
   const config = getUploadConfig(mimetype, type);
-  const folder = `accessa/${userId}/${config.folder}`;
+  const folder = `shopwus/${userId}/${config.folder}`;
 
   const result = await storageService.upload(buffer, {
     resource_type: config.resourceType,
@@ -189,7 +189,7 @@ export async function uploadMultiMediaService(
             item.mimetype,
           );
           const config = getUploadConfig(mimetype);
-          const folder = `accessa/${userId}/${config.folder}`;
+          const folder = `shopwus/${userId}/${config.folder}`;
 
           const uploadResult = await storageService.upload(buffer, {
             resource_type: config.resourceType,
@@ -238,7 +238,7 @@ export async function uploadExcelExportService(
   const mimetype =
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
-  const folder = `accessa/exports/excel/${userId}/${folderName}`;
+  const folder = `shopwus/exports/excel/${userId}/${folderName}`;
 
   const result = await storageService.upload(buffer, {
     resource_type: "raw",
@@ -255,7 +255,7 @@ export async function uploadPdfFileService(
   folderName: string,
   fileName: string,
 ): Promise<{ url: string }> {
-  const folder = `accessa/exports/pdf/${folderName}`;
+  const folder = `shopwus/exports/pdf/${folderName}`;
   const result = await storageService.upload(filePath, {
     resource_type: "raw",
     folder,

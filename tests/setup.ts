@@ -58,7 +58,7 @@ export default async function setup() {
   let container: StartedPostgreSqlContainer;
   try {
     container = await new PostgreSqlContainer("postgis/postgis:16-3.4")
-      .withDatabase("accessa_test")
+      .withDatabase("shopwus_test")
       .withUsername("postgres")
       .withPassword("postgres")
       .start();

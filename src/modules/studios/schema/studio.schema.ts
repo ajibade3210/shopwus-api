@@ -95,7 +95,7 @@ export const updateStudioProfileSchema = z.object({
   whatsAppNumber: z
     .string()
     .nullish()
-    .refine((val) => !val || !val.trim() || isValidPhone(val), {
+    .refine((val) => !val?.trim() || isValidPhone(val), {
       message: "Invalid WhatsApp phone number format",
     }),
   logoUrl: z.string().nullish(),

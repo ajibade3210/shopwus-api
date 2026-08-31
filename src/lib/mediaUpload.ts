@@ -148,12 +148,12 @@ export async function uploadMultiple(
 }
 
 export async function uploadImage(fileData: string | Buffer, asset_path = "") {
-  const folder = asset_path ? `accessa/${asset_path}/images` : "accessa/images";
+  const folder = asset_path ? `shopwus/${asset_path}/images` : "shopwus/images";
   return uploadToR2(fileData, { resource_type: "image", folder });
 }
 
 export async function uploadVideo(fileData: string | Buffer, asset_path = "") {
-  const folder = asset_path ? `accessa/${asset_path}/videos` : "accessa/videos";
+  const folder = asset_path ? `shopwus/${asset_path}/videos` : "shopwus/videos";
   return uploadToR2(fileData, { resource_type: "video", folder });
 }
 
@@ -162,8 +162,8 @@ export async function uploadDocument(
   asset_path = "",
 ) {
   const folder = asset_path
-    ? `accessa/${asset_path}/documents`
-    : "accessa/documents";
+    ? `shopwus/${asset_path}/documents`
+    : "shopwus/documents";
   return uploadToR2(fileData, { resource_type: "auto", folder });
 }
 

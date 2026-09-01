@@ -101,15 +101,23 @@ describe("Sanitized Studio Core Utilities", () => {
       expect(valid.success).toBe(true);
     });
 
-    it("validates Google OAuth signin input with optional claimSlug", async () => {
+    it("validates Google OAuth signin input with optional claimSlug and mode", async () => {
       const { socialSignInSchema } = await import(
         "../../src/modules/auth/schema/auth.schema"
       );
-      const valid = socialSignInSchema.safeParse({
+      const validSignin = socialSignInSchema.safeParse({
         idToken: "google-mock-jwt-id-token",
         claimSlug: "atelier-forma",
+        mode: "signin",
       });
-      expect(valid.success).toBe(true);
+      expect(validSignin.success).toBe(true);
+
+      const validSignup = socialSignInSchema.safeParse({
+        idToken: "google-mock-jwt-id-token",
+        studioName: "Atelier Forma",
+        mode: "signup",
+      });
+      expect(validSignup.success).toBe(true);
     });
   });
 });

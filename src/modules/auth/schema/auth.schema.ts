@@ -31,6 +31,7 @@ export const socialSignInSchema = z
     code: z.string().optional(),
     idToken: z.string().optional(),
     token: z.string().optional(),
+    mode: z.enum(["signin", "signup"]).optional(),
     firstName: z.string().optional(),
     lastName: z.string().optional(),
     fullName: z.string().optional(),

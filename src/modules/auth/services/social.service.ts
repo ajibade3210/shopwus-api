@@ -8,7 +8,11 @@ import {
   DEFAULT_SOCIAL_CHANNELS,
   DEFAULT_VISIBILITY_SETTINGS,
 } from "../../../config/constants/studio";
-import { ForbiddenError } from "../../../lib/errors";
+import {
+  DomainErrorCode,
+  ForbiddenError,
+  NotFoundError,
+} from "../../../lib/errors";
 import { logger } from "../../../lib/logger";
 import { prisma } from "../../../lib/prisma";
 import { verifySocialToken } from "../../../lib/socialAuth";
@@ -53,6 +57,13 @@ export async function socialSignInService(
   let isNewUser = false;
 
   if (!user) {
+    if (data.mode === "signin") {
+      throw new NotFoundError(
+        "No account found with this Google email. Please sign up first to create your studio.",
+        DomainErrorCode.NOT_FOUND,
+      );
+    }
+
     isNewUser = true;
     const effectiveFirstName = profile.firstName || firstName || "Studio";
     const effectiveLastName = profile.lastName || lastName || "Director";

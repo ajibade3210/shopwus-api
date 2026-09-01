@@ -3,6 +3,8 @@
  * Only fills gaps — real values from .env (loaded by dotenv in env.ts) take precedence
  * because dotenv.config({ override: false }) is used there.
  */
+import process from "node:process";
+
 const defaults: Record<string, string> = {
   NODE_ENV: "test",
   DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/shopwus_test",

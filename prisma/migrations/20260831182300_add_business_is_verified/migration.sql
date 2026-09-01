@@ -1,3 +1,0 @@
--- AlterTable
-ALTER TABLE "Business" 
-ADD COLUMN IF NOT EXISTS "isVerified" BOOLEAN NOT NULL DEFAULT true;

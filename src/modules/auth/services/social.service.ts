@@ -59,7 +59,7 @@ export async function socialSignInService(
   if (!user) {
     if (data.mode === "signin") {
       throw new NotFoundError(
-        "No account found with this Google email. Please sign up first to create your studio.",
+        "No account found with this Google email.",
         DomainErrorCode.NOT_FOUND,
       );
     }

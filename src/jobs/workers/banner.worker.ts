@@ -60,14 +60,21 @@ export async function generateHeaderBannerBuffer(business: {
         const arrayBuffer = await res.arrayBuffer();
         const logoBuffer = Buffer.from(arrayBuffer);
         const optimizedLogo = await sharp(logoBuffer)
-          .resize(220, 220, {
-            fit: "contain",
-            background: { r: 0, g: 0, b: 0, alpha: 0 },
+          .resize(300, 300, {
+            fit: "cover",
+            position: "center",
           })
           .png()
           .toBuffer();
         const logoBase64 = `data:image/png;base64,${optimizedLogo.toString("base64")}`;
-        logoSvgContent = `<image href="${logoBase64}" x="70" y="70" width="220" height="220" preserveAspectRatio="xMidYMid meet" />`;
+        logoSvgContent = `
+  <defs>
+    <clipPath id="logo-rounded-clip">
+      <rect x="30" y="30" width="300" height="300" rx="28" />
+    </clipPath>
+  </defs>
+  <image href="${logoBase64}" x="30" y="30" width="300" height="300" clip-path="url(#logo-rounded-clip)" preserveAspectRatio="xMidYMid slice" />
+`;
       }
     } catch (err) {
       logger.warn(
@@ -77,12 +84,16 @@ export async function generateHeaderBannerBuffer(business: {
     }
   }
 
-  // Fallback monogram if no logo image could be loaded
+  // Fallback monogram box if no logo image could be loaded
   if (!logoSvgContent) {
     const initial = title.charAt(0) || "S";
-    logoSvgContent = `<text x="180" y="225" font-family="'Inter', system-ui, -apple-system, sans-serif" font-size="140" font-weight="800" fill="#ffffff" text-anchor="middle">${escapeXml(
-      initial,
-    )}</text>`;
+    logoSvgContent = `
+  <!-- Left Logo Container Box (Monogram) -->
+  <rect x="30" y="30" width="300" height="300" rx="28" fill="#26282B" />
+  <text x="180" y="225" font-family="'Inter', system-ui, -apple-system, sans-serif" font-size="140" font-weight="800" fill="#ffffff" text-anchor="middle">${escapeXml(
+    initial,
+  )}</text>
+`;
   }
 
   const svg = `
@@ -90,8 +101,6 @@ export async function generateHeaderBannerBuffer(business: {
   <!-- White Background -->
   <rect width="1200" height="360" fill="#ffffff" />
   
-  <!-- Left Logo Container Box -->
-  <rect x="30" y="30" width="300" height="300" rx="28" fill="#26282B" />
   ${logoSvgContent}
   
   <!-- Right Content Area -->

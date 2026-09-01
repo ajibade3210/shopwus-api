@@ -1,14 +1,16 @@
 import type { LeadStatus, Prisma } from "@prisma/client";
+import { EmailTemplateNames } from "../../../config/constants/emailTemplateInputs";
 import { NotFoundError } from "../../../lib/errors";
 import { logger } from "../../../lib/logger";
 import { prisma } from "../../../lib/prisma";
-import { sendNewLeadNotificationEmail } from "../../../utils";
+import { sendEmailHandler, sendNewLeadNotificationEmail } from "../../../utils";
 import { generateNextInvoiceNumber } from "../../invoices/services/invoice.service";
 import type {
   ConvertLeadInput,
   CreateLeadInput,
   ListLeadsQuery,
   PublicInquiryInput,
+  SendLeadMessageInput,
 } from "../schema/lead.schema";
 
 export async function submitPublicInquiryService(
@@ -130,7 +132,7 @@ export async function listLeadsService(
     ];
   }
 
-  const [total, leads] = await Promise.all([
+  const [total, leads, existingCustomers] = await Promise.all([
     prisma.lead.count({ where }),
     prisma.lead.findMany({
       where,
@@ -138,23 +140,38 @@ export async function listLeadsService(
       skip,
       take: limit,
     }),
+    prisma.customer.findMany({
+      where: { businessId },
+      select: { id: true, email: true },
+    }),
   ]);
 
-  const items = leads.map((l) => ({
-    id: l.id,
-    businessId: l.businessId,
-    name: l.name,
-    email: l.email,
-    phone: l.phone,
-    service: l.service,
-    services: l.services,
-    eventDate: l.eventDate,
-    budget: l.budget,
-    message: l.message,
-    status: l.status,
-    createdAt: l.createdAt.toISOString(),
-    updatedAt: l.updatedAt.toISOString(),
-  }));
+  const customerEmailMap = new Map(
+    existingCustomers.map((c) => [c.email.toLowerCase().trim(), c.id]),
+  );
+
+  const items = leads.map((l) => {
+    const normEmail = l.email.toLowerCase().trim();
+    const existingCustId = customerEmailMap.get(normEmail);
+
+    return {
+      id: l.id,
+      businessId: l.businessId,
+      name: l.name,
+      email: l.email,
+      phone: l.phone,
+      service: l.service,
+      services: l.services,
+      eventDate: l.eventDate,
+      budget: l.budget,
+      message: l.message,
+      status: l.status,
+      isExistingCustomer: Boolean(existingCustId),
+      customerId: existingCustId || null,
+      createdAt: l.createdAt.toISOString(),
+      updatedAt: l.updatedAt.toISOString(),
+    };
+  });
 
   return {
     items,
@@ -174,6 +191,11 @@ export async function getLeadByIdService(leadId: string, businessId: string) {
     throw new NotFoundError("Lead not found");
   }
 
+  const existingCustomer = await prisma.customer.findFirst({
+    where: { businessId, email: lead.email.toLowerCase().trim() },
+    select: { id: true },
+  });
+
   return {
     id: lead.id,
     businessId: lead.businessId,
@@ -186,6 +208,8 @@ export async function getLeadByIdService(leadId: string, businessId: string) {
     budget: lead.budget,
     message: lead.message,
     status: lead.status,
+    isExistingCustomer: Boolean(existingCustomer),
+    customerId: existingCustomer?.id || null,
     createdAt: lead.createdAt.toISOString(),
     updatedAt: lead.updatedAt.toISOString(),
   };
@@ -235,16 +259,16 @@ export async function updateLeadStatusService(
   businessId: string,
   status: LeadStatus,
 ) {
-  const existing = await prisma.lead.findFirst({
+  const lead = await prisma.lead.findFirst({
     where: { id: leadId, businessId },
   });
 
-  if (!existing) {
+  if (!lead) {
     throw new NotFoundError("Lead not found");
   }
 
   const updated = await prisma.lead.update({
-    where: { id: existing.id },
+    where: { id: lead.id },
     data: { status },
   });
 
@@ -268,11 +292,13 @@ export async function convertLeadToCustomerService(
     throw new NotFoundError("Lead not found");
   }
 
+  const normEmail = lead.email.toLowerCase().trim();
   const rawAmount =
     options.amount !== undefined
       ? Number(options.amount)
       : Number(lead.budget) || 50000;
-  const serviceTitle = options.serviceName || lead.service || "";
+  const serviceTitle =
+    options.serviceName || lead.service || "Bespoke Service";
   const serviceCategory = options.service || lead.service || "Design";
 
   return prisma.$transaction(async (tx) => {
@@ -282,17 +308,19 @@ export async function convertLeadToCustomerService(
       data: { status: "converted" },
     });
 
-    // 2. Find or create Customer
-    let customer = await tx.customer.findFirst({
-      where: { businessId, email: lead.email },
+    // 2. Find or create Customer using businessId_email
+    let customer = await tx.customer.findUnique({
+      where: { businessId_email: { businessId, email: normEmail } },
     });
+
+    let isExisting = false;
 
     if (!customer) {
       customer = await tx.customer.create({
         data: {
           businessId,
           name: lead.name,
-          email: lead.email,
+          email: normEmail,
           phone: lead.phone,
           totalRevenue: rawAmount,
           notes: lead.message
@@ -302,10 +330,14 @@ export async function convertLeadToCustomerService(
         },
       });
     } else {
+      isExisting = true;
       customer = await tx.customer.update({
         where: { id: customer.id },
         data: {
+          name: lead.name || customer.name,
+          phone: lead.phone ?? customer.phone,
           totalRevenue: { increment: rawAmount },
+          isActive: true,
         },
       });
     }
@@ -327,8 +359,10 @@ export async function convertLeadToCustomerService(
       data: {
         businessId,
         customerId: customer.id,
-        type: "lead_conversion",
-        description: `Lead '${lead.name}' converted into active client with service '${serviceTitle}' (₦${rawAmount.toLocaleString()}).`,
+        type: isExisting ? "note_added" : "client_onboarded",
+        description: isExisting
+          ? `Lead converted: New service '${serviceTitle}' linked to existing customer profile.`
+          : `Customer converted from lead '${lead.name}' for '${serviceTitle}'.`,
       },
     });
 
@@ -461,5 +495,68 @@ export async function getLeadSummaryService(businessId: string) {
     total,
     newToday,
     conversion,
+  };
+}
+
+export async function sendLeadMessageService(
+  leadId: string,
+  businessId: string,
+  data: SendLeadMessageInput,
+) {
+  const lead = await prisma.lead.findFirst({
+    where: { id: leadId, businessId },
+    include: {
+      business: true,
+    },
+  });
+
+  if (!lead) {
+    throw new NotFoundError("Lead not found");
+  }
+
+  const studioEmailHeaderUrl =
+    lead.business.includeHeaderInEmail !== false
+      ? lead.business.emailHeaderUrl || undefined
+      : undefined;
+
+  const subject =
+    data.subject?.trim() ||
+    `Consultation for ${lead.name} · ${lead.business.name}`;
+
+  // Send message email via background queue
+  await sendEmailHandler({
+    to: lead.email,
+    subject,
+    template: EmailTemplateNames.STUDIO_MANUAL_EMAIL,
+    context: {
+      recipientName: lead.name,
+      senderName: lead.business.name,
+      studioName: lead.business.name,
+      studioHeaderUrl: studioEmailHeaderUrl,
+      messageBody: data.message.trim(),
+    },
+  });
+
+  // Automatically mark lead as contacted if currently new
+  const updatedLead = await prisma.lead.update({
+    where: { id: lead.id },
+    data: {
+      status: lead.status === "new" ? "contacted" : lead.status,
+    },
+  });
+
+  logger.info(
+    { leadId: lead.id, email: lead.email, businessId },
+    "Sent message email to lead",
+  );
+
+  return {
+    success: true,
+    lead: {
+      id: updatedLead.id,
+      name: updatedLead.name,
+      email: updatedLead.email,
+      status: updatedLead.status,
+    },
   };
 }

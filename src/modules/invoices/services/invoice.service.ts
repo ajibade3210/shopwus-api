@@ -1,7 +1,12 @@
 import { type InvoiceStatus, Prisma } from "@prisma/client";
+import { EmailTemplateNames } from "../../../config/constants/emailTemplateInputs";
+import { env } from "../../../config/env";
+import { JOB_NAMES } from "../../../jobs/job.types";
 import { DomainError, NotFoundError } from "../../../lib/errors";
+import { getBoss } from "../../../lib/pgboss";
 import { prisma } from "../../../lib/prisma";
 import { toFinancialAmount } from "../../../utils/currency.utils";
+import { sendEmailHandler } from "../../../utils/email.utils";
 import {
   generateDocumentNumber,
   type SequenceDbClient,
@@ -215,12 +220,41 @@ export async function createInvoiceService(
   businessId: string,
   data: CreateInvoiceInput,
 ) {
-  const customer = await prisma.customer.findFirst({
+  let customer = await prisma.customer.findFirst({
     where: { id: data.customerId, businessId },
+    include: { business: true },
   });
 
+  if (!customer && data.customerEmail) {
+    customer = await prisma.customer.findFirst({
+      where: { email: data.customerEmail.toLowerCase().trim(), businessId },
+      include: { business: true },
+    });
+  }
+
   if (!customer) {
-    throw new NotFoundError("Customer not found");
+    const business = await prisma.business.findUnique({
+      where: { id: businessId },
+    });
+    if (!business) {
+      throw new NotFoundError("Business not found");
+    }
+
+    customer = await prisma.customer.create({
+      data: {
+        businessId,
+        name: data.customerName?.trim() || "Valued Client",
+        email: (
+          data.customerEmail || "client@example.com"
+        )
+          .toLowerCase()
+          .trim(),
+        notes: data.billingAddress?.trim()
+          ? `Billing: ${data.billingAddress.trim()}`
+          : undefined,
+      },
+      include: { business: true },
+    });
   }
 
   const financials = calculateInvoiceFinancials({
@@ -232,7 +266,7 @@ export async function createInvoiceService(
     total: data.total,
   });
 
-  return prisma.$transaction(async (tx) => {
+  const createdInvoice = await prisma.$transaction(async (tx) => {
     const invoiceNumber = await generateNextInvoiceNumber(businessId, tx);
 
     const invoice = await tx.invoice.create({
@@ -255,6 +289,7 @@ export async function createInvoiceService(
         total: financials.total,
         notes: data.notes?.trim(),
         status: data.status || "draft",
+        sentAt: data.status === "sent" ? new Date() : null,
         items: {
           create: financials.calculatedItems.map((i) => ({
             description: i.description,
@@ -268,8 +303,51 @@ export async function createInvoiceService(
       include: { items: true },
     });
 
-    return serializeInvoice(invoice);
+    return invoice;
   });
+
+  if (createdInvoice.status === "sent") {
+    try {
+      const boss = getBoss();
+      if (boss) {
+        await boss.send(JOB_NAMES.GENERATE_INVOICE_PDF, {
+          invoiceId: createdInvoice.id,
+          businessId,
+        });
+      }
+    } catch (_err) {}
+
+    const studioEmailHeaderUrl =
+      customer.business?.includeHeaderInEmail !== false
+        ? customer.business?.emailHeaderUrl || undefined
+        : undefined;
+
+    const invoiceUrl = `${env.FRONTEND_URL}/invoices/${createdInvoice.invoiceNumber}`;
+
+    sendEmailHandler({
+      to: createdInvoice.customerEmail,
+      subject: `Invoice ${createdInvoice.invoiceNumber} from ${customer.business?.name || "Studio"}`,
+      template: EmailTemplateNames.STUDIO_INVOICE,
+      context: {
+        recipientName: createdInvoice.customerName,
+        studioName: customer.business?.name || "Studio",
+        studioHeaderUrl: studioEmailHeaderUrl,
+        amount: Number(createdInvoice.total).toLocaleString(),
+        currency: createdInvoice.currency || "NGN",
+        invoiceNumber: createdInvoice.invoiceNumber,
+        dueDate: createdInvoice.dueDate.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        }),
+        invoiceUrl,
+        notes: createdInvoice.notes || undefined,
+        message: `Thank you for your business with ${customer.business?.name || "our studio"}. Please find your invoice summary below. You can view, download, or settle your invoice online.`,
+      },
+    }).catch(() => {});
+  }
+
+  return serializeInvoice(createdInvoice);
 }
 
 export async function updateInvoiceService(

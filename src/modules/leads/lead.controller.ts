@@ -6,6 +6,7 @@ import type {
   LeadIdParams,
   ListLeadsQuery,
   PublicInquiryInput,
+  SendLeadMessageInput,
   UpdateLeadStatusInput,
 } from "./schema/lead.schema";
 import {
@@ -16,6 +17,7 @@ import {
   getLeadByIdService,
   getLeadSummaryService,
   listLeadsService,
+  sendLeadMessageService,
   submitPublicInquiryService,
   updateLeadStatusService,
 } from "./services/lead.service";
@@ -117,4 +119,19 @@ export async function deleteLeadHandler(
 ) {
   const result = await deleteLeadService(request.params.id, request.businessId);
   return reply.success(result, "Lead deleted successfully");
+}
+
+export async function sendLeadMessageHandler(
+  request: FastifyRequest<{
+    Params: LeadIdParams;
+    Body: SendLeadMessageInput;
+  }>,
+  reply: FastifyReply,
+) {
+  const result = await sendLeadMessageService(
+    request.params.id,
+    request.businessId,
+    request.body,
+  );
+  return reply.success(result, "Message sent to lead successfully");
 }

@@ -19,7 +19,7 @@ export const invoiceItemInputSchema = z.object({
 });
 
 export const createInvoiceSchema = z.object({
-  customerId: z.string().min(1, "Customer ID is required"),
+  customerId: z.string().optional(),
   customerName: z.string().optional(),
   customerEmail: z.string().email().optional(),
   billingAddress: z.string().optional(),

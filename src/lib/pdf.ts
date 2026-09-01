@@ -144,6 +144,16 @@ async function getBrowser(): Promise<Browser> {
     }
   }
 
+  if (env.NODE_ENV !== Environment.PRODUCTION) {
+    logger.info("Launching local Puppeteer browser for development...");
+    _browser = await puppeteer.launch({
+      headless: true,
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    });
+    _requestCount = 0;
+    return _browser;
+  }
+
   throw new Error(
     "No remote Puppeteer WebSocket endpoint is configured. Please set PUPPETEER_WS_ENDPOINT in your environment.",
   );

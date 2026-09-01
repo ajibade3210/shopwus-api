@@ -160,42 +160,105 @@ export async function createCustomerService(
   const initialServiceName = data.serviceName?.trim() || data.service?.trim();
 
   return prisma.$transaction(async (tx) => {
-    const customer = await tx.customer.create({
-      data: {
-        businessId,
-        name: data.name.trim(),
-        email,
-        phone: data.phone?.trim(),
-        company: data.company?.trim(),
-        notes: data.notes?.trim(),
-        totalRevenue: initialServiceName ? rawAmount : 0,
-        isActive: data.isActive ?? true,
+    let customer = await tx.customer.findUnique({
+      where: {
+        businessId_email: {
+          businessId,
+          email,
+        },
+      },
+      include: {
+        services: true,
       },
     });
 
     let service = null;
-    if (initialServiceName) {
-      service = await tx.customerService.create({
+
+    if (customer) {
+      // Reactivate if inactive and update contact details if provided
+      customer = await tx.customer.update({
+        where: { id: customer.id },
+        data: {
+          name: data.name.trim() || customer.name,
+          phone: data.phone?.trim() ?? customer.phone,
+          company: data.company?.trim() ?? customer.company,
+          notes: data.notes?.trim() ?? customer.notes,
+          isActive: true,
+          totalRevenue: initialServiceName
+            ? { increment: rawAmount }
+            : customer.totalRevenue,
+        },
+        include: {
+          services: true,
+        },
+      });
+
+      if (initialServiceName) {
+        service = await tx.customerService.create({
+          data: {
+            businessId,
+            customerId: customer.id,
+            name: initialServiceName,
+            service: data.service?.trim() || "",
+            amount: rawAmount,
+            status: data.status || "active",
+          },
+        });
+      }
+
+      await tx.customerActivity.create({
         data: {
           businessId,
           customerId: customer.id,
-          name: initialServiceName,
-          service: data.service?.trim() || "",
-          amount: rawAmount,
-          status: data.status || "active",
+          type: "note_added",
+          description: initialServiceName
+            ? `New service '${initialServiceName}' attached to profile.`
+            : `Customer profile reactivated/updated.`,
+        },
+      });
+    } else {
+      customer = await tx.customer.create({
+        data: {
+          businessId,
+          name: data.name.trim(),
+          email,
+          phone: data.phone?.trim(),
+          company: data.company?.trim(),
+          notes: data.notes?.trim(),
+          totalRevenue: initialServiceName ? rawAmount : 0,
+          isActive: data.isActive ?? true,
+        },
+        include: {
+          services: true,
+        },
+      });
+
+      if (initialServiceName) {
+        service = await tx.customerService.create({
+          data: {
+            businessId,
+            customerId: customer.id,
+            name: initialServiceName,
+            service: data.service?.trim() || "",
+            amount: rawAmount,
+            status: data.status || "active",
+          },
+        });
+      }
+
+      await tx.customerActivity.create({
+        data: {
+          businessId,
+          customerId: customer.id,
+          type: "client_onboarded",
+          description: `Customer '${customer.name}' registered in directory.`,
         },
       });
     }
 
-    // Record initial creation activity
-    await tx.customerActivity.create({
-      data: {
-        businessId,
-        customerId: customer.id,
-        type: "client_onboarded",
-        description: `Customer '${customer.name}' registered in directory.`,
-      },
-    });
+    const allServices = service
+      ? [...customer.services, service]
+      : customer.services;
 
     return {
       id: customer.id,
@@ -207,21 +270,18 @@ export async function createCustomerService(
       ...toFinancialAmount(customer.totalRevenue, "totalRevenue"),
       notes: customer.notes,
       isActive: customer.isActive,
-      services: service
-        ? [
-            {
-              id: service.id,
-              businessId: service.businessId,
-              customerId: service.customerId,
-              name: service.name,
-              service: service.service,
-              ...toFinancialAmount(service.amount, "amount"),
-              status: service.status,
-              createdAt: service.createdAt.toISOString(),
-              updatedAt: service.updatedAt.toISOString(),
-            },
-          ]
-        : [],
+      services: allServices.map((s) => ({
+        id: s.id,
+        businessId: s.businessId,
+        customerId: s.customerId,
+        name: s.name,
+        service: s.service,
+        ...toFinancialAmount(s.amount, "amount"),
+        status: s.status,
+        completedAt: s.completedAt ? s.completedAt.toISOString() : null,
+        createdAt: s.createdAt.toISOString(),
+        updatedAt: s.updatedAt.toISOString(),
+      })),
       createdAt: customer.createdAt.toISOString(),
       updatedAt: customer.updatedAt.toISOString(),
     };

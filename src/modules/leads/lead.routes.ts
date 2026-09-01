@@ -75,6 +75,14 @@ export async function leadRoutes(app: FastifyInstance): Promise<void> {
       leadController.convertLeadHandler,
     );
 
+    typedAuthApp.post(
+      "/:id/message",
+      {
+        schema: leadSchema.sendLeadMessageRouteSchema,
+      },
+      leadController.sendLeadMessageHandler,
+    );
+
     typedAuthApp.delete(
       "/:id",
       {

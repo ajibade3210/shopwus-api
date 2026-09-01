@@ -24,6 +24,7 @@ model Customer {
   invoices     Invoice[]
 
   @@unique([id, businessId])
+  @@unique([businessId, email])
   @@index([businessId])
   @@index([email])
 }

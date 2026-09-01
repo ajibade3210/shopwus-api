@@ -1,3 +1,5 @@
+import { EmailTemplateNames } from "../../../config/constants/emailTemplateInputs";
+import { env } from "../../../config/env";
 import { JOB_NAMES } from "../../../jobs/job.types";
 import { NotFoundError } from "../../../lib/errors";
 import { getBoss } from "../../../lib/pgboss";
@@ -54,17 +56,33 @@ export async function sendInvoiceService(
     // Non-blocking: background job queue error should not fail dispatch response
   }
 
+  const studioEmailHeaderUrl =
+    invoice.business.includeHeaderInEmail !== false
+      ? invoice.business.emailHeaderUrl || undefined
+      : undefined;
+
+  const invoiceUrl = `${env.FRONTEND_URL}/invoices/${invoice.invoiceNumber}`;
+
   // Send email notification to client
   sendEmailHandler({
     to: invoice.customerEmail,
     subject: `Invoice ${invoice.invoiceNumber} from ${invoice.business.name}`,
-    template: "otp", // Default clean transactional template
+    template: EmailTemplateNames.STUDIO_INVOICE,
     context: {
       recipientName: invoice.customerName,
       studioName: invoice.business.name,
+      studioHeaderUrl: studioEmailHeaderUrl,
       amount: Number(invoice.total).toLocaleString(),
+      currency: invoice.currency || "NGN",
       invoiceNumber: invoice.invoiceNumber,
-      dueDate: invoice.dueDate.toISOString().split("T")[0],
+      dueDate: invoice.dueDate.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      }),
+      invoiceUrl,
+      notes: invoice.notes || undefined,
+      message: `Thank you for your business with ${invoice.business.name}. Please find your invoice summary below. You can view, download, or settle your invoice online.`,
     },
   }).catch(() => {});
 
@@ -111,7 +129,7 @@ export async function sendQuickCustomerInvoiceService(
       ? Number(options.amount)
       : targetService
         ? Number(targetService.amount)
-        : Number(customer.totalRevenue) || 50000;
+        : Number(customer.totalRevenue) || 0;
 
   const invoiceNumber = await generateNextInvoiceNumber(businessId);
   const serviceTitle = targetService?.name || "";

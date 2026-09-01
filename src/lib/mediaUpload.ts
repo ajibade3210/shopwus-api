@@ -196,7 +196,7 @@ export async function getPresignedDownloadUrl(
     Bucket: env.CLOUDFLARE_R2_BUCKET_NAME,
     Key: key,
     ResponseContentDisposition: dispositionFilename
-      ? `inline; filename="${dispositionFilename}"`
+      ? `attachment; filename="${dispositionFilename}"`
       : undefined,
   });
 

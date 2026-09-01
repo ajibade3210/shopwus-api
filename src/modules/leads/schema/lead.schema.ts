@@ -71,12 +71,18 @@ export const convertLeadSchema = z
   .optional()
   .default({ createDraftInvoice: false });
 
+export const sendLeadMessageSchema = z.object({
+  message: z.string().min(1, "Message content is required"),
+  subject: z.string().optional(),
+});
+
 export type PublicInquiryInput = z.infer<typeof publicInquiryInputSchema>;
 export type CreateLeadInput = z.infer<typeof createLeadInputSchema>;
 export type ListLeadsQuery = z.infer<typeof listLeadsQuerySchema>;
 export type LeadIdParams = z.infer<typeof leadIdParamsSchema>;
 export type UpdateLeadStatusInput = z.infer<typeof updateLeadStatusSchema>;
 export type ConvertLeadInput = z.infer<typeof convertLeadSchema>;
+export type SendLeadMessageInput = z.infer<typeof sendLeadMessageSchema>;
 
 export const publicInquiryRouteSchema = {
   params: studioSlugParamsSchema,
@@ -108,6 +114,12 @@ export const convertLeadRouteSchema = {
   headers: ReqHeaderSchema,
   params: leadIdParamsSchema,
   body: convertLeadSchema,
+};
+
+export const sendLeadMessageRouteSchema = {
+  headers: ReqHeaderSchema,
+  params: leadIdParamsSchema,
+  body: sendLeadMessageSchema,
 };
 
 export const exportLeadsRouteSchema = {

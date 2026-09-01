@@ -1,0 +1,72 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    meta(http-equiv="X-UA-Compatible" content="IE=edge")
+    title= `Invoice ${invoiceNumber} from ${studioName || 'Studio'}`
+    style.
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { background-color: #f4f6f9; font-family: 'Inter', Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+      @media only screen and (max-width: 600px) {
+        .email-container { width: 100% !important; padding: 12px !important; }
+        .email-body { padding: 24px 20px !important; }
+        .btn { display: block !important; width: 100% !important; text-align: center !important; }
+      }
+
+  body(style="margin:0;padding:0;background-color:#f4f6f9;")
+    table(role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#f4f6f9;padding:32px 0;")
+      tr
+        td(align="center")
+          table.email-container(role="presentation" cellpadding="0" cellspacing="0" border="0" width="580" style="max-width:580px;width:100%;background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.06);border:1px solid #e9ecef;")
+
+            //- Header Banner (ONLY Studio Email Header if configured in DB; NEVER platform headerBannerUrl)
+            if studioHeaderUrl
+              tr
+                td(style="padding:0;line-height:0;font-size:0;background-color:#0f172a;")
+                  img(src=studioHeaderUrl alt=(studioName || 'Studio') width="580" style="display:block;width:100%;max-width:100%;height:auto;border:0;")
+
+            //- Content
+            tr
+              td.email-body(style="padding:32px;font-size:15px;color:#334155;line-height:1.6;")
+                p(style="margin:0 0 16px;font-size:16px;font-weight:600;color:#0f172a;") Hi #{recipientName || 'there'},
+                p(style="margin:0 0 20px;color:#475569;") #{message || `Thank you for your trust in ${studioName || 'our business'}. Please find your invoice details below.`}
+
+                //- Invoice Summary Card
+                table(role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;margin-bottom:24px;overflow:hidden;")
+                  tr
+                    td(style="padding:16px 20px;border-bottom:1px solid #e2e8f0;")
+                      table(role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%")
+                        tr
+                          td
+                            span(style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;") Invoice Number
+                            p(style="font-size:16px;font-weight:700;color:#0f172a;margin:2px 0 0;")= invoiceNumber
+                          td(align="right")
+                            span(style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;") Due Date
+                            p(style="font-size:14px;font-weight:600;color:#0f172a;margin:2px 0 0;")= dueDate
+                  tr
+                    td(style="padding:20px;")
+                      table(role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%")
+                        tr
+                          td
+                            span(style="font-size:12px;font-weight:600;color:#475569;") Total Amount Due
+                          td(align="right")
+                            span(style="font-size:20px;font-weight:800;color:#0f172a;") #{currency === 'NGN' || !currency ? '₦' : currency}#{amount}
+
+                if notes
+                  p(style="font-size:13px;color:#64748b;font-style:italic;margin-bottom:24px;")
+                    strong Note:&nbsp;
+                    | #{notes}
+
+                //- Action Button
+                if invoiceUrl
+                  table(role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:24px 0 0;")
+                    tr
+                      td
+                        a.btn(href=invoiceUrl style="display:inline-block;padding:14px 32px;background-color:#111827;color:#ffffff;text-decoration:none;font-weight:600;font-size:14px;border-radius:8px;letter-spacing:0.2px;") View &amp; Pay Invoice Online &rarr;
+
+            //- Footer
+            tr
+              td(style="background-color:#f8fafc;padding:20px 32px;border-top:1px solid #e2e8f0;text-align:center;font-size:12px;color:#94a3b8;")
+                p(style="margin:0;") &copy; #{currentYear} #{studioName || 'Shopwus'}. All rights reserved.

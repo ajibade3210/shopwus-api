@@ -2,12 +2,14 @@ export enum EmailTemplateNames {
   WELCOME_OTP = "otp",
   PASSWORD_RESET = "password_reset",
   INVITE_STAFF = "invite_staff",
-  MANUAL_EMAIL = "manual_email",
   WELCOME = "welcome",
   ACTION_CONFIRMATION = "action_confirmation",
   BROADCAST_MESSAGE = "broadcast_message",
-  INVOICE = "invoice",
   NEW_LEAD = "new_lead",
+
+  // Studio-related templates (located in assets/templates/emails/studio/)
+  STUDIO_MANUAL_EMAIL = "studio/manual_email",
+  STUDIO_INVOICE = "studio/invoice",
 }
 
 export const APPNAME = "Shopwus";

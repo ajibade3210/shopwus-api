@@ -128,7 +128,10 @@ export async function resendInvoiceHandler(
 }
 
 export async function getInvoicePdfHandler(
-  request: FastifyRequest<{ Params: InvoiceIdParams }>,
+  request: FastifyRequest<{
+    Params: InvoiceIdParams;
+    Querystring: { redirect?: string };
+  }>,
   reply: FastifyReply,
 ) {
   const result = await getInvoicePdfDownloadService(
@@ -150,22 +153,22 @@ export async function getInvoicePdfHandler(
     });
   }
 
-  // If client accepts JSON or requests direct URL metadata
-  if (request.headers.accept?.includes("application/json")) {
-    return reply.success(
-      {
-        status: "ready",
-        downloadUrl: result.downloadUrl,
-        pdfUrl: result.pdfUrl,
-        filename: result.filename,
-        invoiceNumber: result.invoiceNumber,
-      },
-      "Invoice PDF URL retrieved",
-    );
+  // If explicit redirect requested for direct browser link navigation
+  if (request.query?.redirect === "true") {
+    return reply.redirect(result.downloadUrl, 302);
   }
 
-  // Otherwise redirect directly to the signed R2 download link
-  return reply.redirect(result.downloadUrl, 302);
+  // Return standard JSON response with download metadata
+  return reply.success(
+    {
+      status: "ready",
+      downloadUrl: result.downloadUrl,
+      pdfUrl: result.pdfUrl,
+      filename: result.filename,
+      invoiceNumber: result.invoiceNumber,
+    },
+    "Invoice PDF URL retrieved",
+  );
 }
 
 export async function triggerInvoicePdfRegenerationHandler(

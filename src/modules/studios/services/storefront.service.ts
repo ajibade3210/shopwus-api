@@ -96,6 +96,11 @@ export async function getStorefrontBySlug(
     phone: business.phone,
     whatsAppNumber: business.whatsAppNumber,
     logoUrl: business.logoUrl,
+    bannerUrl: business.bannerUrl,
+    emailHeaderUrl: business.emailHeaderUrl,
+    headerType: business.headerType,
+    includeHeaderInInvoice: business.includeHeaderInInvoice ?? true,
+    includeHeaderInEmail: business.includeHeaderInEmail ?? true,
     businessType: business.businessType,
     currency: business.currency,
     colors,
@@ -198,7 +203,6 @@ export async function getFeaturedStudiosService(): Promise<
     logoUrl:
       b.logoUrl ||
       "https://cdn.accessa.ng/test/accessa/louis-dike-ayskyj/images/c95e52aa48bf676ed0d53f36bb957b81.png",
-    badge:
-      b.businessType === "STUDIO" ? "Bespoke Experiences" : "Haute Couture",
+    badge: b.businessType === "sales" ? "Bespoke Experiences" : "Haute Couture",
   }));
 }

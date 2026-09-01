@@ -1,6 +1,9 @@
 import type { Prisma } from "@prisma/client";
 import { isReservedSlug } from "../../../config/constants/reserved-slugs";
+import { JOB_NAMES } from "../../../jobs/job.types";
 import { NotFoundError } from "../../../lib/errors";
+import { logger } from "../../../lib/logger";
+import { getBoss } from "../../../lib/pgboss";
 import { prisma } from "../../../lib/prisma";
 import { slugify } from "../../../utils";
 import type { UpdateStudioProfileInput } from "../schema/studio.schema";
@@ -82,6 +85,22 @@ export async function updateStudioMeService(
   if (input.whatsAppNumber !== undefined)
     dataToUpdate.whatsAppNumber = input.whatsAppNumber?.trim();
   if (input.logoUrl !== undefined) dataToUpdate.logoUrl = input.logoUrl?.trim();
+  if (input.bannerUrl !== undefined)
+    dataToUpdate.bannerUrl = input.bannerUrl?.trim();
+  if (input.emailHeaderUrl !== undefined)
+    dataToUpdate.emailHeaderUrl = input.emailHeaderUrl?.trim();
+  if (input.headerType !== undefined && input.headerType !== null)
+    dataToUpdate.headerType = input.headerType;
+  if (
+    input.includeHeaderInInvoice !== undefined &&
+    input.includeHeaderInInvoice !== null
+  )
+    dataToUpdate.includeHeaderInInvoice = input.includeHeaderInInvoice;
+  if (
+    input.includeHeaderInEmail !== undefined &&
+    input.includeHeaderInEmail !== null
+  )
+    dataToUpdate.includeHeaderInEmail = input.includeHeaderInEmail;
   if (input.businessType !== undefined)
     dataToUpdate.businessType = input.businessType?.trim();
   if (input.currency !== undefined)
@@ -222,6 +241,34 @@ export async function updateStudioMeService(
   });
 
   invalidateStorefrontCache(business.slug);
+
+  // Trigger background header banner sync if AUTO header and branding changed
+  const effectiveHeaderType = input.headerType ?? business.headerType ?? "AUTO";
+  const brandingChanged =
+    input.logoUrl !== undefined ||
+    input.name !== undefined ||
+    input.businessName !== undefined ||
+    input.tagline !== undefined;
+
+  if (
+    effectiveHeaderType === "AUTO" &&
+    brandingChanged &&
+    !input.emailHeaderUrl
+  ) {
+    try {
+      const boss = getBoss();
+      await boss.send(
+        JOB_NAMES.GENERATE_HEADER_BANNER,
+        { businessId: business.id },
+        { singletonKey: business.id },
+      );
+    } catch (err) {
+      logger.warn(
+        { err, businessId: business.id },
+        "Failed to queue banner generation job",
+      );
+    }
+  }
 
   return getStorefrontBySlug(business.slug);
 }

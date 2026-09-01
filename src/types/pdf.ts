@@ -15,6 +15,7 @@ export type InvoicePdfData = {
   studioPhone?: string;
   studioAddress?: string;
   studioLogoUrl?: string;
+  studioEmailHeaderUrl?: string;
   customerName: string;
   customerEmail: string;
   billingAddress?: string;

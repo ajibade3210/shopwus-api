@@ -16,6 +16,18 @@ html(lang="en")
         max-width: 800px;
         margin: 0 auto;
       }
+      .banner-header {
+        margin-bottom: 24px;
+        border-radius: 12px;
+        overflow: hidden;
+      }
+      .banner-header img {
+        display: block;
+        width: 100%;
+        max-height: 180px;
+        object-fit: contain;
+        border-radius: 12px;
+      }
       .header {
         display: flex;
         justify-content: space-between;
@@ -128,6 +140,9 @@ html(lang="en")
 
   body
     .container
+      if studioEmailHeaderUrl
+        .banner-header
+          img(src=studioEmailHeaderUrl alt=studioName)
       .header
         .studio-info
           h1= studioName

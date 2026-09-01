@@ -57,6 +57,10 @@ export async function invoicePdfWorker(
           studioPhone: invoice.business.phone || undefined,
           studioAddress: invoice.business.location || undefined,
           studioLogoUrl: invoice.business.logoUrl || undefined,
+          studioEmailHeaderUrl:
+            invoice.business.includeHeaderInInvoice !== false
+              ? invoice.business.emailHeaderUrl || undefined
+              : undefined,
           customerName: invoice.customerName,
           customerEmail: invoice.customerEmail,
           billingAddress: invoice.billingAddress || undefined,

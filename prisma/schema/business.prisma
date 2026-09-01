@@ -14,7 +14,12 @@ model Business {
   timeTo            String?
   byAppointmentOnly Boolean            @default(false)
   logoUrl           String?
-  businessType      String             @default("sales")
+  bannerUrl              String?
+  emailHeaderUrl         String?
+  headerType             String             @default("AUTO")
+  includeHeaderInInvoice Boolean            @default(true)
+  includeHeaderInEmail   Boolean            @default(true)
+  businessType           String             @default("sales")
   currency          String             @default("NGN")
   colors              Json?
   buttonRadius        String?            @default("Subtle")

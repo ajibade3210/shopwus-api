@@ -78,6 +78,11 @@ export interface StudioStorefrontResponseDto {
   phone?: string | null;
   whatsAppNumber?: string | null;
   logoUrl?: string | null;
+  bannerUrl?: string | null;
+  emailHeaderUrl?: string | null;
+  headerType?: string | null;
+  includeHeaderInInvoice: boolean;
+  includeHeaderInEmail: boolean;
   businessType?: string;
   currency?: string;
   colors: ColorSchemeDto;

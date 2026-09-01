@@ -60,14 +60,20 @@ export async function generateHeaderBannerBuffer(business: {
         const arrayBuffer = await res.arrayBuffer();
         const logoBuffer = Buffer.from(arrayBuffer);
         const optimizedLogo = await sharp(logoBuffer)
-          .resize(220, 220, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
+          .resize(220, 220, {
+            fit: "contain",
+            background: { r: 0, g: 0, b: 0, alpha: 0 },
+          })
           .png()
           .toBuffer();
         const logoBase64 = `data:image/png;base64,${optimizedLogo.toString("base64")}`;
         logoSvgContent = `<image href="${logoBase64}" x="70" y="70" width="220" height="220" preserveAspectRatio="xMidYMid meet" />`;
       }
     } catch (err) {
-      logger.warn({ logoUrl: business.logoUrl, err }, "Failed to fetch logo for banner generation, using monogram");
+      logger.warn(
+        { logoUrl: business.logoUrl, err },
+        "Failed to fetch logo for banner generation, using monogram",
+      );
     }
   }
 
@@ -153,7 +159,10 @@ export async function bannerWorker(
           logoUrl: business.logoUrl,
         });
 
-        const uploadResult = await uploadImage(bannerPngBuffer, `businesses/${business.id}`);
+        const uploadResult = await uploadImage(
+          bannerPngBuffer,
+          `businesses/${business.id}`,
+        );
 
         await prisma.business.update({
           where: { id: business.id },

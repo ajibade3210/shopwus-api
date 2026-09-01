@@ -1,4 +1,5 @@
 import argon2 from "argon2";
+import { isReservedSlug } from "../../../config/constants/reserved-slugs";
 import {
   DEFAULT_BUSINESS_TYPE,
   DEFAULT_BUTTON_RADIUS,
@@ -12,7 +13,6 @@ import { ConflictError } from "../../../lib/errors";
 import { logger } from "../../../lib/logger";
 import { prisma } from "../../../lib/prisma";
 import { sendWelcomeEmail, slugify } from "../../../utils";
-import { isReservedSlug } from "../../../config/constants/reserved-slugs";
 import type { SignupInput } from "../schema/auth.schema";
 import { issueAuthTokens } from "./session.service";
 

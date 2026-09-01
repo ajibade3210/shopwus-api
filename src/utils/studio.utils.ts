@@ -33,4 +33,3 @@ export function getBusinessTypeSubjectPrefix(
       return "New Order Request";
   }
 }
-

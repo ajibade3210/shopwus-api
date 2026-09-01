@@ -1,5 +1,5 @@
-import { isReservedSlug } from "../../../config/constants/reserved-slugs";
 import type { Prisma } from "@prisma/client";
+import { isReservedSlug } from "../../../config/constants/reserved-slugs";
 import { NotFoundError } from "../../../lib/errors";
 import { prisma } from "../../../lib/prisma";
 import { slugify } from "../../../utils";

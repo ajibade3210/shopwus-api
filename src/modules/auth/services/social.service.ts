@@ -1,3 +1,4 @@
+import { isReservedSlug } from "../../../config/constants/reserved-slugs";
 import {
   DEFAULT_BUSINESS_TYPE,
   DEFAULT_BUTTON_RADIUS,
@@ -12,7 +13,6 @@ import { logger } from "../../../lib/logger";
 import { prisma } from "../../../lib/prisma";
 import { verifySocialToken } from "../../../lib/socialAuth";
 import { sendWelcomeEmail, slugify } from "../../../utils";
-import { isReservedSlug } from "../../../config/constants/reserved-slugs";
 import type { SocialSignInInput } from "../schema/auth.schema";
 import { issueAuthTokens } from "./session.service";
 

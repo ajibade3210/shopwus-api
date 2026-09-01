@@ -3,6 +3,7 @@ import pug from "pug";
 import {
   APPNAME,
   EmailTemplateNames,
+  getEmailAssetUrls,
 } from "../config/constants/emailTemplateInputs";
 import { env } from "../config/env";
 import { JOB_NAMES } from "../jobs/job.types";
@@ -38,9 +39,11 @@ export async function processEmail(options: SendTemplateOptions) {
     "assets/templates/emails",
     `${options.template}.pug`,
   );
+
   const html = pug.renderFile(templatePath, {
     currentYear: getDateTime().year,
     getDateTime,
+    ...getEmailAssetUrls(),
     ...options.context,
   });
   return sendEmail({

@@ -110,8 +110,13 @@ export async function listLeadsService(
     businessId,
   };
 
-  if (status) {
-    where.status = status;
+  if (status === "converted") {
+    where.status = "converted";
+  } else if (status && status !== "all" && status !== "active") {
+    where.status = status as LeadStatus;
+  } else {
+    // Default (or status === "all" / "active"): return all leads except converted
+    where.status = { not: "converted" };
   }
 
   if (q?.trim()) {
@@ -271,7 +276,7 @@ export async function convertLeadToCustomerService(
   const serviceCategory = options.service || lead.service || "Design";
 
   return prisma.$transaction(async (tx) => {
-    // 1. Update lead status
+    // 1. Update lead status to converted
     const updatedLead = await tx.lead.update({
       where: { id: lead.id },
       data: { status: "converted" },
@@ -442,12 +447,15 @@ export async function getLeadSummaryService(businessId: string) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const total = leads.length;
-  const newToday = leads.filter(
+  const unconvertedLeads = leads.filter((l) => l.status !== "converted");
+  const total = unconvertedLeads.length;
+  const newToday = unconvertedLeads.filter(
     (l) => l.status === "new" || l.createdAt >= today,
   ).length;
   const convertedCount = leads.filter((l) => l.status === "converted").length;
-  const conversion = total > 0 ? Math.round((convertedCount / total) * 100) : 0;
+  const totalAllTime = leads.length;
+  const conversion =
+    totalAllTime > 0 ? Math.round((convertedCount / totalAllTime) * 100) : 0;
 
   return {
     total,

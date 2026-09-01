@@ -36,9 +36,19 @@ export const createLeadInputSchema = z.object({
   status: leadStatusEnum.optional().default("new"),
 });
 
+export const leadFilterStatusEnum = z.enum([
+  "new",
+  "contacted",
+  "qualified",
+  "converted",
+  "lost",
+  "all",
+  "active",
+]);
+
 export const listLeadsQuerySchema = z.object({
   q: z.string().optional(),
-  status: leadStatusEnum.optional(),
+  status: leadFilterStatusEnum.optional(),
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(20),
 });
@@ -51,12 +61,15 @@ export const updateLeadStatusSchema = z.object({
   status: leadStatusEnum,
 });
 
-export const convertLeadSchema = z.object({
-  serviceName: z.string().optional(),
-  service: z.string().optional(),
-  amount: z.union([z.string(), z.number()]).optional(),
-  createDraftInvoice: z.boolean().optional().default(false),
-});
+export const convertLeadSchema = z
+  .object({
+    serviceName: z.string().optional(),
+    service: z.string().optional(),
+    amount: z.union([z.string(), z.number()]).optional(),
+    createDraftInvoice: z.boolean().optional().default(false),
+  })
+  .optional()
+  .default({ createDraftInvoice: false });
 
 export type PublicInquiryInput = z.infer<typeof publicInquiryInputSchema>;
 export type CreateLeadInput = z.infer<typeof createLeadInputSchema>;

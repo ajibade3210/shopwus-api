@@ -2,6 +2,7 @@ import type { PgBoss } from "pg-boss";
 import { logger } from "../lib/logger";
 import { Sentry } from "../lib/monitor";
 import { JOB_NAMES } from "./job.types";
+import { registerBannerWorker } from "./workers/banner.worker";
 import { registerBroadcastWorker } from "./workers/broadcast.worker";
 import { registerEmailWorker } from "./workers/email.worker";
 import { registerInvoiceWorker } from "./workers/invoice.worker";
@@ -20,6 +21,7 @@ export async function registerAllWorkers(boss: PgBoss): Promise<void> {
     registerEmailWorker(boss),
     registerInvoiceWorker(boss),
     registerBroadcastWorker(boss),
+    registerBannerWorker(boss),
   ]);
 
   // Global monitoring: Alert if any job fails permanently after all retries

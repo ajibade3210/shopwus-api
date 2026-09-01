@@ -8,7 +8,7 @@ export interface FeaturedStudioSeedData {
   description: string;
   location: string;
   logoUrl: string;
-  businessType: "STUDIO" | "VENDOR";
+  businessType: "sales" | "VENDOR";
   currency: string;
   ownerEmail: string;
   ownerName: { first: string; last: string };
@@ -25,7 +25,7 @@ export const FEATURED_STUDIOS_SEED_DATA: FeaturedStudioSeedData[] = [
     location: "Victoria Island, Lagos",
     logoUrl:
       "https://cdn.accessa.ng/test/accessa/louis-dike-ayskyj/images/c95e52aa48bf676ed0d53f36bb957b81.png",
-    businessType: "STUDIO",
+    businessType: "sales",
     currency: "NGN",
     ownerEmail: "director@elan-events.ng",
     ownerName: { first: "Amara", last: "Eze" },
@@ -39,7 +39,7 @@ export const FEATURED_STUDIOS_SEED_DATA: FeaturedStudioSeedData[] = [
       "Editorial wedding design and high-society galas across Europe's finest historical landmarks.",
     location: "Paris / London",
     logoUrl: "https://cdn.logosystem.co/logos/the-huntington.webp",
-    businessType: "STUDIO",
+    businessType: "sales",
     currency: "EUR",
     ownerEmail: "claire@maisonbellevents.com",
     ownerName: { first: "Claire", last: "Bell" },
@@ -53,7 +53,7 @@ export const FEATURED_STUDIOS_SEED_DATA: FeaturedStudioSeedData[] = [
       "Architectural lighting, experiential banquets, and modern spatial art for corporate galas and exhibitions.",
     location: "Milan, Italy",
     logoUrl: "https://cdn.logosystem.co/logos/hatil.webp",
-    businessType: "STUDIO",
+    businessType: "sales",
     currency: "EUR",
     ownerEmail: "matteo@lumioatelier.it",
     ownerName: { first: "Matteo", last: "Rossi" },
@@ -67,7 +67,7 @@ export const FEATURED_STUDIOS_SEED_DATA: FeaturedStudioSeedData[] = [
       "Multi-day lakeside celebrations and private yacht receptions for discerning global clientele.",
     location: "Lake Como / Amalfi, Italy",
     logoUrl: "https://cdn.logosystem.co/logos/mila.webp",
-    businessType: "STUDIO",
+    businessType: "sales",
     currency: "EUR",
     ownerEmail: "concierge@meridiancelebrations.com",
     ownerName: { first: "Alessia", last: "Moretti" },
@@ -81,7 +81,7 @@ export const FEATURED_STUDIOS_SEED_DATA: FeaturedStudioSeedData[] = [
       "Discreet milestone celebrations, black-tie dinners, and bespoke artistic productions for private estates.",
     location: "Manhattan, New York",
     logoUrl: "https://cdn.logosystem.co/logos/fourthfloor.webp",
-    businessType: "STUDIO",
+    businessType: "sales",
     currency: "USD",
     ownerEmail: "julian@arcwellbespoke.com",
     ownerName: { first: "Julian", last: "Vance" },
@@ -95,7 +95,7 @@ export const FEATURED_STUDIOS_SEED_DATA: FeaturedStudioSeedData[] = [
       "Iconic corporate galas and royal wedding productions curated with quiet elegance and cutting-edge stagecraft.",
     location: "Downtown, Dubai",
     logoUrl: "https://cdn.logosystem.co/logos/renforce.webp",
-    businessType: "STUDIO",
+    businessType: "sales",
     currency: "USD",
     ownerEmail: "tariq@solacestudios.ae",
     ownerName: { first: "Tariq", last: "Al-Mansoor" },

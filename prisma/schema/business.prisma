@@ -21,6 +21,9 @@ model Business {
   includeHeaderInEmail   Boolean            @default(true)
   businessType           String             @default("sales")
   currency          String             @default("NGN")
+  bankName          String?
+  accountName       String?
+  accountNumber     String?
   colors              Json?
   buttonRadius        String?            @default("Subtle")
   showServices        Boolean            @default(true)

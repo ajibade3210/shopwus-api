@@ -87,6 +87,9 @@ export async function generateAndUploadInvoicePdf(
       }),
       notes: invoice.notes || undefined,
       currency: invoice.currency,
+      bankName: invoice.business.bankName || undefined,
+      accountName: invoice.business.accountName || undefined,
+      accountNumber: invoice.business.accountNumber || undefined,
     };
 
     const pdfBuffer = await generatePdf("invoice", pdfData);

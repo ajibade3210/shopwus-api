@@ -27,6 +27,9 @@ export type InvoicePdfData = {
   total: string;
   notes?: string;
   currency: string;
+  bankName?: string;
+  accountName?: string;
+  accountNumber?: string;
 };
 
 export type PdfTemplateDataMap = {

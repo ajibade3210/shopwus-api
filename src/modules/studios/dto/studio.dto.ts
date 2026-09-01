@@ -85,6 +85,9 @@ export interface StudioStorefrontResponseDto {
   includeHeaderInEmail: boolean;
   businessType?: string;
   currency?: string;
+  bankName?: string | null;
+  accountName?: string | null;
+  accountNumber?: string | null;
   colors: ColorSchemeDto;
   buttonRadius?: string | null;
   operatingHours?: string | null;

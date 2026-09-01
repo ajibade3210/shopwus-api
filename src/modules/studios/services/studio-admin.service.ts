@@ -105,6 +105,12 @@ export async function updateStudioMeService(
     dataToUpdate.businessType = input.businessType?.trim();
   if (input.currency !== undefined)
     dataToUpdate.currency = input.currency?.trim();
+  if (input.bankName !== undefined)
+    dataToUpdate.bankName = input.bankName?.trim() || null;
+  if (input.accountName !== undefined)
+    dataToUpdate.accountName = input.accountName?.trim() || null;
+  if (input.accountNumber !== undefined)
+    dataToUpdate.accountNumber = input.accountNumber?.trim() || null;
   if (input.operatingHours !== undefined)
     dataToUpdate.operatingHours = input.operatingHours?.trim();
   if (input.timeFrom !== undefined)

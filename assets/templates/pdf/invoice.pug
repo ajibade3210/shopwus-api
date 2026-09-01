@@ -125,6 +125,26 @@ html(lang="en")
         font-weight: 800;
         color: #0f172a;
       }
+      .bank-details-section {
+        background-color: #fafaf9;
+        border: 1px solid #f1f5f9;
+        border-radius: 12px;
+        padding: 14px 18px;
+        margin-bottom: 24px;
+      }
+      .bank-details-section h3 {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #855e2e;
+        letter-spacing: 0.5px;
+        margin-bottom: 6px;
+      }
+      .bank-details-section p {
+        font-size: 12px;
+        color: #334155;
+        margin-bottom: 3px;
+      }
       .notes-section {
         border-top: 1px solid #f1f5f9;
         padding-top: 24px;
@@ -201,6 +221,16 @@ html(lang="en")
           .summary-row.total
             span Total
             span= total
+
+      if bankName || accountName || accountNumber
+        .bank-details-section
+          h3 Remittance Banking Details
+          if bankName
+            p #[strong Bank Name:] #{bankName}
+          if accountName
+            p #[strong Account Name:] #{accountName}
+          if accountNumber
+            p #[strong Account Number:] #{accountNumber}
 
       if notes
         .notes-section

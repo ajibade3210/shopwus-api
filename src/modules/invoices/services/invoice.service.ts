@@ -244,9 +244,7 @@ export async function createInvoiceService(
       data: {
         businessId,
         name: data.customerName?.trim() || "Valued Client",
-        email: (
-          data.customerEmail || "client@example.com"
-        )
+        email: (data.customerEmail || "client@example.com")
           .toLowerCase()
           .trim(),
         notes: data.billingAddress?.trim()

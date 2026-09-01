@@ -297,8 +297,7 @@ export async function convertLeadToCustomerService(
     options.amount !== undefined
       ? Number(options.amount)
       : Number(lead.budget) || 50000;
-  const serviceTitle =
-    options.serviceName || lead.service || "Bespoke Service";
+  const serviceTitle = options.serviceName || lead.service || "Bespoke Service";
   const serviceCategory = options.service || lead.service || "Design";
 
   return prisma.$transaction(async (tx) => {

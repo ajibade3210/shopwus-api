@@ -101,8 +101,9 @@ describe("Studio Module Unit Tests", () => {
 
   describe("Reserved Slugs & Guard", () => {
     it("identifies reserved slugs accurately", async () => {
-      const { isReservedSlug } =
-        await import("../../src/config/constants/reserved-slugs");
+      const { isReservedSlug } = await import(
+        "../../src/config/constants/reserved-slugs"
+      );
       expect(isReservedSlug("vendor")).toBe(true);
       expect(isReservedSlug("vendors")).toBe(true);
       expect(isReservedSlug("admin")).toBe(true);
@@ -116,8 +117,9 @@ describe("Studio Module Unit Tests", () => {
     });
 
     it("rejects reserved slugs in checkSlugAvailabilityService", async () => {
-      const { checkSlugAvailabilityService } =
-        await import("../../src/modules/studios/services/studio-admin.service");
+      const { checkSlugAvailabilityService } = await import(
+        "../../src/modules/studios/services/studio-admin.service"
+      );
       const res = await checkSlugAvailabilityService("vendor");
       expect(res.available).toBe(false);
 

@@ -17,8 +17,8 @@ export interface FeaturedStudioSeedData {
 
 export const FEATURED_STUDIOS_SEED_DATA: FeaturedStudioSeedData[] = [
   {
-    slug: "elan-events",
-    name: "Élan Events",
+    slug: "elan-stores",
+    name: "Élan Stores",
     tagline: "Luxury Event Studio · Lagos",
     description:
       "We design unforgettable weddings, corporate events, and private celebrations with timeless elegance.",
@@ -27,7 +27,7 @@ export const FEATURED_STUDIOS_SEED_DATA: FeaturedStudioSeedData[] = [
       "https://cdn.accessa.ng/test/accessa/louis-dike-ayskyj/images/c95e52aa48bf676ed0d53f36bb957b81.png",
     businessType: "sales",
     currency: "NGN",
-    ownerEmail: "director@elan-events.ng",
+    ownerEmail: "director@elan-stores.ng",
     ownerName: { first: "Amara", last: "Eze" },
     category: "Luxury Weddings & Galas",
   },

@@ -30,7 +30,7 @@ export function setAuthCookies(
   const baseOptions = {
     httpOnly: true,
     secure: IS_PROD,
-    sameSite: "lax" as const,
+    sameSite: (IS_PROD ? "none" : "lax") as "none" | "lax",
     path: "/",
   };
 
@@ -53,7 +53,7 @@ export function clearAuthCookies(reply: FastifyReply): void {
   const baseOptions = {
     httpOnly: true,
     secure: IS_PROD,
-    sameSite: "lax" as const,
+    sameSite: (IS_PROD ? "none" : "lax") as "none" | "lax",
   };
 
   reply.setCookie("shopwus_access_token", "", {

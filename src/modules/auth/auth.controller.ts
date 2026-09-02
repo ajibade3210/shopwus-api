@@ -29,7 +29,12 @@ export async function signup(
   });
 
   return reply.success(
-    { user: result.user, studio: result.studio },
+    {
+      user: result.user,
+      studio: result.studio,
+      accessToken: result.accessToken,
+      refreshToken: result.refreshToken,
+    },
     "Studio director registered successfully",
     201,
   );
@@ -52,7 +57,12 @@ export async function login(
   });
 
   return reply.success(
-    { user: result.user, studio: result.studio },
+    {
+      user: result.user,
+      studio: result.studio,
+      accessToken: result.accessToken,
+      refreshToken: result.refreshToken,
+    },
     "Logged in successfully",
   );
 }
@@ -74,7 +84,12 @@ export async function googleAuth(
   });
 
   return reply.success(
-    { user: result.user, studio: result.studio },
+    {
+      user: result.user,
+      studio: result.studio,
+      accessToken: result.accessToken,
+      refreshToken: result.refreshToken,
+    },
     result.isNewUser ? "Studio created successfully" : "Signed in successfully",
     result.isNewUser ? 201 : 200,
   );
@@ -107,7 +122,13 @@ export async function refresh(
     refreshToken: result.refreshToken,
   });
 
-  return reply.success([], "Token refreshed successfully");
+  return reply.success(
+    {
+      accessToken: result.accessToken,
+      refreshToken: result.refreshToken,
+    },
+    "Token refreshed successfully",
+  );
 }
 
 export async function logout(

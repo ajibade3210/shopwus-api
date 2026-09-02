@@ -1,9 +1,7 @@
 import type { Prisma } from "@prisma/client";
 import { isReservedSlug } from "../../../config/constants/reserved-slugs";
-import { JOB_NAMES } from "../../../jobs/job.types";
+import { queueBannerGeneration } from "../../../jobs/workers/banner.worker";
 import { NotFoundError } from "../../../lib/errors";
-import { logger } from "../../../lib/logger";
-import { getBoss } from "../../../lib/pgboss";
 import { prisma } from "../../../lib/prisma";
 import { slugify } from "../../../utils";
 import type { UpdateStudioProfileInput } from "../schema/studio.schema";
@@ -261,19 +259,7 @@ export async function updateStudioMeService(
     brandingChanged &&
     !input.emailHeaderUrl
   ) {
-    try {
-      const boss = getBoss();
-      await boss.send(
-        JOB_NAMES.GENERATE_HEADER_BANNER,
-        { businessId: business.id },
-        { singletonKey: business.id },
-      );
-    } catch (err) {
-      logger.warn(
-        { err, businessId: business.id },
-        "Failed to queue banner generation job",
-      );
-    }
+    await queueBannerGeneration(business.id);
   }
 
   return getStorefrontBySlug(business.slug);

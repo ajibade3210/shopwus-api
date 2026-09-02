@@ -2,7 +2,9 @@ import type { Job, PgBoss } from "pg-boss";
 import sharp from "sharp";
 import { logger } from "../../lib/logger";
 import { uploadImage } from "../../lib/mediaUpload";
+import { getBoss } from "../../lib/pgboss";
 import { prisma } from "../../lib/prisma";
+import { invalidateStorefrontCache } from "../../modules/studios/services/storefront.service";
 import {
   type GenerateHeaderBannerPayload,
   generateHeaderBannerPayloadSchema,
@@ -138,6 +140,7 @@ export async function bannerWorker(
           where: { id: validated.businessId },
           select: {
             id: true,
+            slug: true,
             name: true,
             tagline: true,
             logoUrl: true,
@@ -180,6 +183,10 @@ export async function bannerWorker(
           },
         });
 
+        if (business.slug) {
+          invalidateStorefrontCache(business.slug);
+        }
+
         logger.info(
           { businessId: business.id, bannerUrl: uploadResult.url },
           "Email header banner generated and updated successfully",
@@ -193,6 +200,19 @@ export async function bannerWorker(
       }
     }),
   );
+}
+
+export async function queueBannerGeneration(businessId: string): Promise<void> {
+  try {
+    const boss = getBoss();
+    await boss.send(
+      JOB_NAMES.GENERATE_HEADER_BANNER,
+      { businessId },
+      { singletonKey: businessId },
+    );
+  } catch (err) {
+    logger.warn({ err, businessId }, "Failed to queue banner generation job");
+  }
 }
 
 export async function registerBannerWorker(boss: PgBoss): Promise<void> {

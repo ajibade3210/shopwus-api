@@ -8,6 +8,7 @@ import {
   DEFAULT_SOCIAL_CHANNELS,
   DEFAULT_VISIBILITY_SETTINGS,
 } from "../../../config/constants/studio";
+import { queueBannerGeneration } from "../../../jobs/workers/banner.worker";
 import {
   DomainErrorCode,
   ForbiddenError,
@@ -143,6 +144,16 @@ export async function socialSignInService(
         },
       });
     });
+
+    const primaryBusinessId = user.businessUsers[0]?.businessId;
+    if (primaryBusinessId) {
+      queueBannerGeneration(primaryBusinessId).catch((err) => {
+        logger.warn(
+          { err, businessId: primaryBusinessId },
+          "Failed to trigger banner generation on Google signup",
+        );
+      });
+    }
 
     const userEmail = user.email;
     sendWelcomeEmail(

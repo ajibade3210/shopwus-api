@@ -9,6 +9,7 @@ import {
   DEFAULT_SOCIAL_CHANNELS,
   DEFAULT_VISIBILITY_SETTINGS,
 } from "../../../config/constants/studio";
+import { queueBannerGeneration } from "../../../jobs/workers/banner.worker";
 import { ConflictError } from "../../../lib/errors";
 import { logger } from "../../../lib/logger";
 import { prisma } from "../../../lib/prisma";
@@ -110,6 +111,14 @@ export async function signupService(
     });
 
     return { user, business, businessUser };
+  });
+
+  // Trigger background email header banner generation for the new studio
+  queueBannerGeneration(result.business.id).catch((err) => {
+    logger.warn(
+      { err, businessId: result.business.id },
+      "Failed to trigger banner generation on signup",
+    );
   });
 
   const { accessToken, refreshToken } = await issueAuthTokens({

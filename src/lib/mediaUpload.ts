@@ -13,6 +13,7 @@ import type {
   UploadOptions,
   UploadResult,
 } from "../types/mediaUpload";
+import { ValidationError } from "./errors";
 import { logger } from "./logger";
 
 const s3 = new S3Client({
@@ -27,7 +28,7 @@ const s3 = new S3Client({
 function parseDataUri(dataUri: string) {
   const matches = dataUri.match(/^data:([^;,]+)(?:;[^,]*)?;base64,([\s\S]+)$/);
   if (matches?.length !== 3) {
-    throw new Error("Invalid data URI string");
+    throw new ValidationError("Invalid data URI string");
   }
   return {
     mimetype: matches[1].toLowerCase(),

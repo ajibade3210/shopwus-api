@@ -63,6 +63,8 @@ const envSchema = z.object({
   BOOTSTRAP_SECRET: z
     .string()
     .min(32, "BOOTSTRAP_SECRET must be at least 32 characters long"),
+  PAYSTACK_SECRET_KEY: z.string().optional(),
+  PAYSTACK_PUBLIC_KEY: z.string().optional(),
   PUPPETEER_WS_ENDPOINT: z.string().optional(),
   PUPPETEER_WS_ENDPOINT_BACKUP: z.string().optional(),
 });

@@ -1,4 +1,5 @@
 import type { Prisma } from "@prisma/client";
+import { ValidationError } from "../../../lib/errors";
 import { prisma } from "../../../lib/prisma";
 import type {
   ImportCustomerRecord,
@@ -36,7 +37,7 @@ export function parseCustomerAttributes(
 
       const firstColonIndex = p.indexOf(":");
       if (firstColonIndex === -1) {
-        throw new Error(
+        throw new ValidationError(
           `Invalid attribute format "${p}". Expected "Key: Value".`,
         );
       }
@@ -47,10 +48,10 @@ export function parseCustomerAttributes(
       if (!key && !value) continue; // prune completely empty pair
 
       if (!key) {
-        throw new Error(`Attribute key cannot be empty in "${p}".`);
+        throw new ValidationError(`Attribute key cannot be empty in "${p}".`);
       }
       if (!value) {
-        throw new Error(`Attribute value cannot be empty in "${p}".`);
+        throw new ValidationError(`Attribute value cannot be empty in "${p}".`);
       }
 
       items.push({ key, value });
@@ -58,7 +59,9 @@ export function parseCustomerAttributes(
   } else if (Array.isArray(rawAttributes)) {
     items = rawAttributes;
   } else {
-    throw new Error("Attributes must be a string or array of key-value pairs.");
+    throw new ValidationError(
+      "Attributes must be a string or array of key-value pairs.",
+    );
   }
 
   // 1. Prune completely empty items (where both key and value are blank)
@@ -72,26 +75,34 @@ export function parseCustomerAttributes(
     }
 
     if (!rawKey) {
-      throw new Error("Attribute key is required when value is provided.");
+      throw new ValidationError(
+        "Attribute key is required when value is provided.",
+      );
     }
     if (!rawVal) {
-      throw new Error("Attribute value is required when key is provided.");
+      throw new ValidationError(
+        "Attribute value is required when key is provided.",
+      );
     }
 
     if (rawKey.includes("|")) {
-      throw new Error(`Pipe (|) character is not allowed in key "${rawKey}".`);
+      throw new ValidationError(
+        `Pipe (|) character is not allowed in key "${rawKey}".`,
+      );
     }
     if (rawVal.includes("|")) {
-      throw new Error(
+      throw new ValidationError(
         `Pipe (|) character is not allowed in value "${rawVal}".`,
       );
     }
 
     if (rawKey.length > 50) {
-      throw new Error(`Attribute key "${rawKey}" exceeds 50 character limit.`);
+      throw new ValidationError(
+        `Attribute key "${rawKey}" exceeds 50 character limit.`,
+      );
     }
     if (rawVal.length > 100) {
-      throw new Error(
+      throw new ValidationError(
         `Attribute value for "${rawKey}" exceeds 100 character limit.`,
       );
     }
@@ -101,7 +112,7 @@ export function parseCustomerAttributes(
 
   // 2. Validate max 25 items constraint
   if (nonBlankItems.length > 25) {
-    throw new Error(
+    throw new ValidationError(
       `Exceeded maximum 25 attributes limit (found ${nonBlankItems.length}).`,
     );
   }
@@ -111,7 +122,7 @@ export function parseCustomerAttributes(
   for (const attr of nonBlankItems) {
     const lowerKey = attr.key.toLowerCase();
     if (seenKeys.has(lowerKey)) {
-      throw new Error(`Duplicate attribute key "${attr.key}".`);
+      throw new ValidationError(`Duplicate attribute key "${attr.key}".`);
     }
     seenKeys.add(lowerKey);
   }

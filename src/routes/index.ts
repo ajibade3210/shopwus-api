@@ -1,14 +1,18 @@
 import type { FastifyInstance } from "fastify";
 import { analyticsRoutes } from "../modules/analytics/analytics.routes";
 import { authRoutes } from "../modules/auth/auth.routes";
+import { billingRoutes } from "../modules/billing/billing.routes";
 import { blogRoutes } from "../modules/blog/blog.routes";
 import { broadcastRoutes } from "../modules/broadcasts/broadcast.routes";
 import { customerRoutes } from "../modules/customers/customer.routes";
+import { deliveryRoutes } from "../modules/delivery/delivery.routes";
 import { expenseRoutes } from "../modules/expenses/expense.routes";
 import { feedbackRoutes } from "../modules/feedback/feedback.routes";
 import { invoiceRoutes } from "../modules/invoices/invoice.routes";
 import { leadRoutes } from "../modules/leads/lead.routes";
 import { mediaRoutes } from "../modules/media/media.routes";
+import { orderRoutes } from "../modules/orders/order.routes";
+import { productRoutes } from "../modules/products/product.routes";
 import { studioRoutes } from "../modules/studios/studio.routes";
 import { valuationRoutes } from "../modules/valuation/valuation.routes";
 
@@ -16,6 +20,10 @@ async function v1Routes(v1: FastifyInstance) {
   await v1.register(authRoutes, { prefix: "/auth" });
   await v1.register(mediaRoutes, { prefix: "/media" });
   await v1.register(studioRoutes, { prefix: "/studios" });
+  await v1.register(productRoutes, { prefix: "/products" });
+  await v1.register(orderRoutes, { prefix: "/orders" });
+  await v1.register(deliveryRoutes, { prefix: "/delivery" });
+  await v1.register(billingRoutes, { prefix: "/billing" });
   await v1.register(leadRoutes, { prefix: "/leads" });
   await v1.register(customerRoutes, { prefix: "/customers" });
   await v1.register(invoiceRoutes, { prefix: "/invoices" });

@@ -1,6 +1,7 @@
 import type { FastifyReply } from "fastify";
 import { Environment } from "../config/constants/environment";
 import { env } from "../config/env";
+import type { SetAuthCookiesOptions } from "../types";
 
 const IS_PROD = env.NODE_ENV === Environment.PRODUCTION;
 
@@ -13,11 +14,8 @@ const REFRESH_MAX_AGE_SECONDS = 24 * 60 * 60; // 1 day
 // "Remember me" refresh token TTL.
 const REMEMBER_ME_MAX_AGE_SECONDS = 30 * 24 * 60 * 60; // 30 days
 
-export interface SetAuthCookiesOptions {
-  accessToken: string;
-  refreshToken: string;
-  rememberMe?: boolean;
-}
+// SetAuthCookiesOptions is defined in src/types/utils.ts
+// Re-exported via src/types/index.ts
 
 /**
  * Sets HttpOnly, SameSite=Lax auth cookies on the response.

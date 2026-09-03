@@ -1,14 +1,13 @@
-export function slugify(text: string): string {
+export function generateSlug(text: string): string {
   return text
-    .toString()
     .toLowerCase()
     .trim()
-    .replace(/\s+/g, "-")
-    .replace(/[^\w-]+/g, "")
-    .replace(/--+/g, "-")
-    .replace(/^-+/, "")
-    .replace(/-+$/, "");
+    .replace(/[^\w\s-]/g, "")
+    .replace(/[\s_-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
+
+export const slugify = generateSlug;
 
 export function generateUserAlias(
   firstName: string,

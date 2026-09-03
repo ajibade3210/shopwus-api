@@ -7,7 +7,7 @@ This file provides development standards, architectural rules, and operational g
 # MANDATORY: Check When Done — NEVER SKIP THIS
 AFTER EVERY CODE CHANGE, WITHOUT EXCEPTION, YOU MUST:
 1. **No Magic Strings Allowed** — Define named constants, enums, or configuration maps in `src/config/constants/`.
-2. **Types & Schemas in Designated Sections** — Move DTOs and response interfaces to `dto/` or `src/types/`, and Zod schemas to `schema/`. Never declare inline types or ad-hoc interfaces in controllers or route definitions.
+2. **All Types & Interfaces in `src/types/`** — Every exported interface, type alias, or DTO must live in `src/types/` (or a module's `dto/` folder). This applies to **every file without exception** — including controllers, routes, services, schemas, and infrastructure/library files under `src/lib/`. Never declare exported interfaces inline in `src/lib/` files (e.g., `paystack.ts`, `mediaUpload.ts`). Private module-only shapes (unexported, single-file use) are the only acceptable inline types.
 3. **Scan Related Files** — Check route registrations, controller calls, service functions, DTO serializers, Zod schemas, sibling services, and background workers for anything missing, broken, or inconsistent with your change.
 4. **Briefly Explain Changes** — Provide a concise summary of the problem, the fix applied, and any important architectural considerations.
 5. **Call Out Breaking Changes** — Explicitly warn if a change impacts DB schema, Prisma migrations, API response contracts, job payload shapes, or authentication.

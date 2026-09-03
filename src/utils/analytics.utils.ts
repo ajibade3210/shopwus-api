@@ -1,3 +1,5 @@
+import type { TimeBucket } from "../types";
+
 export function formatCompact(val: number): string {
   if (val >= 1_000_000) {
     const m = (val / 1_000_000).toFixed(1);
@@ -23,11 +25,8 @@ export function calculateNiceCeiling(maxVal: number): number {
   return multiple * power;
 }
 
-export interface TimeBucket {
-  label: string;
-  start: Date;
-  end: Date;
-}
+// TimeBucket is defined in src/types/utils.ts, re-exported via src/types/index.ts
+export type { TimeBucket };
 
 export function generateTimeBuckets(
   timeframe: string,

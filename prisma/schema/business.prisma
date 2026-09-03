@@ -24,6 +24,16 @@ model Business {
   bankName          String?
   accountName       String?
   accountNumber     String?
+  addressLine1        String?
+  addressLine2        String?
+  city                String?
+  state               String?
+  postalCode          String?
+  country             String             @default("Nigeria")
+  enableStorePickup   Boolean            @default(true)
+  pickupInstructions  String?
+  enableHomeDelivery  Boolean            @default(true)
+  freeDeliveryThreshold Decimal?         @db.Decimal(12, 2)
   colors              Json?
   buttonRadius        String?            @default("Subtle")
   showServices        Boolean            @default(true)
@@ -40,20 +50,27 @@ model Business {
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt
 
-  businessUsers      BusinessUser[]
-  socialChannels     SocialChannel[]
-  portfolioProjects  PortfolioProject[]
-  reviews            Review[]
-  services           Service[]
-  customers          Customer[]
-  customerServices   CustomerService[]
-  leads              Lead[]
-  invoices           Invoice[]
-  expenses           Expense[]
-  broadcastCampaigns BroadcastCampaign[]
-  feedbackRequests   FeedbackRequest[]
-  valuationRecords   ValuationRecord[]
-  documentSequences  DocumentSequence[]
+  businessUsers       BusinessUser[]
+  socialChannels      SocialChannel[]
+  portfolioProjects   PortfolioProject[]
+  reviews             Review[]
+  services            Service[]
+  customers           Customer[]
+  customerServices    CustomerService[]
+  leads               Lead[]
+  invoices            Invoice[]
+  expenses            Expense[]
+  broadcastCampaigns  BroadcastCampaign[]
+  feedbackRequests    FeedbackRequest[]
+  valuationRecords    ValuationRecord[]
+  documentSequences   DocumentSequence[]
+  products            Product[]
+  categories          Category[]
+  orders              Order[]
+  checkoutSessions    CheckoutSession[]
+  deliveryZones       DeliveryZone[]
+  billing             BusinessBilling?
+  paymentTransactions PaymentTransaction[]
 
   @@index([slug])
 }

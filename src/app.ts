@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import multipart from "@fastify/multipart";
 import sensible from "@fastify/sensible";
-import Fastify from "fastify";
+import Fastify, { type FastifyRequest } from "fastify";
 import {
   serializerCompiler,
   validatorCompiler,
@@ -45,6 +45,23 @@ export async function buildApp() {
       fileSize: env.MAX_VIDEO_SIZE,
     },
   });
+
+  // Preserve raw body buffer for secure cryptographic webhook signature verification
+  app.addContentTypeParser(
+    "application/json",
+    { parseAs: "buffer" },
+    (req, body: Buffer, done) => {
+      (req as FastifyRequest & { rawBody?: string }).rawBody =
+        body.toString("utf8");
+      try {
+        const json = JSON.parse(body.toString("utf8"));
+        done(null, json);
+      } catch (err: unknown) {
+        done(err as Error, undefined);
+      }
+    },
+  );
+
   await registerRateLimit(app);
   registerErrorHandler(app);
 

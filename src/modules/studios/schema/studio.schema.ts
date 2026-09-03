@@ -83,6 +83,7 @@ export const socialChannelInputSchema = z
   );
 
 export const updateStudioProfileSchema = z.object({
+  slug: z.string().nullish(),
   businessName: z.string().nullish(),
   name: z.string().nullish(),
   tagline: z.string().nullish(),

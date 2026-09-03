@@ -1,7 +1,11 @@
 import type { Prisma } from "@prisma/client";
 import { isReservedSlug } from "../../../config/constants/reserved-slugs";
 import { queueBannerGeneration } from "../../../jobs/workers/banner.worker";
-import { NotFoundError } from "../../../lib/errors";
+import {
+  ConflictError,
+  NotFoundError,
+  ValidationError,
+} from "../../../lib/errors";
 import { prisma } from "../../../lib/prisma";
 import { slugify } from "../../../utils";
 import type { UpdateStudioProfileInput } from "../schema/studio.schema";
@@ -66,6 +70,27 @@ export async function updateStudioMeService(
   const business = await resolveDirectorBusiness(userId, businessId);
 
   const dataToUpdate: Prisma.BusinessUpdateInput = {};
+
+  if (input.slug !== undefined && input.slug !== null) {
+    const normalizedSlug = slugify(input.slug);
+    if (normalizedSlug !== business.slug) {
+      if (normalizedSlug.length < 3 || isReservedSlug(normalizedSlug)) {
+        throw new ValidationError(
+          "Studio slug must be at least 3 characters and not reserved",
+        );
+      }
+      const availability = await checkSlugAvailabilityService(
+        normalizedSlug,
+        business.id,
+      );
+      if (!availability.available) {
+        throw new ConflictError("Studio slug is already in use");
+      }
+      // Explicitly invalidate old storefront slug cache before updating
+      await invalidateStorefrontCache(business.slug);
+      dataToUpdate.slug = normalizedSlug;
+    }
+  }
 
   if (input.name !== undefined || input.businessName !== undefined) {
     dataToUpdate.name = (input.name || input.businessName)?.trim();
@@ -244,7 +269,8 @@ export async function updateStudioMeService(
     }
   });
 
-  invalidateStorefrontCache(business.slug);
+  const effectiveSlug = (dataToUpdate.slug as string) || business.slug;
+  await invalidateStorefrontCache(effectiveSlug);
 
   // Trigger background header banner sync if AUTO header and branding changed
   const effectiveHeaderType = input.headerType ?? business.headerType ?? "AUTO";
@@ -262,7 +288,7 @@ export async function updateStudioMeService(
     await queueBannerGeneration(business.id);
   }
 
-  return getStorefrontBySlug(business.slug);
+  return getStorefrontBySlug(effectiveSlug);
 }
 
 export async function publishStudioMeService(

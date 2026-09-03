@@ -87,6 +87,7 @@ describe("Studio Module Unit Tests", () => {
           text: "#191C1D",
         },
         buttonRadius: "rounded-lg",
+        slug: "atelier-forma-rebranded",
         services: [
           {
             name: "Digital Product Architecture",
@@ -96,6 +97,9 @@ describe("Studio Module Unit Tests", () => {
         ],
       });
       expect(profileUpdate.success).toBe(true);
+      if (profileUpdate.success) {
+        expect(profileUpdate.data.slug).toBe("atelier-forma-rebranded");
+      }
     });
   });
 

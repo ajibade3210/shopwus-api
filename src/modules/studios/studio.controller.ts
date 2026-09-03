@@ -1,4 +1,5 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
+import { prisma } from "../../lib/prisma";
 import type {
   CheckSlugQuery,
   GetStorefrontParams,
@@ -24,10 +25,15 @@ export async function checkSlugHandler(
   reply: FastifyReply,
 ) {
   const { slug } = request.query;
-  const result = await checkSlugAvailabilityService(
-    slug,
-    request.user?.businessId,
-  );
+  let businessId = request.user?.businessId;
+  if (!businessId && request.user?.userId) {
+    const bu = await prisma.businessUser.findFirst({
+      where: { userId: request.user.userId },
+      select: { businessId: true },
+    });
+    businessId = bu?.businessId;
+  }
+  const result = await checkSlugAvailabilityService(slug, businessId);
   return reply.success(result, "Slug availability checked");
 }
 

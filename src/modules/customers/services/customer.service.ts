@@ -118,7 +118,8 @@ export async function getCustomerByIdService(
     company: customer.company,
     ...toFinancialAmount(customer.totalRevenue, "totalRevenue"),
     notes: customer.notes,
-    attributes: (customer.attributes as unknown as CustomerAttributeDto[]) || null,
+    attributes:
+      (customer.attributes as unknown as CustomerAttributeDto[]) || null,
     isActive: customer.isActive,
     services: customer.services.map((s) => ({
       id: s.id,
@@ -176,99 +177,75 @@ export async function createCustomerService(
     });
 
     let service = null;
-    let customer;
 
-    if (existing) {
-      // Reactivate if inactive and update contact details if provided
-      customer = await tx.customer.update({
-        where: { id: existing.id },
-        data: {
-          name: data.name.trim() || existing.name,
-          phone: data.phone?.trim() ?? existing.phone,
-          company: data.company?.trim() ?? existing.company,
-          notes: data.notes?.trim() ?? existing.notes,
-          ...(data.attributes !== undefined
-            ? {
-                attributes: data.attributes
-                  ? (data.attributes as unknown as Prisma.InputJsonValue)
-                  : Prisma.DbNull,
-              }
-            : {}),
-          isActive: true,
-          totalRevenue: initialServiceName
-            ? { increment: rawAmount }
-            : existing.totalRevenue,
-        },
-        include: {
-          services: true,
-        },
-      });
-
-      if (initialServiceName) {
-        service = await tx.customerService.create({
+    const customer = existing
+      ? await tx.customer.update({
+          where: { id: existing.id },
+          data: {
+            name: data.name.trim() || existing.name,
+            phone: data.phone?.trim() ?? existing.phone,
+            company: data.company?.trim() ?? existing.company,
+            notes: data.notes?.trim() ?? existing.notes,
+            ...(data.attributes !== undefined
+              ? {
+                  attributes: data.attributes
+                    ? (data.attributes as unknown as Prisma.InputJsonValue)
+                    : Prisma.DbNull,
+                }
+              : {}),
+            isActive: true,
+            totalRevenue: initialServiceName
+              ? { increment: rawAmount }
+              : existing.totalRevenue,
+          },
+          include: {
+            services: true,
+          },
+        })
+      : await tx.customer.create({
           data: {
             businessId,
-            customerId: customer.id,
-            name: initialServiceName,
-            service: data.service?.trim() || "",
-            amount: rawAmount,
-            status: data.status || "active",
+            name: data.name.trim(),
+            email,
+            phone: data.phone?.trim(),
+            company: data.company?.trim(),
+            notes: data.notes?.trim(),
+            attributes: data.attributes
+              ? (data.attributes as unknown as Prisma.InputJsonValue)
+              : undefined,
+            totalRevenue: initialServiceName ? rawAmount : 0,
+            isActive: data.isActive ?? true,
+          },
+          include: {
+            services: true,
           },
         });
-      }
 
-      await tx.customerActivity.create({
+    if (initialServiceName) {
+      service = await tx.customerService.create({
         data: {
           businessId,
           customerId: customer.id,
-          type: "note_added",
-          description: initialServiceName
-            ? `New service '${initialServiceName}' attached to profile.`
-            : "Customer profile reactivated/updated.",
-        },
-      });
-    } else {
-      customer = await tx.customer.create({
-        data: {
-          businessId,
-          name: data.name.trim(),
-          email,
-          phone: data.phone?.trim(),
-          company: data.company?.trim(),
-          notes: data.notes?.trim(),
-          attributes: data.attributes
-            ? (data.attributes as unknown as Prisma.InputJsonValue)
-            : undefined,
-          totalRevenue: initialServiceName ? rawAmount : 0,
-          isActive: data.isActive ?? true,
-        },
-        include: {
-          services: true,
-        },
-      });
-
-      if (initialServiceName) {
-        service = await tx.customerService.create({
-          data: {
-            businessId,
-            customerId: customer.id,
-            name: initialServiceName,
-            service: data.service?.trim() || "",
-            amount: rawAmount,
-            status: data.status || "active",
-          },
-        });
-      }
-
-      await tx.customerActivity.create({
-        data: {
-          businessId,
-          customerId: customer.id,
-          type: "client_onboarded",
-          description: `Customer '${customer.name}' registered in directory.`,
+          name: initialServiceName,
+          service: data.service?.trim() || "",
+          amount: rawAmount,
+          status: data.status || "active",
         },
       });
     }
+
+    await tx.customerActivity.create({
+      data: {
+        businessId,
+        customerId: customer.id,
+        type: existing ? "note_added" : "client_onboarded",
+        description: initialServiceName
+          ? `New service '${initialServiceName}' attached to profile.`
+          : existing
+            ? "Customer profile reactivated/updated."
+            : `Customer '${customer.name}' registered in directory.`,
+      },
+    });
 
     const allServices = service
       ? [...customer.services, service]
@@ -283,7 +260,8 @@ export async function createCustomerService(
       company: customer.company,
       ...toFinancialAmount(customer.totalRevenue, "totalRevenue"),
       notes: customer.notes,
-      attributes: (customer.attributes as unknown as CustomerAttributeDto[]) || null,
+      attributes:
+        (customer.attributes as unknown as CustomerAttributeDto[]) || null,
       isActive: customer.isActive,
       services: allServices.map((s) => ({
         id: s.id,
@@ -324,7 +302,8 @@ export async function updateCustomerService(
   if (data.company !== undefined) updatePayload.company = data.company?.trim();
   if (data.notes !== undefined) updatePayload.notes = data.notes?.trim();
   if (data.attributes !== undefined)
-    updatePayload.attributes = data.attributes as unknown as Prisma.InputJsonValue;
+    updatePayload.attributes =
+      data.attributes as unknown as Prisma.InputJsonValue;
   if (data.isActive !== undefined) updatePayload.isActive = data.isActive;
 
   const updated = await prisma.customer.update({
@@ -346,7 +325,8 @@ export async function updateCustomerService(
     company: updated.company,
     ...toFinancialAmount(updated.totalRevenue, "totalRevenue"),
     notes: updated.notes,
-    attributes: (updated.attributes as unknown as CustomerAttributeDto[]) || null,
+    attributes:
+      (updated.attributes as unknown as CustomerAttributeDto[]) || null,
     isActive: updated.isActive,
     services: updated.services.map((s) => ({
       id: s.id,

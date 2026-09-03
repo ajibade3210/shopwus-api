@@ -186,8 +186,12 @@ describe("Customers Module Unit Tests", () => {
 
   describe("Customer Attributes CSV Parser", () => {
     it("parses valid formatted string and handles first colon split", () => {
-      const { parseCustomerAttributes } = require("../../src/modules/customers/services/customer-bulk.service");
-      const parsed = parseCustomerAttributes("Waist: 32 | Delivery: 10:30 AM | Shoe Size: 10.5");
+      const {
+        parseCustomerAttributes,
+      } = require("../../src/modules/customers/services/customer-bulk.service");
+      const parsed = parseCustomerAttributes(
+        "Waist: 32 | Delivery: 10:30 AM | Shoe Size: 10.5",
+      );
       expect(parsed).toEqual([
         { key: "Waist", value: "32" },
         { key: "Delivery", value: "10:30 AM" },
@@ -196,7 +200,9 @@ describe("Customers Module Unit Tests", () => {
     });
 
     it("silently prunes empty pairs from string", () => {
-      const { parseCustomerAttributes } = require("../../src/modules/customers/services/customer-bulk.service");
+      const {
+        parseCustomerAttributes,
+      } = require("../../src/modules/customers/services/customer-bulk.service");
       const parsed = parseCustomerAttributes("Waist: 32 | | Chest: 40 | ");
       expect(parsed).toEqual([
         { key: "Waist", value: "32" },
@@ -205,8 +211,12 @@ describe("Customers Module Unit Tests", () => {
     });
 
     it("throws on missing colon in attribute string", () => {
-      const { parseCustomerAttributes } = require("../../src/modules/customers/services/customer-bulk.service");
-      expect(() => parseCustomerAttributes("Waist 32")).toThrow('Expected "Key: Value"');
+      const {
+        parseCustomerAttributes,
+      } = require("../../src/modules/customers/services/customer-bulk.service");
+      expect(() => parseCustomerAttributes("Waist 32")).toThrow(
+        'Expected "Key: Value"',
+      );
     });
   });
 });

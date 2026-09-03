@@ -126,7 +126,10 @@ export const importCustomerRecordSchema = z.object({
   phone: z.string().optional(),
   company: z.string().optional(),
   notes: z.string().optional(),
-  attributes: z.union([customerAttributesArraySchema, z.string()]).optional().nullable(),
+  attributes: z
+    .union([customerAttributesArraySchema, z.string()])
+    .optional()
+    .nullable(),
 });
 
 export const importCustomersSchema = z.union([

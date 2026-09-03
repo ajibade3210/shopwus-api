@@ -82,13 +82,13 @@ export function parseCustomerAttributes(
       throw new Error(`Pipe (|) character is not allowed in key "${rawKey}".`);
     }
     if (rawVal.includes("|")) {
-      throw new Error(`Pipe (|) character is not allowed in value "${rawVal}".`);
+      throw new Error(
+        `Pipe (|) character is not allowed in value "${rawVal}".`,
+      );
     }
 
     if (rawKey.length > 50) {
-      throw new Error(
-        `Attribute key "${rawKey}" exceeds 50 character limit.`,
-      );
+      throw new Error(`Attribute key "${rawKey}" exceeds 50 character limit.`);
     }
     if (rawVal.length > 100) {
       throw new Error(
@@ -141,7 +141,9 @@ export async function importCustomersService(
       }
 
       const rawName = record.name ? String(record.name).trim() : "";
-      const rawEmail = record.email ? String(record.email).toLowerCase().trim() : "";
+      const rawEmail = record.email
+        ? String(record.email).toLowerCase().trim()
+        : "";
 
       if (!rawName) {
         skipped.push({ line, error: "Customer name is required." });
@@ -150,7 +152,10 @@ export async function importCustomersService(
 
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!rawEmail || !emailRegex.test(rawEmail)) {
-        skipped.push({ line, error: `Valid email is required (found "${record.email || ""}").` });
+        skipped.push({
+          line,
+          error: `Valid email is required (found "${record.email || ""}").`,
+        });
         continue;
       }
 
@@ -207,7 +212,8 @@ export async function importCustomersService(
         results.push(created);
       }
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Failed to import row.";
+      const message =
+        err instanceof Error ? err.message : "Failed to import row.";
       skipped.push({ line, error: message });
     }
   }

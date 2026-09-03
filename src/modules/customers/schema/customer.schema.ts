@@ -8,12 +8,58 @@ export const customerServiceStatusEnum = z.enum([
   "cancelled",
 ]);
 
+export const customerAttributeSchema = z.object({
+  key: z
+    .string()
+    .trim()
+    .min(1, "Attribute key is required")
+    .max(50, "Attribute key must not exceed 50 characters")
+    .regex(/^[^|]+$/, "Pipe (|) character is not allowed in attribute key"),
+  value: z
+    .string()
+    .trim()
+    .min(1, "Attribute value is required")
+    .max(100, "Attribute value must not exceed 100 characters")
+    .regex(/^[^|]+$/, "Pipe (|) character is not allowed in attribute value"),
+});
+
+export const rawCustomerAttributeSchema = z.object({
+  key: z.string().default(""),
+  value: z.string().default(""),
+});
+
+export const customerAttributesArraySchema = z
+  .array(rawCustomerAttributeSchema)
+  .transform((items) =>
+    items.filter((item) => item.key.trim() !== "" || item.value.trim() !== ""),
+  )
+  .pipe(
+    z
+      .array(customerAttributeSchema)
+      .max(25, "Maximum 25 attributes allowed per customer")
+      .superRefine((items, ctx) => {
+        const seenKeys = new Set<string>();
+        for (let i = 0; i < items.length; i++) {
+          const lowerKey = items[i].key.toLowerCase().trim();
+          if (seenKeys.has(lowerKey)) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: `Duplicate attribute key "${items[i].key}"`,
+              path: [i, "key"],
+            });
+          }
+          seenKeys.add(lowerKey);
+        }
+      }),
+  );
+
 export const createCustomerSchema = z.object({
   name: z.string().min(1, "Customer name is required"),
   email: z.string().email("Valid email address is required"),
   phone: z.string().optional(),
   company: z.string().optional(),
   notes: z.string().optional(),
+  attributes: customerAttributesArraySchema.optional().nullable(),
   isActive: z.boolean().optional().default(true),
   // Optional initial service
   serviceName: z.string().optional(),
@@ -28,6 +74,7 @@ export const updateCustomerSchema = z.object({
   phone: z.string().optional(),
   company: z.string().optional(),
   notes: z.string().optional(),
+  attributes: customerAttributesArraySchema.optional().nullable(),
   isActive: z.boolean().optional(),
 });
 
@@ -79,6 +126,7 @@ export const importCustomerRecordSchema = z.object({
   phone: z.string().optional(),
   company: z.string().optional(),
   notes: z.string().optional(),
+  attributes: z.union([customerAttributesArraySchema, z.string()]).optional().nullable(),
 });
 
 export const importCustomersSchema = z.union([

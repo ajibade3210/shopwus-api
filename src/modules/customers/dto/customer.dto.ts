@@ -24,6 +24,11 @@ export interface CustomerActivityDto {
   timestamp: string;
 }
 
+export interface CustomerAttributeDto {
+  key: string;
+  value: string;
+}
+
 export interface CustomerDto {
   id: string;
   businessId: string;
@@ -34,6 +39,7 @@ export interface CustomerDto {
   totalRevenue: number;
   totalRevenueKobo?: number;
   notes?: string | null;
+  attributes?: CustomerAttributeDto[] | null;
   isActive: boolean;
   services: CustomerServiceDto[];
   activities?: CustomerActivityDto[];

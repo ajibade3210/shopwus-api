@@ -1,7 +1,8 @@
-import type { Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { NotFoundError } from "../../../lib/errors";
 import { prisma } from "../../../lib/prisma";
 import { toFinancialAmount } from "../../../utils/currency.utils";
+import type { CustomerAttributeDto } from "../dto/customer.dto";
 import type {
   CreateCustomerInput,
   ListCustomersQuery,
@@ -58,6 +59,7 @@ export async function listCustomersService(
     company: c.company,
     ...toFinancialAmount(c.totalRevenue, "totalRevenue"),
     notes: c.notes,
+    attributes: (c.attributes as unknown as CustomerAttributeDto[]) || null,
     isActive: c.isActive,
     services: c.services.map((s) => ({
       id: s.id,
@@ -116,6 +118,7 @@ export async function getCustomerByIdService(
     company: customer.company,
     ...toFinancialAmount(customer.totalRevenue, "totalRevenue"),
     notes: customer.notes,
+    attributes: (customer.attributes as unknown as CustomerAttributeDto[]) || null,
     isActive: customer.isActive,
     services: customer.services.map((s) => ({
       id: s.id,
@@ -160,7 +163,7 @@ export async function createCustomerService(
   const initialServiceName = data.serviceName?.trim() || data.service?.trim();
 
   return prisma.$transaction(async (tx) => {
-    let customer = await tx.customer.findUnique({
+    const existing = await tx.customer.findUnique({
       where: {
         businessId_email: {
           businessId,
@@ -173,20 +176,28 @@ export async function createCustomerService(
     });
 
     let service = null;
+    let customer;
 
-    if (customer) {
+    if (existing) {
       // Reactivate if inactive and update contact details if provided
       customer = await tx.customer.update({
-        where: { id: customer.id },
+        where: { id: existing.id },
         data: {
-          name: data.name.trim() || customer.name,
-          phone: data.phone?.trim() ?? customer.phone,
-          company: data.company?.trim() ?? customer.company,
-          notes: data.notes?.trim() ?? customer.notes,
+          name: data.name.trim() || existing.name,
+          phone: data.phone?.trim() ?? existing.phone,
+          company: data.company?.trim() ?? existing.company,
+          notes: data.notes?.trim() ?? existing.notes,
+          ...(data.attributes !== undefined
+            ? {
+                attributes: data.attributes
+                  ? (data.attributes as unknown as Prisma.InputJsonValue)
+                  : Prisma.DbNull,
+              }
+            : {}),
           isActive: true,
           totalRevenue: initialServiceName
             ? { increment: rawAmount }
-            : customer.totalRevenue,
+            : existing.totalRevenue,
         },
         include: {
           services: true,
@@ -213,7 +224,7 @@ export async function createCustomerService(
           type: "note_added",
           description: initialServiceName
             ? `New service '${initialServiceName}' attached to profile.`
-            : `Customer profile reactivated/updated.`,
+            : "Customer profile reactivated/updated.",
         },
       });
     } else {
@@ -225,6 +236,9 @@ export async function createCustomerService(
           phone: data.phone?.trim(),
           company: data.company?.trim(),
           notes: data.notes?.trim(),
+          attributes: data.attributes
+            ? (data.attributes as unknown as Prisma.InputJsonValue)
+            : undefined,
           totalRevenue: initialServiceName ? rawAmount : 0,
           isActive: data.isActive ?? true,
         },
@@ -269,6 +283,7 @@ export async function createCustomerService(
       company: customer.company,
       ...toFinancialAmount(customer.totalRevenue, "totalRevenue"),
       notes: customer.notes,
+      attributes: (customer.attributes as unknown as CustomerAttributeDto[]) || null,
       isActive: customer.isActive,
       services: allServices.map((s) => ({
         id: s.id,
@@ -308,6 +323,8 @@ export async function updateCustomerService(
   if (data.phone !== undefined) updatePayload.phone = data.phone?.trim();
   if (data.company !== undefined) updatePayload.company = data.company?.trim();
   if (data.notes !== undefined) updatePayload.notes = data.notes?.trim();
+  if (data.attributes !== undefined)
+    updatePayload.attributes = data.attributes as unknown as Prisma.InputJsonValue;
   if (data.isActive !== undefined) updatePayload.isActive = data.isActive;
 
   const updated = await prisma.customer.update({
@@ -329,6 +346,7 @@ export async function updateCustomerService(
     company: updated.company,
     ...toFinancialAmount(updated.totalRevenue, "totalRevenue"),
     notes: updated.notes,
+    attributes: (updated.attributes as unknown as CustomerAttributeDto[]) || null,
     isActive: updated.isActive,
     services: updated.services.map((s) => ({
       id: s.id,

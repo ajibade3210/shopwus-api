@@ -1,9 +1,8 @@
-import { Prisma, PrismaClient } from "@prisma/client";
+import { type Business, Prisma } from "@prisma/client";
 import dotenv from "dotenv";
+import { basePrisma as prisma } from "../../src/lib/prisma";
 
 dotenv.config();
-
-const prisma = new PrismaClient();
 
 export async function seedProductsForEmail(targetEmail: string) {
   console.info(`\n👜 Seeding Designer Bag Catalog for: ${targetEmail}`);
@@ -24,7 +23,7 @@ export async function seedProductsForEmail(targetEmail: string) {
     );
   }
 
-  let business = user.businessUsers[0]?.business;
+  let business: Business | null = user.businessUsers[0]?.business ?? null;
 
   if (!business) {
     // If user has no business linked, check if a business exists with this email or create one

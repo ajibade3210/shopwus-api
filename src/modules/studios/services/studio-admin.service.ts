@@ -107,7 +107,8 @@ export async function updateStudioMeService(
   if (input.phone !== undefined) dataToUpdate.phone = input.phone?.trim();
   if (input.whatsAppNumber !== undefined)
     dataToUpdate.whatsAppNumber = input.whatsAppNumber?.trim();
-  if (input.logoUrl !== undefined) dataToUpdate.logoUrl = input.logoUrl?.trim() || null;
+  if (input.logoUrl !== undefined)
+    dataToUpdate.logoUrl = input.logoUrl?.trim() || null;
   if (input.bannerUrl !== undefined)
     dataToUpdate.bannerUrl = input.bannerUrl?.trim() || null;
   if (input.emailHeaderUrl !== undefined)

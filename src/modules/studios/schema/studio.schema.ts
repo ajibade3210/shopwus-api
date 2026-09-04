@@ -49,7 +49,8 @@ export const portfolioProjectInputSchema = z.object({
     .string()
     .nullish()
     .refine((val) => !val || !val.startsWith("blob:"), {
-      message: "Image must be a valid uploaded Cloudflare URL, not a local blob",
+      message:
+        "Image must be a valid uploaded Cloudflare URL, not a local blob",
     }),
   order: z.number().nullish(),
   isCover: z.boolean().nullish(),

@@ -12,7 +12,7 @@ export async function mediaRoutes(app: FastifyInstance): Promise<void> {
     {
       preHandler: [authenticate],
       schema: mediaSchema.uploadMediaRouteSchema,
-      ...rateLimit(10, "1 hour"),
+      ...rateLimit(120, "1 minute"),
     },
     mediaController.uploadMedia,
   );
@@ -22,7 +22,7 @@ export async function mediaRoutes(app: FastifyInstance): Promise<void> {
     {
       preHandler: [authenticate],
       schema: mediaSchema.uploadMediaRouteSchema,
-      ...rateLimit(10, "1 hour"),
+      ...rateLimit(120, "1 minute"),
     },
     mediaController.uploadMultiMedia,
   );
@@ -32,7 +32,7 @@ export async function mediaRoutes(app: FastifyInstance): Promise<void> {
     {
       preHandler: [authenticate],
       schema: mediaSchema.deleteMediaRouteSchema,
-      ...rateLimit(10, "1 hour"),
+      ...rateLimit(120, "1 minute"),
     },
     mediaController.deleteMedia,
   );

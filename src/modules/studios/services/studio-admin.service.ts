@@ -107,11 +107,11 @@ export async function updateStudioMeService(
   if (input.phone !== undefined) dataToUpdate.phone = input.phone?.trim();
   if (input.whatsAppNumber !== undefined)
     dataToUpdate.whatsAppNumber = input.whatsAppNumber?.trim();
-  if (input.logoUrl !== undefined) dataToUpdate.logoUrl = input.logoUrl?.trim();
+  if (input.logoUrl !== undefined) dataToUpdate.logoUrl = input.logoUrl?.trim() || null;
   if (input.bannerUrl !== undefined)
-    dataToUpdate.bannerUrl = input.bannerUrl?.trim();
+    dataToUpdate.bannerUrl = input.bannerUrl?.trim() || null;
   if (input.emailHeaderUrl !== undefined)
-    dataToUpdate.emailHeaderUrl = input.emailHeaderUrl?.trim();
+    dataToUpdate.emailHeaderUrl = input.emailHeaderUrl?.trim() || null;
   if (input.headerType !== undefined && input.headerType !== null)
     dataToUpdate.headerType = input.headerType;
   if (

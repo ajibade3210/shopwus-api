@@ -45,10 +45,22 @@ export const portfolioProjectInputSchema = z.object({
   category: z.string().nullish(),
   location: z.string().nullish(),
   description: z.string().nullish(),
-  image: z.string().nullish(),
+  image: z
+    .string()
+    .nullish()
+    .refine((val) => !val || !val.startsWith("blob:"), {
+      message: "Image must be a valid uploaded Cloudflare URL, not a local blob",
+    }),
   order: z.number().nullish(),
   isCover: z.boolean().nullish(),
-  gallery: z.array(z.string()).nullish(),
+  gallery: z
+    .array(
+      z.string().refine((val) => !val.startsWith("blob:"), {
+        message:
+          "Gallery images must be valid uploaded Cloudflare URLs, not local blobs",
+      }),
+    )
+    .nullish(),
   stats: z.string().nullish(),
   client: z.string().nullish(),
   year: z.string().nullish(),
@@ -99,9 +111,26 @@ export const updateStudioProfileSchema = z.object({
     .refine((val) => !val?.trim() || isValidPhone(val), {
       message: "Invalid WhatsApp phone number format",
     }),
-  logoUrl: z.string().nullish(),
-  bannerUrl: z.string().nullish(),
-  emailHeaderUrl: z.string().nullish(),
+  logoUrl: z
+    .string()
+    .nullish()
+    .refine((val) => !val || !val.startsWith("blob:"), {
+      message: "Logo must be a valid uploaded Cloudflare URL, not a local blob",
+    }),
+  bannerUrl: z
+    .string()
+    .nullish()
+    .refine((val) => !val || !val.startsWith("blob:"), {
+      message:
+        "Banner must be a valid uploaded Cloudflare URL, not a local blob",
+    }),
+  emailHeaderUrl: z
+    .string()
+    .nullish()
+    .refine((val) => !val || !val.startsWith("blob:"), {
+      message:
+        "Email header must be a valid uploaded Cloudflare URL, not a local blob",
+    }),
   headerType: z.enum(["AUTO", "CUSTOM"]).nullish(),
   includeHeaderInInvoice: z.boolean().nullish(),
   includeHeaderInEmail: z.boolean().nullish(),

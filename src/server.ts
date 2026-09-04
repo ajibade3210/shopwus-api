@@ -1,24 +1,17 @@
+import sharp from "sharp";
 import { buildApp } from "./app";
-import { Environment } from "./config/constants/environment";
 import { env } from "./config/env";
 import { registerAllWorkers } from "./jobs";
 import { initMonitor } from "./lib/monitor";
-import { initPdfGenerator } from "./lib/pdf";
 import { startBoss } from "./lib/pgboss";
 import { prisma } from "./lib/prisma";
 
+// Restrict Sharp/libvips memory usage on constrained containers (e.g. Render 512MB RAM)
+sharp.cache(false);
+sharp.concurrency(1);
+
 async function start() {
   initMonitor();
-
-  // Only pre-warm PDF generator when NOT running locally in development
-  // This saves resources locally while ensuring performance on deployed servers
-  const isLocalDev =
-    env.NODE_ENV === Environment.DEVELOP &&
-    (env.HOST === "127.0.0.1" || env.HOST === "localhost");
-
-  if (!isLocalDev) {
-    await initPdfGenerator();
-  }
 
   const app = await buildApp();
 

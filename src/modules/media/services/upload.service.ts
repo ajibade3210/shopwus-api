@@ -129,39 +129,51 @@ export async function uploadMediaService(
   };
 }
 
+// Configure Sharp memory limits for constrained container environments
+sharp.cache(false);
+sharp.concurrency(1);
+
 export async function uploadMultiMediaService(
   files: AsyncIterableIterator<MultipartFile>,
   userId: string,
 ): Promise<(UploadResult & { publicId: string; type: string })[]> {
-  interface PendingFile {
-    filename: string;
-    mimetype: string;
-    buffer: Buffer;
-  }
-  const pendingFiles: PendingFile[] = [];
+  type FormattedResult = UploadResult & { publicId: string; type: string };
+  const results: FormattedResult[] = [];
 
   try {
     for await (const file of files) {
-      const buffer = await file.toBuffer();
+      const rawBuffer = await file.toBuffer();
       const maxSize = file.mimetype.startsWith("video/")
         ? env.MAX_VIDEO_SIZE
         : env.MAX_FILE_SIZE;
 
-      if (file.file.truncated || buffer.length > maxSize) {
+      if (file.file.truncated || rawBuffer.length > maxSize) {
         throw new PayloadTooLargeError(
           `File ${file.filename} exceeds the allowed size limit`,
         );
       }
 
-      pendingFiles.push({
-        filename: file.filename,
-        mimetype: file.mimetype,
-        buffer,
+      const { buffer, mimetype } = await optimizeImageBuffer(
+        rawBuffer,
+        file.mimetype,
+      );
+      const config = getUploadConfig(mimetype);
+      const folder = `shopwus/${userId}/${config.folder}`;
+
+      const uploadResult = await storageService.upload(buffer, {
+        resource_type: config.resourceType,
+        folder,
+        mimetype,
+      });
+
+      results.push({
+        ...uploadResult,
+        publicId: uploadResult.public_id,
+        type: getMediaTypeFromFolder(config.folder),
       });
     }
   } catch (error) {
-    // If an error occurred before we could iterate over all files,
-    // drain any remaining files from the generator to prevent Premature Close errors.
+    // Drain any remaining files from generator on failure to prevent premature close
     try {
       for await (const file of files) {
         file.file.resume();
@@ -169,57 +181,7 @@ export async function uploadMultiMediaService(
     } catch (_) {
       // Ignore errors during stream cleanup
     }
-    throw error;
-  }
 
-  if (pendingFiles.length === 0)
-    throw new ValidationError("No valid files uploaded");
-
-  type FormattedResult = UploadResult & { publicId: string; type: string };
-  const results: FormattedResult[] = [];
-  const BATCH_SIZE = 5;
-
-  try {
-    for (let i = 0; i < pendingFiles.length; i += BATCH_SIZE) {
-      const chunk = pendingFiles.slice(i, i + BATCH_SIZE);
-      const chunkSettled = await Promise.allSettled(
-        chunk.map(async (item) => {
-          const { buffer, mimetype } = await optimizeImageBuffer(
-            item.buffer,
-            item.mimetype,
-          );
-          const config = getUploadConfig(mimetype);
-          const folder = `shopwus/${userId}/${config.folder}`;
-
-          const uploadResult = await storageService.upload(buffer, {
-            resource_type: config.resourceType,
-            folder,
-            mimetype,
-          });
-
-          return {
-            ...uploadResult,
-            publicId: uploadResult.public_id,
-            type: getMediaTypeFromFolder(config.folder),
-          };
-        }),
-      );
-
-      let firstError: unknown = null;
-      for (const res of chunkSettled) {
-        if (res.status === "fulfilled") {
-          results.push(res.value);
-        } else if (!firstError) {
-          firstError = res.reason;
-        }
-      }
-
-      if (firstError) {
-        throw firstError;
-      }
-    }
-    return results;
-  } catch (error) {
     if (results.length > 0) {
       await Promise.allSettled(
         results.map((res) => storageService.delete(res.publicId)),
@@ -227,6 +189,12 @@ export async function uploadMultiMediaService(
     }
     throw error;
   }
+
+  if (results.length === 0) {
+    throw new ValidationError("No valid files uploaded");
+  }
+
+  return results;
 }
 
 export async function uploadExcelExportService(

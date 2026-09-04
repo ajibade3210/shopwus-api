@@ -15,6 +15,7 @@ const defaults: Record<string, string> = {
   CLOUDFLARE_R2_BUCKET_NAME: "test-bucket",
   CLOUDFLARE_R2_PUBLIC_URL: "https://test.r2.example.com",
   RESEND_API_KEY: "re_test_key",
+  RESEND_FROM_EMAIL: "noreply@shopwus.com",
   MANUAL_EMAIL_PASSWORD: "test-manual-email-password-1234",
   FRONTEND_URL: "https://test.example.com",
   JWT_SECRET: "test-jwt-secret-for-unit-tests-only",

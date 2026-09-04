@@ -29,7 +29,7 @@ const envSchema = z.object({
   CLOUDFLARE_R2_BUCKET_NAME: z.string(),
   CLOUDFLARE_R2_PUBLIC_URL: z.url(),
   RESEND_API_KEY: z.string(),
-  RESEND_FROM_EMAIL: z.email().default("onboarding@resend.dev"),
+  RESEND_FROM_EMAIL: z.email().default("noreply@shopwus.com"),
   ADMIN_EMAIL: z.email().optional(),
   MANUAL_EMAIL_PASSWORD: z
     .string()

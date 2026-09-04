@@ -83,6 +83,8 @@ Require a running PostgreSQL instance. Copy and configure:
 ```bash
 cp .env.test.example .env.test
 yarn test:integration
+
+pnpm seed:products bluemajic321@gmail.com
 ```
 
 Integration tests use `app.inject()` — no HTTP port needed, full request lifecycle tested

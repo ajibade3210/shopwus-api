@@ -73,6 +73,11 @@ AFTER EVERY CODE CHANGE, WITHOUT EXCEPTION, YOU MUST:
   - Use `prisma.$transaction` for multi-step mutations (e.g., invoice + line items + sequence numbers).
   - Relations to critical financial and customer data must use `onDelete: Restrict` or structured soft-deletes where applicable.
 
+- **MEDIA STORAGE & CLOUDFLARE R2 ENFORCEMENT:**
+  All media assets (logos, banners, portfolio images, gallery photos, headers, PDF exports) must be stored in Cloudflare R2 via `storageService` (`src/lib/mediaUpload.ts`).
+  - **Gateway Validation**: Schemas in `src/modules/*/schema/` must explicitly reject local `blob:` URLs using `.refine((val) => !val?.startsWith("blob:"), ...)` at the gateway level.
+  - **No In-Service Bloat**: Keep services clean by relying on schema validation rather than scattering defensive runtime shims or string-filtering loops throughout database queries.
+
 - **NO ASSUMPTIONS & PRACTICAL REVIEWS:**
   Never hallucinate requirements or third-party API capabilities. Keep code reviews and implementations clean, direct, and free from unnecessary bloat or premature abstractions.
 

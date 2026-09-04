@@ -71,7 +71,9 @@ function mimetypeToExtension(mimetype: string): string {
 function getEffectiveFolder(folder?: string): string {
   if (!folder) return "";
   const cleaned = folder.replace(/^\/+|\/+$/g, "");
-  return env.NODE_ENV && env.NODE_ENV !== "production" ? `test/${cleaned}` : cleaned;
+  return env.NODE_ENV && env.NODE_ENV !== "production"
+    ? `test/${cleaned}`
+    : cleaned;
 }
 
 export async function uploadToR2(

@@ -51,7 +51,14 @@ export async function uploadMediaService(
 
     const config = getUploadConfig(file.mimetype, type);
     const folder = `shopwus/${userId}/${config.folder}`;
-    logger.info({ filename: file.filename, mimetype: file.mimetype, size: rawBuffer.length }, "Uploading media file");
+    logger.info(
+      {
+        filename: file.filename,
+        mimetype: file.mimetype,
+        size: rawBuffer.length,
+      },
+      "Uploading media file",
+    );
 
     // Upload exact original file directly to preserve 100% premium quality without re-encoding or lossy compression
     const result = await storageService.upload(rawBuffer, {
@@ -60,7 +67,10 @@ export async function uploadMediaService(
       mimetype: file.mimetype,
     });
 
-    logger.info({ publicId: result.public_id, url: result.url }, "Media file uploaded successfully");
+    logger.info(
+      { publicId: result.public_id, url: result.url },
+      "Media file uploaded successfully",
+    );
 
     return {
       ...result,
@@ -128,9 +138,15 @@ export async function uploadMultiMediaService(
       throw new ValidationError("No valid files uploaded");
     }
 
-    logger.info({ count: uploadPromises.length }, "Processing multi-media upload batch");
+    logger.info(
+      { count: uploadPromises.length },
+      "Processing multi-media upload batch",
+    );
     const results = await Promise.all(uploadPromises);
-    logger.info({ count: results.length }, "Multi-media upload batch completed successfully");
+    logger.info(
+      { count: results.length },
+      "Multi-media upload batch completed successfully",
+    );
     return results;
   } catch (error) {
     // Drain any remaining files from generator on failure to prevent premature close
@@ -183,7 +199,10 @@ export async function getPresignedUrlService(
   const config = getUploadConfig(input.mimetype, input.type);
   const folder = `shopwus/${userId}/${config.folder}`;
 
-  logger.info({ filename: input.filename, mimetype: input.mimetype }, "Generating presigned upload URL");
+  logger.info(
+    { filename: input.filename, mimetype: input.mimetype },
+    "Generating presigned upload URL",
+  );
 
   const result = await storageService.getPresignedUploadUrl({
     folder,
@@ -209,7 +228,10 @@ export async function getPresignedUrlsService(
     type: string;
   }>
 > {
-  logger.info({ count: input.files.length }, "Generating presigned upload URLs batch");
+  logger.info(
+    { count: input.files.length },
+    "Generating presigned upload URLs batch",
+  );
   return Promise.all(
     input.files.map((file) => getPresignedUrlService(file, userId)),
   );

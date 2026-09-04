@@ -48,7 +48,7 @@ export const portfolioProjectInputSchema = z.object({
   image: z
     .string()
     .nullish()
-    .refine((val) => !val || !val.startsWith("blob:"), {
+    .refine((val) => !val?.startsWith("blob:"), {
       message:
         "Image must be a valid uploaded Cloudflare URL, not a local blob",
     }),
@@ -56,7 +56,7 @@ export const portfolioProjectInputSchema = z.object({
   isCover: z.boolean().nullish(),
   gallery: z
     .array(
-      z.string().refine((val) => !val.startsWith("blob:"), {
+      z.string().refine((val) => !val?.startsWith("blob:"), {
         message:
           "Gallery images must be valid uploaded Cloudflare URLs, not local blobs",
       }),
@@ -115,20 +115,20 @@ export const updateStudioProfileSchema = z.object({
   logoUrl: z
     .string()
     .nullish()
-    .refine((val) => !val || !val.startsWith("blob:"), {
+    .refine((val) => !val?.startsWith("blob:"), {
       message: "Logo must be a valid uploaded Cloudflare URL, not a local blob",
     }),
   bannerUrl: z
     .string()
     .nullish()
-    .refine((val) => !val || !val.startsWith("blob:"), {
+    .refine((val) => !val?.startsWith("blob:"), {
       message:
         "Banner must be a valid uploaded Cloudflare URL, not a local blob",
     }),
   emailHeaderUrl: z
     .string()
     .nullish()
-    .refine((val) => !val || !val.startsWith("blob:"), {
+    .refine((val) => !val?.startsWith("blob:"), {
       message:
         "Email header must be a valid uploaded Cloudflare URL, not a local blob",
     }),

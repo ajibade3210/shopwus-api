@@ -135,16 +135,21 @@ export async function logout(
   req: TypedRequest<LogoutInput, unknown, unknown, ReqHeaders>,
   reply: FastifyReply,
 ) {
-  // Accept token from body or cookie
-  const refreshToken =
-    req.body?.refreshToken ||
-    (req as unknown as FastifyRequest).cookies?.shopwus_refresh_token;
+  try {
+    // Accept token from body or cookie
+    const refreshToken =
+      req.body?.refreshToken ||
+      (req as unknown as FastifyRequest).cookies?.shopwus_refresh_token;
 
-  if (refreshToken) {
-    await authService.logoutService({ refreshToken });
+    if (refreshToken) {
+      await authService.logoutService({ refreshToken });
+    }
+  } catch (error) {
+    req.log.warn({ error }, "Error during logout token revocation");
+  } finally {
+    clearAuthCookies(reply);
   }
 
-  clearAuthCookies(reply);
   return reply.success([], "Logged out successfully");
 }
 

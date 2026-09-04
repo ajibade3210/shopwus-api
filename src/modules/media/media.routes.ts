@@ -27,6 +27,26 @@ export async function mediaRoutes(app: FastifyInstance): Promise<void> {
     mediaController.uploadMultiMedia,
   );
 
+  typedApp.post(
+    "/presigned-url",
+    {
+      preHandler: [authenticate],
+      schema: mediaSchema.presignedUrlRouteSchema,
+      ...rateLimit(120, "1 minute"),
+    },
+    mediaController.getPresignedUrl,
+  );
+
+  typedApp.post(
+    "/presigned-urls",
+    {
+      preHandler: [authenticate],
+      schema: mediaSchema.presignedUrlsRouteSchema,
+      ...rateLimit(120, "1 minute"),
+    },
+    mediaController.getPresignedUrls,
+  );
+
   typedApp.delete(
     "/delete",
     {

@@ -1,12 +1,13 @@
 import type { MultipartFile } from "@fastify/multipart";
-import sharp from "sharp";
-import { MEDIA_OPTIMIZATION } from "../../../config/constants/media";
 import { env } from "../../../config/env";
 import { PayloadTooLargeError, ValidationError } from "../../../lib/errors";
-import { logger } from "../../../lib/logger";
 import { storageService } from "../../../lib/mediaUpload";
 import type { UploadResult } from "../../../types";
-import type { UploadMediaInput } from "../schema/media.schema";
+import type {
+  GetPresignedUrlInput,
+  GetPresignedUrlsInput,
+  UploadMediaInput,
+} from "../schema/media.schema";
 
 function getUploadConfig(mimetype: string, typeHint?: string) {
   if (mimetype.startsWith("image/")) {
@@ -29,119 +30,62 @@ function getMediaTypeFromFolder(folder: string): string {
   return "image";
 }
 
-async function optimizeImageBuffer(
-  rawBuffer: Buffer,
-  mimetype: string,
-): Promise<{ buffer: Buffer; mimetype: string }> {
-  if (
-    !mimetype.startsWith("image/") ||
-    mimetype === "image/svg+xml" ||
-    mimetype === "image/gif"
-  ) {
-    return { buffer: rawBuffer, mimetype };
-  }
-
-  try {
-    const image = sharp(rawBuffer, { failOnError: false });
-    const metadata = await image.metadata();
-
-    let pipeline = image.rotate();
-
-    if (
-      (metadata.width && metadata.width > MEDIA_OPTIMIZATION.MAX_DIMENSION) ||
-      (metadata.height && metadata.height > MEDIA_OPTIMIZATION.MAX_DIMENSION)
-    ) {
-      pipeline = pipeline.resize(
-        MEDIA_OPTIMIZATION.MAX_DIMENSION,
-        MEDIA_OPTIMIZATION.MAX_DIMENSION,
-        {
-          fit: "inside",
-          withoutEnlargement: true,
-        },
-      );
-    }
-
-    let outputMimetype = mimetype;
-    if (mimetype === "image/png") {
-      pipeline = pipeline.png({
-        palette: true,
-        quality: MEDIA_OPTIMIZATION.PNG_QUALITY,
-        compressionLevel: MEDIA_OPTIMIZATION.PNG_COMPRESSION_LEVEL,
-      });
-    } else if (mimetype === "image/webp") {
-      pipeline = pipeline.webp({ quality: MEDIA_OPTIMIZATION.WEBP_QUALITY });
-    } else {
-      pipeline = pipeline.jpeg({
-        quality: MEDIA_OPTIMIZATION.JPEG_QUALITY,
-        mozjpeg: true,
-      });
-      outputMimetype = "image/jpeg";
-    }
-
-    const optimizedBuffer = await pipeline.toBuffer();
-    if (optimizedBuffer.length < rawBuffer.length) {
-      return { buffer: optimizedBuffer, mimetype: outputMimetype };
-    }
-  } catch (error) {
-    logger.warn(
-      { error },
-      "Failed to optimize image buffer; uploading original buffer",
-    );
-  }
-
-  return { buffer: rawBuffer, mimetype };
-}
-
 export async function uploadMediaService(
   file: MultipartFile,
   query: UploadMediaInput,
   userId: string,
 ): Promise<UploadResult & { publicId: string; type: string }> {
-  const { type } = query;
-  const rawBuffer = await file.toBuffer();
+  try {
+    const { type } = query;
+    const rawBuffer = await file.toBuffer();
 
-  const maxSize = file.mimetype.startsWith("video/")
-    ? env.MAX_VIDEO_SIZE
-    : env.MAX_FILE_SIZE;
-  if (file.file.truncated || rawBuffer.length > maxSize) {
-    throw new PayloadTooLargeError(
-      `File size exceeds limit of ${maxSize / (1024 * 1024)}MB`,
-    );
+    const maxSize = file.mimetype.startsWith("video/")
+      ? env.MAX_VIDEO_SIZE
+      : env.MAX_FILE_SIZE;
+    if (file.file.truncated || rawBuffer.length > maxSize) {
+      throw new PayloadTooLargeError(
+        `File size exceeds limit of ${maxSize / (1024 * 1024)}MB`,
+      );
+    }
+
+    const config = getUploadConfig(file.mimetype, type);
+    const folder = `shopwus/${userId}/${config.folder}`;
+
+    // Upload exact original file directly to preserve 100% premium quality without re-encoding or lossy compression
+    const result = await storageService.upload(rawBuffer, {
+      resource_type: config.resourceType,
+      folder,
+      mimetype: file.mimetype,
+    });
+
+    return {
+      ...result,
+      publicId: result.public_id,
+      type: getMediaTypeFromFolder(config.folder),
+    };
+  } finally {
+    if (global.gc) {
+      try {
+        global.gc();
+      } catch (_) {}
+    }
   }
-
-  const { buffer, mimetype } = await optimizeImageBuffer(
-    rawBuffer,
-    file.mimetype,
-  );
-  const config = getUploadConfig(mimetype, type);
-  const folder = `shopwus/${userId}/${config.folder}`;
-
-  const result = await storageService.upload(buffer, {
-    resource_type: config.resourceType,
-    folder,
-    mimetype,
-  });
-
-  return {
-    ...result,
-    publicId: result.public_id,
-    type: getMediaTypeFromFolder(config.folder),
-  };
 }
-
-// Configure Sharp memory limits for constrained container environments
-sharp.cache(false);
-sharp.concurrency(1);
 
 export async function uploadMultiMediaService(
   files: AsyncIterableIterator<MultipartFile>,
   userId: string,
 ): Promise<(UploadResult & { publicId: string; type: string })[]> {
   type FormattedResult = UploadResult & { publicId: string; type: string };
-  const results: FormattedResult[] = [];
+  const uploadPromises: Promise<FormattedResult>[] = [];
+  const successfulResults: FormattedResult[] = [];
 
   try {
     for await (const file of files) {
+      if (uploadPromises.length >= 20) {
+        throw new ValidationError("Maximum 20 files allowed per upload batch");
+      }
+
       const rawBuffer = await file.toBuffer();
       const maxSize = file.mimetype.startsWith("video/")
         ? env.MAX_VIDEO_SIZE
@@ -153,25 +97,35 @@ export async function uploadMultiMediaService(
         );
       }
 
-      const { buffer, mimetype } = await optimizeImageBuffer(
-        rawBuffer,
-        file.mimetype,
-      );
-      const config = getUploadConfig(mimetype);
+      const config = getUploadConfig(file.mimetype);
       const folder = `shopwus/${userId}/${config.folder}`;
 
-      const uploadResult = await storageService.upload(buffer, {
-        resource_type: config.resourceType,
-        folder,
-        mimetype,
-      });
+      // Upload original file directly to Cloudflare R2 concurrently without altering quality
+      const uploadPromise = storageService
+        .upload(rawBuffer, {
+          resource_type: config.resourceType,
+          folder,
+          mimetype: file.mimetype,
+        })
+        .then((res) => {
+          const formatted = {
+            ...res,
+            publicId: res.public_id,
+            type: getMediaTypeFromFolder(config.folder),
+          };
+          successfulResults.push(formatted);
+          return formatted;
+        });
 
-      results.push({
-        ...uploadResult,
-        publicId: uploadResult.public_id,
-        type: getMediaTypeFromFolder(config.folder),
-      });
+      uploadPromises.push(uploadPromise);
     }
+
+    if (uploadPromises.length === 0) {
+      throw new ValidationError("No valid files uploaded");
+    }
+
+    const results = await Promise.all(uploadPromises);
+    return results;
   } catch (error) {
     // Drain any remaining files from generator on failure to prevent premature close
     try {
@@ -182,19 +136,74 @@ export async function uploadMultiMediaService(
       // Ignore errors during stream cleanup
     }
 
-    if (results.length > 0) {
+    // Await any in-flight uploads to settle so we don't leave orphaned files on R2
+    await Promise.allSettled(uploadPromises);
+
+    if (successfulResults.length > 0) {
       await Promise.allSettled(
-        results.map((res) => storageService.delete(res.publicId)),
+        successfulResults.map((res) => storageService.delete(res.publicId)),
       );
     }
     throw error;
+  } finally {
+    if (global.gc) {
+      try {
+        global.gc();
+      } catch (_) {}
+    }
+  }
+}
+
+export async function getPresignedUrlService(
+  input: GetPresignedUrlInput,
+  userId: string,
+): Promise<{
+  uploadUrl: string;
+  publicUrl: string;
+  key: string;
+  signedContentType: string;
+  type: string;
+}> {
+  const maxSize = input.mimetype.startsWith("video/")
+    ? env.MAX_VIDEO_SIZE
+    : env.MAX_FILE_SIZE;
+
+  if (input.size && input.size > maxSize) {
+    throw new PayloadTooLargeError(
+      `File size exceeds limit of ${maxSize / (1024 * 1024)}MB`,
+    );
   }
 
-  if (results.length === 0) {
-    throw new ValidationError("No valid files uploaded");
-  }
+  const config = getUploadConfig(input.mimetype, input.type);
+  const folder = `shopwus/${userId}/${config.folder}`;
 
-  return results;
+  const result = await storageService.getPresignedUploadUrl({
+    folder,
+    filename: input.filename,
+    mimetype: input.mimetype,
+  });
+
+  return {
+    ...result,
+    type: getMediaTypeFromFolder(config.folder),
+  };
+}
+
+export async function getPresignedUrlsService(
+  input: GetPresignedUrlsInput,
+  userId: string,
+): Promise<
+  Array<{
+    uploadUrl: string;
+    publicUrl: string;
+    key: string;
+    signedContentType: string;
+    type: string;
+  }>
+> {
+  return Promise.all(
+    input.files.map((file) => getPresignedUrlService(file, userId)),
+  );
 }
 
 export async function uploadExcelExportService(

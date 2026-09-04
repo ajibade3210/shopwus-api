@@ -1,7 +1,12 @@
 import type { FastifyReply } from "fastify";
 import { ValidationError } from "../../lib/errors";
 import type { ReqHeaders, TypedRequest } from "../../utils";
-import type { DeleteMediaInput, UploadMediaInput } from "./schema/media.schema";
+import type {
+  DeleteMediaInput,
+  GetPresignedUrlInput,
+  GetPresignedUrlsInput,
+  UploadMediaInput,
+} from "./schema/media.schema";
 import * as mediaService from "./services";
 
 export async function uploadMedia(
@@ -29,6 +34,28 @@ export async function uploadMultiMedia(
     req.user.userId,
   );
   return reply.success(result, "Media uploaded successfully", 201);
+}
+
+export async function getPresignedUrl(
+  req: TypedRequest<GetPresignedUrlInput, unknown, unknown, ReqHeaders>,
+  reply: FastifyReply,
+) {
+  const result = await mediaService.getPresignedUrlService(
+    req.body,
+    req.user.userId,
+  );
+  return reply.success(result, "Presigned upload URL generated successfully");
+}
+
+export async function getPresignedUrls(
+  req: TypedRequest<GetPresignedUrlsInput, unknown, unknown, ReqHeaders>,
+  reply: FastifyReply,
+) {
+  const result = await mediaService.getPresignedUrlsService(
+    req.body,
+    req.user.userId,
+  );
+  return reply.success(result, "Presigned upload URLs generated successfully");
 }
 
 export async function deleteMedia(

@@ -1,14 +1,9 @@
-import sharp from "sharp";
 import { buildApp } from "./app";
 import { env } from "./config/env";
 import { registerAllWorkers } from "./jobs";
 import { initMonitor } from "./lib/monitor";
 import { startBoss } from "./lib/pgboss";
 import { prisma } from "./lib/prisma";
-
-// Restrict Sharp/libvips memory usage on constrained containers (e.g. Render 512MB RAM)
-sharp.cache(false);
-sharp.concurrency(1);
 
 async function start() {
   initMonitor();

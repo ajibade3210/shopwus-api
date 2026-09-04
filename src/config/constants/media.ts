@@ -3,11 +3,3 @@ export enum MediaType {
   VIDEO = "VIDEO",
   DOCUMENT = "DOCUMENT",
 }
-
-export const MEDIA_OPTIMIZATION = {
-  MAX_DIMENSION: 2048,
-  JPEG_QUALITY: 80,
-  WEBP_QUALITY: 80,
-  PNG_QUALITY: 80,
-  PNG_COMPRESSION_LEVEL: 8,
-} as const;

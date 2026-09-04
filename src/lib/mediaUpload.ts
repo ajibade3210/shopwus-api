@@ -3,9 +3,11 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import {
   DeleteObjectCommand,
+  GetObjectCommand,
   PutObjectCommand,
   S3Client,
 } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { env } from "../config/env";
 
 import type {
@@ -63,7 +65,13 @@ function mimetypeToExtension(mimetype: string): string {
     "application/pdf": "pdf",
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "xlsx",
   };
-  return map[mimetype] ?? mimetype.split("/")[1].split("+")[0] ?? "";
+  return map[mimetype] ?? mimetype.split("/")[1]?.split("+")[0] ?? "";
+}
+
+function getEffectiveFolder(folder?: string): string {
+  if (!folder) return "";
+  const cleaned = folder.replace(/^\/+|\/+$/g, "");
+  return env.NODE_ENV && env.NODE_ENV !== "production" ? `test/${cleaned}` : cleaned;
 }
 
 export async function uploadToR2(
@@ -100,20 +108,8 @@ export async function uploadToR2(
       : `${options.public_id}${extension ? `.${extension}` : ""}`
     : `${crypto.randomBytes(16).toString("hex")}${extension ? `.${extension}` : ""}`;
 
-  // Determine the effective folder (prepend 'test/' in non‑production)
-  const effectiveFolder = ((): string => {
-    if (!options.folder) return "";
-    // If we are not in production, store under a test prefix
-    if (env.NODE_ENV && env.NODE_ENV !== "production") {
-      return `test/${options.folder.replace(/^\//, "")}`;
-    }
-    return options.folder.replace(/^\//, "");
-  })();
-
-  const folder = effectiveFolder;
-  const key = `${folder}${folder ? "/" : ""}${filename}`
-    .replace(/\/+/g, "/")
-    .replace(/^\//, "");
+  const folder = getEffectiveFolder(options.folder);
+  const key = [folder, filename].filter(Boolean).join("/");
 
   const command = new PutObjectCommand({
     Bucket: env.CLOUDFLARE_R2_BUCKET_NAME,
@@ -189,9 +185,6 @@ export async function getPresignedDownloadUrl(
   expiresInSeconds = 3600,
   dispositionFilename?: string,
 ): Promise<string> {
-  const { GetObjectCommand } = await import("@aws-sdk/client-s3");
-  const { getSignedUrl } = await import("@aws-sdk/s3-request-presigner");
-
   const command = new GetObjectCommand({
     Bucket: env.CLOUDFLARE_R2_BUCKET_NAME,
     Key: key,
@@ -203,6 +196,44 @@ export async function getPresignedDownloadUrl(
   return getSignedUrl(s3, command, { expiresIn: expiresInSeconds });
 }
 
+export async function getPresignedUploadUrl(params: {
+  folder?: string;
+  filename: string;
+  mimetype: string;
+  expiresInSeconds?: number;
+}): Promise<{
+  uploadUrl: string;
+  publicUrl: string;
+  key: string;
+  signedContentType: string;
+}> {
+  let extension = path.extname(params.filename).replace(".", "");
+  if (!extension && params.mimetype) {
+    extension = mimetypeToExtension(params.mimetype);
+  }
+
+  const uniqueName = `${crypto.randomBytes(16).toString("hex")}${extension ? `.${extension.toLowerCase()}` : ""}`;
+
+  const effectiveFolder = getEffectiveFolder(params.folder);
+  const key = [effectiveFolder, uniqueName].filter(Boolean).join("/");
+
+  const signedContentType = params.mimetype || "application/octet-stream";
+
+  const command = new PutObjectCommand({
+    Bucket: env.CLOUDFLARE_R2_BUCKET_NAME,
+    Key: key,
+    ContentType: signedContentType,
+  });
+
+  const uploadUrl = await getSignedUrl(s3, command, {
+    expiresIn: params.expiresInSeconds ?? 900,
+  });
+
+  const publicUrl = `${env.CLOUDFLARE_R2_PUBLIC_URL.replace(/\/$/, "")}/${key}`;
+
+  return { uploadUrl, publicUrl, key, signedContentType };
+}
+
 export const storageService = {
   upload: uploadToR2,
   uploadMultiple,
@@ -211,6 +242,7 @@ export const storageService = {
   uploadDocument,
   delete: deleteFromR2,
   getPresignedDownloadUrl,
+  getPresignedUploadUrl,
 };
 
 export default storageService;

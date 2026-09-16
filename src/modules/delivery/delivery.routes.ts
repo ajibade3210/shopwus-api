@@ -71,4 +71,3 @@ export async function deliveryRoutes(app: FastifyInstance): Promise<void> {
     deliveryController.executeLogisticsSweepHandler,
   );
 }
-

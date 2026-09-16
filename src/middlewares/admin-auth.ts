@@ -10,10 +10,17 @@ export async function requireAdminSecret(
   const expectedSecret = env.ADMIN_PRIVATE_SECRET;
 
   if (!expectedSecret) {
-    throw new UnauthorizedError("Admin private secret is not configured on the server.");
+    throw new UnauthorizedError(
+      "Admin private secret is not configured on the server.",
+    );
   }
 
-  if (typeof secretHeader !== "string" || secretHeader.trim() !== expectedSecret.trim()) {
-    throw new UnauthorizedError("Unauthorized: Invalid or missing x-admin-secret header.");
+  if (
+    typeof secretHeader !== "string" ||
+    secretHeader.trim() !== expectedSecret.trim()
+  ) {
+    throw new UnauthorizedError(
+      "Unauthorized: Invalid or missing x-admin-secret header.",
+    );
   }
 }

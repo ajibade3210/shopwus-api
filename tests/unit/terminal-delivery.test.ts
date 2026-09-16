@@ -78,7 +78,9 @@ describe("Terminal Delivery Service - Quoting & Fallbacks", () => {
       { id: "prod_1", name: "Silk Dress", price: 25000, weightKg: 0.5 },
     ]);
 
-    const mockPost = jest.fn().mockRejectedValueOnce(new Error("Network Timeout (4000ms exceeded)"));
+    const mockPost = jest
+      .fn()
+      .mockRejectedValueOnce(new Error("Network Timeout (4000ms exceeded)"));
     jest.spyOn(terminalClientModule, "getTerminalClient").mockReturnValueOnce({
       post: mockPost,
     } as unknown as ReturnType<typeof terminalClientModule.getTerminalClient>);

@@ -1,4 +1,5 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
+import { dispatchOrderWithTerminalService } from "../delivery/services/terminal.service";
 import { serializeCheckoutSession, serializeOrder } from "./dto/order.dto";
 import type {
   CreateManualOrderInput,
@@ -16,7 +17,6 @@ import {
   syncCheckoutSessionService,
   updateOrderStatusService,
 } from "./services/order.service";
-import { dispatchOrderWithTerminalService } from "../delivery/services/terminal.service";
 
 export async function syncCheckoutSessionHandler(
   request: FastifyRequest<{
@@ -54,7 +54,6 @@ export async function createStorefrontOrderHandler(
     201,
   );
 }
-
 
 export async function createManualOrderHandler(
   request: FastifyRequest<{
@@ -143,4 +142,3 @@ export async function dispatchOrderHandler(
     "Order dispatched with Terminal Africa courier successfully",
   );
 }
-

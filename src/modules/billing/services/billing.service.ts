@@ -9,8 +9,8 @@ import {
 } from "../../../lib/paystack";
 import { prisma } from "../../../lib/prisma";
 import {
-  recordDeliveryFeeCollected,
   handleTransferWebhook,
+  recordDeliveryFeeCollected,
 } from "../../delivery/services/logistics-sweep.service";
 import type {
   ResolveAccountInput,
@@ -335,7 +335,10 @@ export async function processPaystackWebhookService(
               Number(order.deliveryFee) > 0 &&
               (order.terminalRateId || order.deliveryType === "HOME_DELIVERY")
             ) {
-              await recordDeliveryFeeCollected(order.id, Number(order.deliveryFee));
+              await recordDeliveryFeeCollected(
+                order.id,
+                Number(order.deliveryFee),
+              );
             }
           }
         }

@@ -1,5 +1,5 @@
-import { prisma } from "../../src/lib/prisma";
 import * as paystackLib from "../../src/lib/paystack";
+import { prisma } from "../../src/lib/prisma";
 import {
   executeLogisticsSweep,
   getUnsettledLogisticsSummary,
@@ -37,7 +37,9 @@ describe("Logistics Sweep Treasury & Ledger Service", () => {
 
   describe("recordDeliveryFeeCollected", () => {
     it("should create a PENDING ledger entry when a valid delivery fee is passed", async () => {
-      (prisma.logisticsLedgerEntry.findFirst as jest.Mock).mockResolvedValueOnce(null);
+      (
+        prisma.logisticsLedgerEntry.findFirst as jest.Mock
+      ).mockResolvedValueOnce(null);
       (prisma.logisticsLedgerEntry.create as jest.Mock).mockResolvedValueOnce({
         id: "entry_1",
         orderId: "order_1",
@@ -61,7 +63,9 @@ describe("Logistics Sweep Treasury & Ledger Service", () => {
     });
 
     it("should ignore duplicate calls for the same order", async () => {
-      (prisma.logisticsLedgerEntry.findFirst as jest.Mock).mockResolvedValueOnce({
+      (
+        prisma.logisticsLedgerEntry.findFirst as jest.Mock
+      ).mockResolvedValueOnce({
         id: "entry_existing",
         orderId: "order_dup",
         status: "PENDING",
@@ -74,7 +78,9 @@ describe("Logistics Sweep Treasury & Ledger Service", () => {
 
   describe("voidDeliveryFee", () => {
     it("should update pending ledger entries to VOIDED", async () => {
-      (prisma.logisticsLedgerEntry.updateMany as jest.Mock).mockResolvedValueOnce({
+      (
+        prisma.logisticsLedgerEntry.updateMany as jest.Mock
+      ).mockResolvedValueOnce({
         count: 1,
       });
 
@@ -89,10 +95,9 @@ describe("Logistics Sweep Treasury & Ledger Service", () => {
 
   describe("getUnsettledLogisticsSummary", () => {
     it("should compute exact amountToTransfer and report IDLE status when no sweep is in flight", async () => {
-      (prisma.logisticsLedgerEntry.findMany as jest.Mock).mockResolvedValueOnce([
-        { amount: 3000 },
-        { amount: 2500 },
-      ]);
+      (prisma.logisticsLedgerEntry.findMany as jest.Mock).mockResolvedValueOnce(
+        [{ amount: 3000 }, { amount: 2500 }],
+      );
       (prisma.logisticsSweep.findFirst as jest.Mock)
         .mockResolvedValueOnce(null)
         .mockResolvedValueOnce({
@@ -116,7 +121,9 @@ describe("Logistics Sweep Treasury & Ledger Service", () => {
     });
 
     it("should report SWEEP_IN_FLIGHT when an in-flight sweep is pending", async () => {
-      (prisma.logisticsLedgerEntry.findMany as jest.Mock).mockResolvedValueOnce([]);
+      (prisma.logisticsLedgerEntry.findMany as jest.Mock).mockResolvedValueOnce(
+        [],
+      );
       (prisma.logisticsSweep.findFirst as jest.Mock)
         .mockResolvedValueOnce({
           id: "sweep_inflight",
@@ -131,7 +138,9 @@ describe("Logistics Sweep Treasury & Ledger Service", () => {
 
       expect(summary.status).toBe("SWEEP_IN_FLIGHT");
       expect(summary.inFlightSweep).not.toBeNull();
-      expect(summary.inFlightSweep?.transferReference).toBe("SWEEP-MANUAL-12345");
+      expect(summary.inFlightSweep?.transferReference).toBe(
+        "SWEEP-MANUAL-12345",
+      );
     });
   });
 
@@ -148,8 +157,12 @@ describe("Logistics Sweep Treasury & Ledger Service", () => {
     });
 
     it("should return NO_OP when there are no pending ledger entries", async () => {
-      (prisma.logisticsSweep.findFirst as jest.Mock).mockResolvedValueOnce(null);
-      (prisma.logisticsLedgerEntry.findMany as jest.Mock).mockResolvedValueOnce([]);
+      (prisma.logisticsSweep.findFirst as jest.Mock).mockResolvedValueOnce(
+        null,
+      );
+      (prisma.logisticsLedgerEntry.findMany as jest.Mock).mockResolvedValueOnce(
+        [],
+      );
 
       const result = await executeLogisticsSweep("MANUAL");
       expect(result.mode).toBe("NO_OP");
@@ -157,11 +170,15 @@ describe("Logistics Sweep Treasury & Ledger Service", () => {
     });
 
     it("should reconcile ledger in RECORD_ONLY mode without calling external Paystack transfer API", async () => {
-      (prisma.logisticsSweep.findFirst as jest.Mock).mockResolvedValueOnce(null);
-      (prisma.logisticsLedgerEntry.findMany as jest.Mock).mockResolvedValueOnce([
-        { id: "e1", amount: 3000 },
-        { id: "e2", amount: 2000 },
-      ]);
+      (prisma.logisticsSweep.findFirst as jest.Mock).mockResolvedValueOnce(
+        null,
+      );
+      (prisma.logisticsLedgerEntry.findMany as jest.Mock).mockResolvedValueOnce(
+        [
+          { id: "e1", amount: 3000 },
+          { id: "e2", amount: 2000 },
+        ],
+      );
 
       const mockCreateSweep = prisma.logisticsSweep.create as jest.Mock;
       mockCreateSweep.mockResolvedValueOnce({

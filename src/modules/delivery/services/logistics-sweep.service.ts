@@ -268,7 +268,8 @@ export async function executeLogisticsSweep(
 
     return {
       success: true,
-      message: "Paystack transfer initiated. Awaiting webhook settlement confirmation.",
+      message:
+        "Paystack transfer initiated. Awaiting webhook settlement confirmation.",
       sweepId: sweep.id,
       amount: totalAmountNum,
       ordersCount: pendingEntries.length,
@@ -279,7 +280,9 @@ export async function executeLogisticsSweep(
     };
   } catch (err: unknown) {
     const errorMsg =
-      err instanceof Error ? err.message : "Failed to initiate Paystack transfer";
+      err instanceof Error
+        ? err.message
+        : "Failed to initiate Paystack transfer";
 
     await prisma.$transaction([
       prisma.logisticsSweep.update({

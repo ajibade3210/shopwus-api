@@ -3,7 +3,6 @@ import { NotFoundError } from "../../../lib/errors";
 import { prisma } from "../../../lib/prisma";
 import type { UpdateDeliverySettingsInput } from "../schema/delivery.schema";
 
-
 export async function getDeliverySettingsService(businessId: string) {
   const business = await prisma.business.findUnique({
     where: { id: businessId },

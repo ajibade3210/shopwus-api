@@ -394,4 +394,3 @@ export async function initiatePaystackTransfer(params: {
 
   return data.data;
 }
-

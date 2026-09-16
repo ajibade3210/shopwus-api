@@ -75,4 +75,3 @@ export async function executeLogisticsSweepHandler(
   const result = await executeLogisticsSweep("MANUAL", forceRecordOnly);
   return reply.success(result, result.message);
 }
-

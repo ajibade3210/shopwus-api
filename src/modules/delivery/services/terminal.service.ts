@@ -364,9 +364,7 @@ export async function dispatchOrderWithTerminalService(
   }
 
   const resData =
-    (response?.data as Record<string, unknown>)?.data ||
-    response?.data ||
-    {};
+    (response?.data as Record<string, unknown>)?.data || response?.data || {};
   const shipmentData = resData as Record<string, unknown>;
 
   const shipmentId = String(
@@ -422,4 +420,3 @@ export async function dispatchOrderWithTerminalService(
 
   return updatedOrder;
 }
-

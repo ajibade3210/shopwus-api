@@ -35,6 +35,7 @@ AFTER EVERY CODE CHANGE, WITHOUT EXCEPTION, YOU MUST:
   - **Core Infrastructure / Libraries** $\rightarrow$ `src/lib/{infrastructure}.ts` (Prisma client, error classes, logger, email, PDF, queue client)
   - **Configuration & Constants** $\rightarrow$ `src/config/` (`env.ts` for Zod env vars, `constants/` for static configuration maps)
   - **Background Jobs** $\rightarrow$ `src/jobs/` (job name constants & payload schemas in `job.types.ts`, queue workers in `workers/`)
+  - Remove all unnecessary comments or redundant comments. Keep code clean, lean, and self-documenting without redundant inline explanations or unnecessary JSDoc blocks.
 
 - **ZERO `any` POLICY (Strict TypeScript):**
   `any` is strictly prohibited anywhere in the codebase. Always use explicit types from `@prisma/client`, `src/types`, module DTOs, or Zod inferences (`z.infer<...>`). For unknown inputs or error catching, use `unknown` with explicit runtime type narrowing.

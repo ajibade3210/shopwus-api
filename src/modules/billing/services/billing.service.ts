@@ -13,10 +13,6 @@ import type {
   UpdatePayoutAccountInput,
 } from "../schema/billing.schema";
 
-// ---------------------------------------------------------------------------
-// VENDOR BANK & PAYOUT SETUP
-// ---------------------------------------------------------------------------
-
 export async function getBanksListService() {
   return listPaystackBanks();
 }
@@ -38,13 +34,11 @@ export async function updatePayoutAccountService(
     throw new NotFoundError("Business not found");
   }
 
-  // 1. Resolve account name directly with Paystack
   const resolved = await resolveBankAccount(
     input.accountNumber,
     input.bankCode,
   );
 
-  // 2. Create Paystack Subaccount for Split Settlement
   const subaccount = await createPaystackSubaccount({
     business_name: business.name,
     settlement_bank: input.bankCode,
@@ -53,7 +47,6 @@ export async function updatePayoutAccountService(
     description: `Shopwus settlement account for ${business.name}`,
   });
 
-  // 3. Persist to BusinessBilling
   return prisma.businessBilling.upsert({
     where: { businessId },
     create: {
@@ -141,10 +134,6 @@ export async function getBillingSummaryService(businessId: string) {
   };
 }
 
-// ---------------------------------------------------------------------------
-// PAYMENT INITIALIZATION (SPLIT PAYMENT)
-// ---------------------------------------------------------------------------
-
 export async function initializeOrderPaymentService(
   orderId: string,
   callbackUrl?: string,
@@ -195,7 +184,6 @@ export async function initializeOrderPaymentService(
     },
   });
 
-  // Link reference to order
   await prisma.order.update({
     where: { id: order.id },
     data: {
@@ -205,10 +193,6 @@ export async function initializeOrderPaymentService(
 
   return initData;
 }
-
-// ---------------------------------------------------------------------------
-// PAYSTACK WEBHOOK EVENT PROCESSING (IDEMPOTENT + TRANSACTIONAL STOCK DECREMENT)
-// ---------------------------------------------------------------------------
 
 export async function processPaystackWebhookService(
   eventData: PaystackWebhookPayload,
@@ -224,13 +208,11 @@ export async function processPaystackWebhookService(
 
     if (!reference) return;
 
-    // Idempotency check: Check if transaction has already been recorded
     const existingTx = await prisma.paymentTransaction.findUnique({
       where: { reference },
     });
 
     if (existingTx && existingTx.status === "SUCCESS") {
-      // Duplicate webhook delivery from Paystack; skip safely
       return;
     }
 
@@ -241,10 +223,8 @@ export async function processPaystackWebhookService(
     const gatewayFee = new Prisma.Decimal((data.fees || 0) / 100);
     const merchantSettlement = totalAmount.minus(platformFee);
 
-    // Execute within Prisma interactive transaction
     await prisma.$transaction(
       async (tx) => {
-        // 1. Record / Update PaymentTransaction
         if (orderId && businessId) {
           await tx.paymentTransaction.upsert({
             where: { reference },
@@ -269,7 +249,6 @@ export async function processPaystackWebhookService(
             },
           });
 
-          // 2. Mark Order as PAID
           const order = await tx.order.findUnique({
             where: { id: orderId },
             include: { items: true },
@@ -284,7 +263,6 @@ export async function processPaystackWebhookService(
               },
             });
 
-            // 3. Transactional Inventory Decrement for items with inventory tracking
             for (const item of order.items) {
               if (item.variantId) {
                 await tx.productVariant.updateMany({
@@ -328,7 +306,6 @@ export async function processPaystackWebhookService(
               }
             }
 
-            // 4. Record Initial Fulfillment timeline event
             await tx.orderFulfillment.create({
               data: {
                 orderId,

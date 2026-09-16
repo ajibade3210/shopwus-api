@@ -8,14 +8,8 @@ import * as billingSchema from "./schema/billing.schema";
 export async function billingRoutes(app: FastifyInstance): Promise<void> {
   const typedApp = app.withTypeProvider<ZodTypeProvider>();
 
-  // ---------------------------------------------------------------------------
-  // PUBLIC WEBHOOK LISTENER
-  // ---------------------------------------------------------------------------
   typedApp.post("/webhook", billingController.paystackWebhookHandler);
 
-  // ---------------------------------------------------------------------------
-  // PUBLIC STOREFRONT ORDER PAYMENT INITIALIZATION
-  // ---------------------------------------------------------------------------
   typedApp.post(
     "/storefront/initialize-payment",
     {
@@ -27,9 +21,6 @@ export async function billingRoutes(app: FastifyInstance): Promise<void> {
     billingController.initializeOrderPaymentHandler,
   );
 
-  // ---------------------------------------------------------------------------
-  // AUTHENTICATED VENDOR BILLING & PAYOUT MANAGEMENT
-  // ---------------------------------------------------------------------------
   typedApp.get(
     "/banks",
     {

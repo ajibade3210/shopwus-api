@@ -58,8 +58,6 @@ export interface BillingSummaryDto {
   transactions: PaymentTransactionDto[];
 }
 
-// ── Serializers ───────────────────────────────────────────────────────────────
-
 export function serializeBusinessBilling(
   b: BusinessBilling,
 ): BusinessBillingDto {

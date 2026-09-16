@@ -21,10 +21,6 @@ import {
   updatePayoutAccountService,
 } from "./services/billing.service";
 
-// ---------------------------------------------------------------------------
-// VENDOR BILLING HANDLERS
-// ---------------------------------------------------------------------------
-
 export async function getBanksListHandler(
   _request: FastifyRequest,
   reply: FastifyReply,
@@ -70,10 +66,6 @@ export async function getBillingSummaryHandler(
   );
 }
 
-// ---------------------------------------------------------------------------
-// PAYMENT INITIALIZATION HANDLER
-// ---------------------------------------------------------------------------
-
 export async function initializeOrderPaymentHandler(
   request: FastifyRequest<{ Body: InitializePaymentInput }>,
   reply: FastifyReply,
@@ -84,10 +76,6 @@ export async function initializeOrderPaymentHandler(
   );
   return reply.success(result, "Payment initialized");
 }
-
-// ---------------------------------------------------------------------------
-// PAYSTACK WEBHOOK HANDLER
-// ---------------------------------------------------------------------------
 
 export async function paystackWebhookHandler(
   request: FastifyRequest,
@@ -105,7 +93,6 @@ export async function paystackWebhookHandler(
     return reply.status(400).send({ message: "Invalid signature" });
   }
 
-  // Process asynchronously
   processPaystackWebhookService(request.body as PaystackWebhookPayload).catch(
     (err) => {
       request.log.error(err, "Paystack webhook processing error");

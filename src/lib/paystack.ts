@@ -46,9 +46,13 @@ export async function listPaystackBanks(): Promise<PaystackBank[]> {
         data.message || "Failed to fetch banks from Paystack",
       );
     }
-    return data.data;
+    const seen = new Set<string>();
+    return (data.data || []).filter((bank) => {
+      if (!bank.code || seen.has(bank.code)) return false;
+      seen.add(bank.code);
+      return true;
+    });
   } catch (_err) {
-    // Return fallback popular banks list if external API call fails
     return [
       {
         id: 1,
@@ -132,7 +136,6 @@ export async function resolveBankAccount(
 ): Promise<ResolvedBankAccount> {
   const secretKey = env.PAYSTACK_SECRET_KEY || process.env.PAYSTACK_SECRET_KEY;
   if (!secretKey) {
-    // Development demo fallback
     return {
       account_number: accountNumber,
       account_name: "VERIFIED MERCHANT ACCOUNT",
@@ -168,7 +171,6 @@ export async function createPaystackSubaccount(params: {
 }): Promise<PaystackSubaccountResult> {
   const secretKey = env.PAYSTACK_SECRET_KEY || process.env.PAYSTACK_SECRET_KEY;
   if (!secretKey) {
-    // Development mock
     return {
       subaccount_code: `ACCT_${Date.now()}`,
       account_name: params.business_name,
@@ -211,7 +213,6 @@ export async function initializeSplitPayment(params: {
 }): Promise<SplitPaymentResult> {
   const secretKey = env.PAYSTACK_SECRET_KEY || process.env.PAYSTACK_SECRET_KEY;
   if (!secretKey) {
-    // Development mock checkout URL
     return {
       authorization_url: `${params.callbackUrl || "http://localhost:3000"}?reference=${params.reference}&paid=true`,
       access_code: `mock_acc_${Date.now()}`,
@@ -225,7 +226,7 @@ export async function initializeSplitPayment(params: {
     reference: params.reference,
     subaccount: params.subaccountCode,
     transaction_charge: params.platformFeeInKobo,
-    bearer: "subaccount", // Merchant absorbs gateway charge
+    bearer: "subaccount",
     callback_url: params.callbackUrl,
     metadata: params.metadata,
   };
@@ -283,7 +284,7 @@ export function verifyPaystackWebhookSignature(
   if (!signature) return false;
   const secretKey =
     env.PAYSTACK_SECRET_KEY || process.env.PAYSTACK_SECRET_KEY || "";
-  if (!secretKey) return true; // Accept during test/dev if secret not set
+  if (!secretKey) return true;
 
   const hash = crypto
     .createHmac("sha512", secretKey)

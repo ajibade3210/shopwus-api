@@ -1,17 +1,13 @@
-import type { DeliveryZone } from "@prisma/client";
-import { toFinancialAmount } from "../../../utils/currency.utils";
-
-export interface DeliveryZoneDto {
-  id: string;
-  businessId: string;
-  name: string;
-  states: string[];
+export interface DeliveryQuoteDto {
+  rateId: string;
+  carrierName: string;
+  carrierSlug?: string | null;
+  carrierLogo?: string | null;
+  deliveryEta?: number | null;
+  deliveryTime?: string | null;
+  currency: string;
   fee: number;
-  feeKobo?: number;
-  estimatedDays?: string | null;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
+  feeKobo: number;
 }
 
 export interface StorefrontDeliveryConfigDto {
@@ -19,23 +15,41 @@ export interface StorefrontDeliveryConfigDto {
   enableHomeDelivery: boolean;
   freeDeliveryThreshold?: number | null;
   freeDeliveryThresholdKobo?: number | null;
+  fallbackShippingFee?: number | null;
+  fallbackShippingFeeKobo?: number | null;
   pickupLocation?: string | null;
   pickupInstructions?: string | null;
-  deliveryZones: DeliveryZoneDto[];
 }
 
-// ── Serializers ───────────────────────────────────────────────────────────────
-
-export function serializeDeliveryZone(zone: DeliveryZone): DeliveryZoneDto {
-  return {
-    id: zone.id,
-    businessId: zone.businessId,
-    name: zone.name,
-    states: zone.states,
-    ...toFinancialAmount(zone.fee, "fee"),
-    estimatedDays: zone.estimatedDays,
-    isActive: zone.isActive,
-    createdAt: zone.createdAt.toISOString(),
-    updatedAt: zone.updatedAt.toISOString(),
-  };
+export interface DeliverySettingsDto {
+  addressLine1?: string | null;
+  addressLine2?: string | null;
+  city?: string | null;
+  state?: string | null;
+  postalCode?: string | null;
+  country: string;
+  senderPhone?: string | null;
+  enableStorePickup: boolean;
+  pickupInstructions?: string | null;
+  enableHomeDelivery: boolean;
+  freeDeliveryThreshold?: number | null;
+  freeDeliveryThresholdKobo?: number | null;
+  fallbackShippingFee?: number | null;
+  fallbackShippingFeeKobo?: number | null;
 }
+
+export interface TerminalQuoteResponse {
+  status: boolean;
+  message?: string;
+  data?: Array<{
+    id: string;
+    carrier_name: string;
+    carrier_slug?: string;
+    carrier_logo?: string;
+    delivery_eta?: number;
+    delivery_time?: string;
+    amount: number;
+    currency?: string;
+  }>;
+}
+

@@ -1,86 +1,8 @@
 import { Prisma } from "@prisma/client";
 import { NotFoundError } from "../../../lib/errors";
 import { prisma } from "../../../lib/prisma";
-import type {
-  DeliveryZoneInput,
-  UpdateDeliverySettingsInput,
-  UpdateDeliveryZoneInput,
-} from "../schema/delivery.schema";
+import type { UpdateDeliverySettingsInput } from "../schema/delivery.schema";
 
-// ---------------------------------------------------------------------------
-// VENDOR DELIVERY ZONES
-// ---------------------------------------------------------------------------
-
-export async function listDeliveryZonesService(businessId: string) {
-  return prisma.deliveryZone.findMany({
-    where: { businessId },
-    orderBy: { createdAt: "asc" },
-  });
-}
-
-export async function createDeliveryZoneService(
-  businessId: string,
-  input: DeliveryZoneInput,
-) {
-  return prisma.deliveryZone.create({
-    data: {
-      businessId,
-      name: input.name,
-      states: input.states,
-      fee: new Prisma.Decimal(input.fee),
-      estimatedDays: input.estimatedDays || null,
-      isActive: input.isActive,
-    },
-  });
-}
-
-export async function updateDeliveryZoneService(
-  zoneId: string,
-  businessId: string,
-  input: UpdateDeliveryZoneInput,
-) {
-  const zone = await prisma.deliveryZone.findFirst({
-    where: { id: zoneId, businessId },
-  });
-
-  if (!zone) {
-    throw new NotFoundError("Delivery zone not found");
-  }
-
-  const data: Prisma.DeliveryZoneUpdateInput = {};
-  if (input.name !== undefined) data.name = input.name;
-  if (input.states !== undefined) data.states = input.states;
-  if (input.fee !== undefined) data.fee = new Prisma.Decimal(input.fee);
-  if (input.estimatedDays !== undefined)
-    data.estimatedDays = input.estimatedDays;
-  if (input.isActive !== undefined) data.isActive = input.isActive;
-
-  return prisma.deliveryZone.update({
-    where: { id: zoneId },
-    data,
-  });
-}
-
-export async function deleteDeliveryZoneService(
-  zoneId: string,
-  businessId: string,
-) {
-  const zone = await prisma.deliveryZone.findFirst({
-    where: { id: zoneId, businessId },
-  });
-
-  if (!zone) {
-    throw new NotFoundError("Delivery zone not found");
-  }
-
-  return prisma.deliveryZone.delete({
-    where: { id: zoneId },
-  });
-}
-
-// ---------------------------------------------------------------------------
-// VENDOR STORE ORIGIN ADDRESS & DELIVERY SETTINGS
-// ---------------------------------------------------------------------------
 
 export async function getDeliverySettingsService(businessId: string) {
   const business = await prisma.business.findUnique({
@@ -92,10 +14,12 @@ export async function getDeliverySettingsService(businessId: string) {
       state: true,
       postalCode: true,
       country: true,
+      senderPhone: true,
       enableStorePickup: true,
       pickupInstructions: true,
       enableHomeDelivery: true,
       freeDeliveryThreshold: true,
+      fallbackShippingFee: true,
     },
   });
 
@@ -126,6 +50,8 @@ export async function updateDeliverySettingsService(
   if (input.city !== undefined) updateData.city = input.city;
   if (input.state !== undefined) updateData.state = input.state;
   if (input.postalCode !== undefined) updateData.postalCode = input.postalCode;
+  if (input.senderPhone !== undefined)
+    updateData.senderPhone = input.senderPhone;
   if (input.enableStorePickup !== undefined)
     updateData.enableStorePickup = input.enableStorePickup;
   if (input.pickupInstructions !== undefined)
@@ -138,6 +64,12 @@ export async function updateDeliverySettingsService(
         ? new Prisma.Decimal(input.freeDeliveryThreshold)
         : null;
   }
+  if (input.fallbackShippingFee !== undefined) {
+    updateData.fallbackShippingFee =
+      input.fallbackShippingFee !== null
+        ? new Prisma.Decimal(input.fallbackShippingFee)
+        : new Prisma.Decimal(3000);
+  }
 
   return prisma.business.update({
     where: { id: businessId },
@@ -149,17 +81,15 @@ export async function updateDeliverySettingsService(
       state: true,
       postalCode: true,
       country: true,
+      senderPhone: true,
       enableStorePickup: true,
       pickupInstructions: true,
       enableHomeDelivery: true,
       freeDeliveryThreshold: true,
+      fallbackShippingFee: true,
     },
   });
 }
-
-// ---------------------------------------------------------------------------
-// PUBLIC STOREFRONT DELIVERY CONFIG
-// ---------------------------------------------------------------------------
 
 export async function getStorefrontDeliveryConfigService(studioSlug: string) {
   const business = await prisma.business.findUnique({
@@ -177,10 +107,7 @@ export async function getStorefrontDeliveryConfigService(studioSlug: string) {
       pickupInstructions: true,
       enableHomeDelivery: true,
       freeDeliveryThreshold: true,
-      deliveryZones: {
-        where: { isActive: true },
-        orderBy: { fee: "asc" },
-      },
+      fallbackShippingFee: true,
     },
   });
 
@@ -206,12 +133,8 @@ export async function getStorefrontDeliveryConfigService(studioSlug: string) {
     freeDeliveryThreshold: business.freeDeliveryThreshold
       ? Number(business.freeDeliveryThreshold)
       : null,
-    deliveryZones: business.deliveryZones.map((z) => ({
-      id: z.id,
-      name: z.name,
-      states: z.states,
-      fee: Number(z.fee),
-      estimatedDays: z.estimatedDays,
-    })),
+    fallbackShippingFee: business.fallbackShippingFee
+      ? Number(business.fallbackShippingFee)
+      : 3000,
   };
 }

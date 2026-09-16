@@ -67,6 +67,17 @@ const envSchema = z.object({
   PAYSTACK_PUBLIC_KEY: z.string().optional(),
   PUPPETEER_WS_ENDPOINT: z.string().optional(),
   PUPPETEER_WS_ENDPOINT_BACKUP: z.string().optional(),
+
+  TERMINAL_ENVIRONMENT: z.enum(["sandbox", "live"]).default("sandbox"),
+  TERMINAL_PUBLIC_KEY: z.string().optional(),
+  TERMINAL_SECRET_KEY: z.string().optional(),
+  TERMINAL_BASE_URL: z.string().default("https://sandbox.terminal.africa/v1"),
+
+  ADMIN_PRIVATE_SECRET: z
+    .string()
+    .default("shopwus_admin_logistics_sweep_secret_key_default"),
+  LOGISTICS_AUTO_SWEEP_ENABLED: z.enum(["true", "false"]).default("false"),
+  TERMINAL_PAYSTACK_RECIPIENT_CODE: z.string().optional(),
 });
 
 const result = envSchema.safeParse(process.env);

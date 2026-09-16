@@ -27,6 +27,29 @@ export const fulfillmentStatusEnum = z.enum([
 
 export const deliveryTypeEnum = z.enum(["STORE_PICKUP", "HOME_DELIVERY"]);
 
+export const manualFulfillmentModeEnum = z.enum([
+  "DIRECT_SALE",
+  "STORE_PICKUP",
+  "SHIP_TO_CUSTOMER",
+]);
+
+export const manualPaymentMethodEnum = z.enum([
+  "CASH",
+  "POS",
+  "BANK_TRANSFER",
+  "ONLINE",
+  "OTHER",
+]);
+
+export const MANUAL_FULFILLMENT_MODE = {
+  DIRECT_SALE: "DIRECT_SALE",
+  STORE_PICKUP: "STORE_PICKUP",
+  SHIP_TO_CUSTOMER: "SHIP_TO_CUSTOMER",
+} as const;
+
+export type ManualFulfillmentMode = z.infer<typeof manualFulfillmentModeEnum>;
+export type ManualPaymentMethod = z.infer<typeof manualPaymentMethodEnum>;
+
 export const shippingAddressSchema = z.object({
   recipientName: z.string().trim().min(1, "Recipient name is required"),
   phone: z.string().trim().min(5, "Contact phone is required"),
@@ -64,7 +87,9 @@ export const createStorefrontOrderSchema = z.object({
   notes: z.string().trim().optional().nullable(),
   deliveryType: deliveryTypeEnum.default("HOME_DELIVERY"),
   shippingAddress: shippingAddressSchema.optional().nullable(),
-  deliveryZoneId: z.string().optional().nullable(),
+  terminalRateId: z.string().optional().nullable(),
+  deliveryFee: z.number().nonnegative().optional(),
+  carrierName: z.string().optional().nullable(),
   items: z
     .array(cartItemInputSchema)
     .min(1, "Order must have at least one item"),
@@ -99,6 +124,28 @@ export const updateOrderStatusSchema = z.object({
   notes: z.string().trim().optional().nullable(),
 });
 
+export const manualOrderItemSchema = z.object({
+  productId: z.string().min(1, "Product ID is required"),
+  variantId: z.string().optional().nullable(),
+  quantity: z.number().int().positive("Quantity must be at least 1"),
+  unitPrice: z.number().nonnegative().optional(),
+});
+
+export const createManualOrderSchema = z.object({
+  customerName: z.string().trim().min(1, "Customer name is required"),
+  customerEmail: z.string().email("Valid customer email is required"),
+  customerPhone: z.string().trim().min(3, "Customer phone number is required"),
+  items: z
+    .array(manualOrderItemSchema)
+    .min(1, "Order must have at least one item"),
+  fulfillmentMode: manualFulfillmentModeEnum,
+  shippingAddress: shippingAddressSchema.optional().nullable(),
+  deliveryFee: z.number().nonnegative().optional().default(0),
+  paymentStatus: z.enum(["PAID", "UNPAID", "PENDING"]).default("PAID"),
+  paymentMethod: manualPaymentMethodEnum.default("CASH"),
+  notes: z.string().trim().optional().nullable(),
+});
+
 export type CreateStorefrontOrderInput = z.infer<
   typeof createStorefrontOrderSchema
 >;
@@ -107,3 +154,4 @@ export type SyncCheckoutSessionInput = z.infer<
 >;
 export type ListOrdersQuery = z.infer<typeof listOrdersQuerySchema>;
 export type UpdateOrderStatusInput = z.infer<typeof updateOrderStatusSchema>;
+export type CreateManualOrderInput = z.infer<typeof createManualOrderSchema>;

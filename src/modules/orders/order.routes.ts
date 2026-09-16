@@ -9,9 +9,6 @@ import * as orderSchema from "./schema/order.schema";
 export async function orderRoutes(app: FastifyInstance): Promise<void> {
   const typedApp = app.withTypeProvider<ZodTypeProvider>();
 
-  // ---------------------------------------------------------------------------
-  // PUBLIC STOREFRONT CHECKOUT ROUTES
-  // ---------------------------------------------------------------------------
   typedApp.post(
     "/storefront/:slug/checkout/session",
     {
@@ -37,9 +34,17 @@ export async function orderRoutes(app: FastifyInstance): Promise<void> {
     orderController.createStorefrontOrderHandler,
   );
 
-  // ---------------------------------------------------------------------------
-  // AUTHENTICATED VENDOR ROUTES
-  // ---------------------------------------------------------------------------
+  typedApp.post(
+    "/manual",
+    {
+      schema: {
+        body: orderSchema.createManualOrderSchema,
+      },
+      preHandler: [authenticate, requireBusiness],
+    },
+    orderController.createManualOrderHandler,
+  );
+
   typedApp.get(
     "/summary",
     {
@@ -76,5 +81,16 @@ export async function orderRoutes(app: FastifyInstance): Promise<void> {
       preHandler: [authenticate, requireBusiness],
     },
     orderController.updateOrderStatusHandler,
+  );
+
+  typedApp.post(
+    "/:id/dispatch",
+    {
+      schema: {
+        params: orderSchema.orderIdParamsSchema,
+      },
+      preHandler: [authenticate, requireBusiness],
+    },
+    orderController.dispatchOrderHandler,
   );
 }

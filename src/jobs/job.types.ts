@@ -9,6 +9,7 @@ export const JOB_NAMES = {
   CLEANUP_EXPIRED_SESSIONS: "auth-cleanup-expired-sessions",
   CLEANUP_CHECKOUT_SESSIONS: "cleanup-checkout-sessions",
   GENERATE_HEADER_BANNER: "generate-header-banner",
+  LOGISTICS_WEEKLY_SWEEP: "logistics-weekly-sweep",
 } as const;
 
 export type JobName = (typeof JOB_NAMES)[keyof typeof JOB_NAMES];

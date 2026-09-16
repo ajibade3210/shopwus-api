@@ -1,16 +1,21 @@
-import { Prisma } from "@prisma/client";
+import {
+  DeliveryType,
+  FulfillmentStatus,
+  OrderStatus,
+  PaymentStatus,
+  Prisma,
+} from "@prisma/client";
 import { BusinessRuleError, NotFoundError } from "../../../lib/errors";
 import { prisma } from "../../../lib/prisma";
-import type {
-  CreateStorefrontOrderInput,
-  ListOrdersQuery,
-  SyncCheckoutSessionInput,
-  UpdateOrderStatusInput,
+import { voidDeliveryFee } from "../../delivery/services/logistics-sweep.service";
+import {
+  type CreateManualOrderInput,
+  type CreateStorefrontOrderInput,
+  type ListOrdersQuery,
+  MANUAL_FULFILLMENT_MODE,
+  type SyncCheckoutSessionInput,
+  type UpdateOrderStatusInput,
 } from "../schema/order.schema";
-
-// ---------------------------------------------------------------------------
-// CHECKOUT SESSIONS (ABANDONED CART TRACKING)
-// ---------------------------------------------------------------------------
 
 export async function syncCheckoutSessionService(
   studioSlug: string,
@@ -61,10 +66,6 @@ export async function syncCheckoutSessionService(
     },
   });
 }
-
-// ---------------------------------------------------------------------------
-// ORDER CREATION & PLACEMENT (STOREFRONT CHECKOUT)
-// ---------------------------------------------------------------------------
 
 async function getNextOrderNumber(businessId: string): Promise<string> {
   const currentYear = new Date().getFullYear();
@@ -232,17 +233,12 @@ export async function createStorefrontOrderService(
       : null;
     if (freeThreshold !== null && subtotalNumber >= freeThreshold) {
       deliveryFeeNumber = 0;
-    } else if (input.deliveryZoneId) {
-      const zone = await prisma.deliveryZone.findFirst({
-        where: {
-          id: input.deliveryZoneId,
-          businessId: business.id,
-          isActive: true,
-        },
-      });
-      if (zone) {
-        deliveryFeeNumber = Number(zone.fee);
-      }
+    } else if (input.deliveryFee !== undefined) {
+      deliveryFeeNumber = input.deliveryFee;
+    } else {
+      deliveryFeeNumber = business.fallbackShippingFee
+        ? Number(business.fallbackShippingFee)
+        : 3000;
     }
   }
 
@@ -254,7 +250,12 @@ export async function createStorefrontOrderService(
 
   const platformFeeNumber = (subtotalNumber * platformFeePercent) / 100;
   const totalNumber = subtotalNumber + deliveryFeeNumber;
-  const merchantEarningsNumber = totalNumber - platformFeeNumber;
+  // If delivery is managed via platform courier (Terminal), the delivery fee remains
+  // with the platform to fund the courier wallet: merchant receives subtotal - platformFee
+  const merchantEarningsNumber =
+    input.terminalRateId || input.deliveryType === "HOME_DELIVERY"
+      ? subtotalNumber - platformFeeNumber
+      : totalNumber - platformFeeNumber;
 
   const orderNumber = await getNextOrderNumber(business.id);
 
@@ -306,6 +307,8 @@ export async function createStorefrontOrderService(
             ? (input.shippingAddress as Prisma.InputJsonValue)
             : undefined,
           pickupLocation,
+          terminalRateId: input.terminalRateId || null,
+          courierName: input.carrierName || null,
           paystackSubaccount: business.billing?.paystackSubaccount || null,
           items: {
             create: itemSnapshots,
@@ -346,9 +349,277 @@ export async function createStorefrontOrderService(
   return order;
 }
 
-// ---------------------------------------------------------------------------
-// VENDOR ORDER REGISTERS & CRUD
-// ---------------------------------------------------------------------------
+export async function createManualOrderService(
+  businessId: string,
+  input: CreateManualOrderInput,
+) {
+  const business = await prisma.business.findUnique({
+    where: { id: businessId },
+    include: { billing: true },
+  });
+
+  if (!business) {
+    throw new NotFoundError("Business not found");
+  }
+
+  const productIds = input.items.map((i) => i.productId);
+  const products = await prisma.product.findMany({
+    where: {
+      businessId: business.id,
+      id: { in: productIds },
+    },
+    include: {
+      variants: true,
+    },
+  });
+
+  const productMap = new Map(products.map((p) => [p.id, p]));
+
+  // 1. Build line item snapshots and calculate subtotal
+  let subtotalNumber = 0;
+  const itemSnapshots: Array<{
+    productId: string;
+    variantId?: string | null;
+    productName: string;
+    variantTitle?: string | null;
+    productSku: string | null;
+    productImage: string | null;
+    unitPrice: Prisma.Decimal;
+    quantity: number;
+    totalPrice: Prisma.Decimal;
+  }> = [];
+
+  for (const item of input.items) {
+    const product = productMap.get(item.productId);
+    if (!product) {
+      throw new BusinessRuleError(
+        `Product with ID ${item.productId} was not found.`,
+      );
+    }
+
+    let unitPrice =
+      item.unitPrice !== undefined
+        ? new Prisma.Decimal(item.unitPrice)
+        : product.price;
+    let productSku = product.sku;
+    let variantTitle: string | null = null;
+    let variantId: string | null = null;
+
+    if (item.variantId) {
+      const variant = product.variants.find((v) => v.id === item.variantId);
+      if (!variant) {
+        throw new BusinessRuleError(
+          `Selected variant for "${product.name}" was not found.`,
+        );
+      }
+      if (
+        product.trackInventory &&
+        !product.allowBackorder &&
+        variant.inventoryCount < item.quantity
+      ) {
+        throw new BusinessRuleError(
+          `Insufficient stock for "${product.name} • ${variant.title}". Available: ${variant.inventoryCount}, Requested: ${item.quantity}.`,
+        );
+      }
+      if (item.unitPrice === undefined) {
+        unitPrice = variant.price;
+      }
+      productSku = variant.sku || product.sku;
+      variantTitle = variant.title;
+      variantId = variant.id;
+    } else {
+      if (
+        product.trackInventory &&
+        !product.allowBackorder &&
+        product.inventoryCount < item.quantity
+      ) {
+        throw new BusinessRuleError(
+          `Insufficient stock for "${product.name}". Available: ${product.inventoryCount}, Requested: ${item.quantity}.`,
+        );
+      }
+    }
+
+    const unitPriceNum = Number(unitPrice);
+    const lineTotalNum = unitPriceNum * item.quantity;
+    subtotalNumber += lineTotalNum;
+
+    itemSnapshots.push({
+      productId: product.id,
+      variantId,
+      productName: product.name,
+      variantTitle,
+      productSku,
+      productImage: product.images[0] || null,
+      unitPrice,
+      quantity: item.quantity,
+      totalPrice: new Prisma.Decimal(lineTotalNum),
+    });
+  }
+
+  // 2. Fulfillment and delivery mapping
+  let deliveryFeeNumber = 0;
+  let deliveryType: DeliveryType = DeliveryType.STORE_PICKUP;
+  let fulfillmentStatus: FulfillmentStatus = FulfillmentStatus.UNFULFILLED;
+  let status: OrderStatus = OrderStatus.CONFIRMED;
+  let pickupLocation: string | null = null;
+
+  if (input.fulfillmentMode === MANUAL_FULFILLMENT_MODE.DIRECT_SALE) {
+    deliveryType = DeliveryType.STORE_PICKUP;
+    deliveryFeeNumber = 0;
+    fulfillmentStatus = FulfillmentStatus.DELIVERED;
+    status =
+      input.paymentStatus === PaymentStatus.PAID
+        ? OrderStatus.COMPLETED
+        : OrderStatus.CONFIRMED;
+  } else if (input.fulfillmentMode === MANUAL_FULFILLMENT_MODE.STORE_PICKUP) {
+    deliveryType = DeliveryType.STORE_PICKUP;
+    deliveryFeeNumber = 0;
+    fulfillmentStatus = FulfillmentStatus.READY_FOR_PICKUP;
+    status = OrderStatus.CONFIRMED;
+    const storeParts = [
+      business.addressLine1,
+      business.addressLine2,
+      business.city,
+      business.state,
+    ].filter(Boolean);
+    pickupLocation =
+      storeParts.length > 0
+        ? storeParts.join(", ")
+        : business.location || "Store Location";
+  } else {
+    // SHIP_TO_CUSTOMER
+    deliveryType = DeliveryType.HOME_DELIVERY;
+    deliveryFeeNumber = input.deliveryFee ?? 0;
+    fulfillmentStatus = FulfillmentStatus.UNFULFILLED;
+    status = OrderStatus.CONFIRMED;
+  }
+
+  const totalNumber = subtotalNumber + deliveryFeeNumber;
+  const merchantEarningsNumber = totalNumber; // In-house direct sales have 0 platform fee deduction
+
+  const orderNumber = await getNextOrderNumber(business.id);
+
+  // 3. Atomic Transaction: Upsert customer, decrement stock, create order, fulfillment & optional transaction
+  const order = await prisma.$transaction(
+    async (tx) => {
+      let customerId: string | null = null;
+      const existingCustomer = await tx.customer.findFirst({
+        where: {
+          businessId: business.id,
+          email: input.customerEmail.toLowerCase().trim(),
+        },
+      });
+
+      if (existingCustomer) {
+        customerId = existingCustomer.id;
+      } else {
+        const newCustomer = await tx.customer.create({
+          data: {
+            businessId: business.id,
+            name: input.customerName.trim(),
+            email: input.customerEmail.toLowerCase().trim(),
+            phone: input.customerPhone.trim() || null,
+          },
+        });
+        customerId = newCustomer.id;
+      }
+
+      // Decrement stock for tracked items
+      for (const item of input.items) {
+        const product = productMap.get(item.productId);
+        if (product?.trackInventory) {
+          if (item.variantId) {
+            await tx.productVariant.update({
+              where: { id: item.variantId },
+              data: { inventoryCount: { decrement: item.quantity } },
+            });
+          }
+          await tx.product.update({
+            where: { id: item.productId },
+            data: { inventoryCount: { decrement: item.quantity } },
+          });
+        }
+      }
+
+      const createdOrder = await tx.order.create({
+        data: {
+          businessId: business.id,
+          customerId,
+          orderNumber,
+          customerName: input.customerName.trim(),
+          customerEmail: input.customerEmail.toLowerCase().trim(),
+          customerPhone: input.customerPhone.trim(),
+          notes: input.notes || null,
+          currency: business.currency || "NGN",
+          subtotal: new Prisma.Decimal(subtotalNumber),
+          deliveryFee: new Prisma.Decimal(deliveryFeeNumber),
+          platformFee: new Prisma.Decimal(0),
+          merchantEarnings: new Prisma.Decimal(merchantEarningsNumber),
+          total: new Prisma.Decimal(totalNumber),
+          status,
+          paymentStatus: input.paymentStatus,
+          fulfillmentStatus,
+          fulfilledAt: fulfillmentStatus === "DELIVERED" ? new Date() : null,
+          deliveryType,
+          shippingAddress: input.shippingAddress
+            ? (input.shippingAddress as Prisma.InputJsonValue)
+            : undefined,
+          pickupLocation,
+          items: {
+            create: itemSnapshots,
+          },
+        },
+        include: {
+          items: true,
+          customer: true,
+          fulfillments: true,
+          transactions: true,
+        },
+      });
+
+      // Create initial fulfillment record
+      await tx.orderFulfillment.create({
+        data: {
+          orderId: createdOrder.id,
+          status: fulfillmentStatus,
+          notes:
+            input.fulfillmentMode === "DIRECT_SALE"
+              ? "In-store manual sale handed over to customer"
+              : input.notes || undefined,
+        },
+      });
+
+      // If paid, create PaymentTransaction for bookkeeping
+      if (input.paymentStatus === "PAID") {
+        const cleanNum = orderNumber.replace(/[^A-Za-z0-9]/g, "");
+        const reference = `ORD-MANUAL-${cleanNum}-${Date.now()}`;
+        await tx.paymentTransaction.create({
+          data: {
+            orderId: createdOrder.id,
+            businessId: business.id,
+            reference,
+            amount: new Prisma.Decimal(totalNumber),
+            platformFee: new Prisma.Decimal(0),
+            gatewayFee: new Prisma.Decimal(0),
+            merchantSettlement: new Prisma.Decimal(totalNumber),
+            currency: business.currency || "NGN",
+            channel: input.paymentMethod || "CASH",
+            status: "SUCCESS",
+            paidAt: new Date(),
+          },
+        });
+      }
+
+      return createdOrder;
+    },
+    {
+      maxWait: 3000,
+      timeout: 10000,
+    },
+  );
+
+  return order;
+}
 
 export async function listOrdersService(
   businessId: string,
@@ -553,7 +824,7 @@ export async function updateOrderStatusService(
   if (input.paymentStatus) updateData.paymentStatus = input.paymentStatus;
   if (input.fulfillmentStatus) {
     updateData.fulfillmentStatus = input.fulfillmentStatus;
-    if (input.fulfillmentStatus === "DELIVERED") {
+    if (input.fulfillmentStatus === FulfillmentStatus.DELIVERED) {
       updateData.fulfilledAt = new Date();
     }
   }
@@ -574,7 +845,6 @@ export async function updateOrderStatusService(
     },
   });
 
-  // Log fulfillment status change in audit table if fulfillmentStatus changed
   if (
     input.fulfillmentStatus &&
     input.fulfillmentStatus !== order.fulfillmentStatus
@@ -588,6 +858,14 @@ export async function updateOrderStatusService(
         notes: input.notes,
       },
     });
+  }
+
+  if (
+    input.status === OrderStatus.CANCELLED ||
+    input.fulfillmentStatus === FulfillmentStatus.CANCELLED ||
+    input.paymentStatus === PaymentStatus.REFUNDED
+  ) {
+    await voidDeliveryFee(id);
   }
 
   return updatedOrder;

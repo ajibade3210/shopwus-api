@@ -53,6 +53,10 @@ model Product {
   isFeatured        Boolean          @default(false)
   attributes        Json?
 
+  // Shipping & Logistics
+  requiresShipping  Boolean          @default(true)
+  weightKg          Decimal?         @db.Decimal(8, 2)
+
   createdAt         DateTime         @default(now())
   updatedAt         DateTime         @updatedAt
 

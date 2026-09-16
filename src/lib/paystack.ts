@@ -293,3 +293,105 @@ export function verifyPaystackWebhookSignature(
 
   return hash === signature;
 }
+
+export interface PaystackTransferResult {
+  reference: string;
+  transfer_code: string;
+  amount: number;
+  status: string;
+}
+
+export interface PaystackRecipientResult {
+  recipient_code: string;
+  type: string;
+  name: string;
+  details: {
+    account_number: string;
+    account_name?: string;
+    bank_code: string;
+    bank_name?: string;
+  };
+}
+
+export async function createTransferRecipient(params: {
+  name: string;
+  accountNumber: string;
+  bankCode: string;
+  description?: string;
+}): Promise<PaystackRecipientResult> {
+  const secretKey = env.PAYSTACK_SECRET_KEY || process.env.PAYSTACK_SECRET_KEY;
+  if (!secretKey) {
+    return {
+      recipient_code: `mock_rcp_${Date.now()}`,
+      type: "nuban",
+      name: params.name,
+      details: {
+        account_number: params.accountNumber,
+        account_name: params.name,
+        bank_code: params.bankCode,
+        bank_name: "Mock Bank",
+      },
+    };
+  }
+
+  const res = await fetch(`${PAYSTACK_BASE_URL}/transferrecipient`, {
+    method: "POST",
+    headers: getHeaders(),
+    body: JSON.stringify({
+      type: "nuban",
+      name: params.name,
+      account_number: params.accountNumber,
+      bank_code: params.bankCode,
+      currency: "NGN",
+      description: params.description || "Terminal Africa Shipping Wallet",
+    }),
+  });
+
+  const data = (await res.json()) as PaystackResponse<PaystackRecipientResult>;
+  if (!data.status) {
+    throw new PaymentError(
+      data.message || "Failed to create transfer recipient on Paystack",
+    );
+  }
+
+  return data.data;
+}
+
+export async function initiatePaystackTransfer(params: {
+  amountInKobo: number;
+  recipientCode: string;
+  reference: string;
+  reason?: string;
+}): Promise<PaystackTransferResult> {
+  const secretKey = env.PAYSTACK_SECRET_KEY || process.env.PAYSTACK_SECRET_KEY;
+  if (!secretKey) {
+    return {
+      reference: params.reference,
+      transfer_code: `mock_trf_${Date.now()}`,
+      amount: params.amountInKobo,
+      status: "pending",
+    };
+  }
+
+  const res = await fetch(`${PAYSTACK_BASE_URL}/transfer`, {
+    method: "POST",
+    headers: getHeaders(),
+    body: JSON.stringify({
+      source: "balance",
+      amount: params.amountInKobo,
+      recipient: params.recipientCode,
+      reference: params.reference,
+      reason: params.reason || "Logistics fee sweep to Terminal Africa",
+    }),
+  });
+
+  const data = (await res.json()) as PaystackResponse<PaystackTransferResult>;
+  if (!data.status) {
+    throw new PaymentError(
+      data.message || "Failed to initiate Paystack transfer",
+    );
+  }
+
+  return data.data;
+}
+

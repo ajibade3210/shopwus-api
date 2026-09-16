@@ -1,12 +1,14 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { serializeCheckoutSession, serializeOrder } from "./dto/order.dto";
 import type {
+  CreateManualOrderInput,
   CreateStorefrontOrderInput,
   ListOrdersQuery,
   SyncCheckoutSessionInput,
   UpdateOrderStatusInput,
 } from "./schema/order.schema";
 import {
+  createManualOrderService,
   createStorefrontOrderService,
   getOrderByIdService,
   getOrderSummaryService,
@@ -14,10 +16,7 @@ import {
   syncCheckoutSessionService,
   updateOrderStatusService,
 } from "./services/order.service";
-
-// ---------------------------------------------------------------------------
-// PUBLIC STOREFRONT CHECKOUT & CART SESSION
-// ---------------------------------------------------------------------------
+import { dispatchOrderWithTerminalService } from "../delivery/services/terminal.service";
 
 export async function syncCheckoutSessionHandler(
   request: FastifyRequest<{
@@ -56,9 +55,23 @@ export async function createStorefrontOrderHandler(
   );
 }
 
-// ---------------------------------------------------------------------------
-// VENDOR ORDERS
-// ---------------------------------------------------------------------------
+
+export async function createManualOrderHandler(
+  request: FastifyRequest<{
+    Body: CreateManualOrderInput;
+  }>,
+  reply: FastifyReply,
+) {
+  const result = await createManualOrderService(
+    request.businessId,
+    request.body,
+  );
+  return reply.success(
+    serializeOrder(result),
+    "Order created successfully",
+    201,
+  );
+}
 
 export async function listOrdersHandler(
   request: FastifyRequest<{ Querystring: ListOrdersQuery }>,
@@ -116,3 +129,18 @@ export async function updateOrderStatusHandler(
   );
   return reply.success(serializeOrder(result), "Order status updated");
 }
+
+export async function dispatchOrderHandler(
+  request: FastifyRequest<{ Params: { id: string } }>,
+  reply: FastifyReply,
+) {
+  const result = await dispatchOrderWithTerminalService(
+    request.params.id,
+    request.businessId,
+  );
+  return reply.success(
+    serializeOrder(result),
+    "Order dispatched with Terminal Africa courier successfully",
+  );
+}
+

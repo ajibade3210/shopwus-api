@@ -64,6 +64,9 @@ export interface OrderDto {
   pickupLocation?: string | null;
   trackingNumber?: string | null;
   courierName?: string | null;
+  terminalRateId?: string | null;
+  terminalShipmentId?: string | null;
+  trackingUrl?: string | null;
   estimatedDelivery?: string | null;
   fulfilledAt?: string | null;
   paymentReference?: string | null;
@@ -145,6 +148,9 @@ export function serializeOrder(
     pickupLocation: order.pickupLocation,
     trackingNumber: order.trackingNumber,
     courierName: order.courierName,
+    terminalRateId: order.terminalRateId,
+    terminalShipmentId: order.terminalShipmentId,
+    trackingUrl: order.trackingUrl,
     estimatedDelivery: order.estimatedDelivery
       ? order.estimatedDelivery.toISOString()
       : null,

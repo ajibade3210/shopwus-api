@@ -8,6 +8,10 @@ import {
   resolveBankAccount,
 } from "../../../lib/paystack";
 import { prisma } from "../../../lib/prisma";
+import {
+  recordDeliveryFeeCollected,
+  handleTransferWebhook,
+} from "../../delivery/services/logistics-sweep.service";
 import type {
   ResolveAccountInput,
   UpdatePayoutAccountInput,
@@ -165,13 +169,20 @@ export async function initializeOrderPaymentService(
 
   const reference = `ORD-PAY-${order.orderNumber.replace(/[^A-Za-z0-9]/g, "")}-${Date.now()}`;
   const totalInKobo = Math.round(Number(order.total) * 100);
-  const platformFeeInKobo = Math.round(Number(order.platformFee) * 100);
+  const merchantEarningsInKobo = Math.round(
+    Number(order.merchantEarnings) * 100,
+  );
+  // Platform retains platformFee + deliveryFee (funding the central Terminal wallet)
+  const platformRetentionInKobo = Math.max(
+    0,
+    totalInKobo - merchantEarningsInKobo,
+  );
 
   const initData = await initializeSplitPayment({
     email: order.customerEmail,
     amountInKobo: totalInKobo,
     subaccountCode,
-    platformFeeInKobo,
+    platformFeeInKobo: platformRetentionInKobo,
     reference,
     callbackUrl,
     metadata: {
@@ -181,6 +192,7 @@ export async function initializeOrderPaymentService(
       subtotal: Number(order.subtotal),
       deliveryFee: Number(order.deliveryFee),
       platformFee: Number(order.platformFee),
+      merchantEarnings: Number(order.merchantEarnings),
     },
   });
 
@@ -221,11 +233,20 @@ export async function processPaystackWebhookService(
       ? new Prisma.Decimal(metadata.platformFee)
       : new Prisma.Decimal(0);
     const gatewayFee = new Prisma.Decimal((data.fees || 0) / 100);
-    const merchantSettlement = totalAmount.minus(platformFee);
 
     await prisma.$transaction(
       async (tx) => {
         if (orderId && businessId) {
+          const order = await tx.order.findUnique({
+            where: { id: orderId },
+            include: { items: true },
+          });
+
+          // Merchant settlement corresponds directly to order.merchantEarnings
+          const merchantSettlement = order
+            ? order.merchantEarnings
+            : totalAmount.minus(platformFee);
+
           await tx.paymentTransaction.upsert({
             where: { reference },
             create: {
@@ -247,11 +268,6 @@ export async function processPaystackWebhookService(
               rawWebhookData: data as Prisma.InputJsonValue,
               paidAt: data.paid_at ? new Date(data.paid_at) : new Date(),
             },
-          });
-
-          const order = await tx.order.findUnique({
-            where: { id: orderId },
-            include: { items: true },
           });
 
           if (order && order.paymentStatus !== "PAID") {
@@ -313,6 +329,14 @@ export async function processPaystackWebhookService(
                 notes: "Payment verified via Paystack Split Settlement",
               },
             });
+
+            if (
+              order?.deliveryFee &&
+              Number(order.deliveryFee) > 0 &&
+              (order.terminalRateId || order.deliveryType === "HOME_DELIVERY")
+            ) {
+              await recordDeliveryFeeCollected(order.id, Number(order.deliveryFee));
+            }
           }
         }
       },
@@ -321,5 +345,10 @@ export async function processPaystackWebhookService(
         timeout: 5000,
       },
     );
+  } else if (
+    eventType === "transfer.success" ||
+    eventType === "transfer.failed"
+  ) {
+    await handleTransferWebhook(eventType, data);
   }
 }

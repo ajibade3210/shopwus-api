@@ -30,10 +30,12 @@ model Business {
   state               String?
   postalCode          String?
   country             String             @default("Nigeria")
+  senderPhone         String?
   enableStorePickup   Boolean            @default(true)
   pickupInstructions  String?
   enableHomeDelivery  Boolean            @default(true)
   freeDeliveryThreshold Decimal?         @db.Decimal(12, 2)
+  fallbackShippingFee   Decimal?         @default(3000) @db.Decimal(12, 2)
   colors              Json?
   buttonRadius        String?            @default("Subtle")
   showServices        Boolean            @default(true)
@@ -68,7 +70,6 @@ model Business {
   categories          Category[]
   orders              Order[]
   checkoutSessions    CheckoutSession[]
-  deliveryZones       DeliveryZone[]
   billing             BusinessBilling?
   paymentTransactions PaymentTransaction[]
 

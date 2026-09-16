@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
+import { requireAdminSecret } from "../../middlewares/admin-auth";
 import { authenticate, requireBusiness } from "../../middlewares/auth";
 import { rateLimit } from "../../utils";
 import * as deliveryController from "./delivery.controller";
@@ -9,9 +10,6 @@ import * as deliverySchema from "./schema/delivery.schema";
 export async function deliveryRoutes(app: FastifyInstance): Promise<void> {
   const typedApp = app.withTypeProvider<ZodTypeProvider>();
 
-  // ---------------------------------------------------------------------------
-  // PUBLIC STOREFRONT DELIVERY QUERY (Rate limited)
-  // ---------------------------------------------------------------------------
   typedApp.get(
     "/storefront/:slug",
     {
@@ -23,9 +21,18 @@ export async function deliveryRoutes(app: FastifyInstance): Promise<void> {
     deliveryController.getStorefrontDeliveryConfigHandler,
   );
 
-  // ---------------------------------------------------------------------------
-  // AUTHENTICATED VENDOR DELIVERY MANAGEMENT
-  // ---------------------------------------------------------------------------
+  typedApp.post(
+    "/storefront/:slug/quotes",
+    {
+      schema: {
+        params: z.object({ slug: z.string().min(1) }),
+        body: deliverySchema.getStorefrontDeliveryQuotesSchema,
+      },
+      ...rateLimit(60, "1 minute"),
+    },
+    deliveryController.getStorefrontDeliveryQuotesHandler,
+  );
+
   typedApp.get(
     "/settings",
     {
@@ -46,44 +53,22 @@ export async function deliveryRoutes(app: FastifyInstance): Promise<void> {
   );
 
   typedApp.get(
-    "/zones",
+    "/admin/sweep/status",
     {
-      preHandler: [authenticate, requireBusiness],
+      preHandler: [requireAdminSecret],
     },
-    deliveryController.listDeliveryZonesHandler,
+    deliveryController.getLogisticsSweepStatusHandler,
   );
 
   typedApp.post(
-    "/zones",
+    "/admin/sweep",
     {
       schema: {
-        body: deliverySchema.deliveryZoneSchema,
+        body: deliverySchema.executeLogisticsSweepSchema,
       },
-      preHandler: [authenticate, requireBusiness],
+      preHandler: [requireAdminSecret],
     },
-    deliveryController.createDeliveryZoneHandler,
-  );
-
-  typedApp.put(
-    "/zones/:id",
-    {
-      schema: {
-        params: deliverySchema.deliveryZoneIdParamsSchema,
-        body: deliverySchema.updateDeliveryZoneSchema,
-      },
-      preHandler: [authenticate, requireBusiness],
-    },
-    deliveryController.updateDeliveryZoneHandler,
-  );
-
-  typedApp.delete(
-    "/zones/:id",
-    {
-      schema: {
-        params: deliverySchema.deliveryZoneIdParamsSchema,
-      },
-      preHandler: [authenticate, requireBusiness],
-    },
-    deliveryController.deleteDeliveryZoneHandler,
+    deliveryController.executeLogisticsSweepHandler,
   );
 }
+

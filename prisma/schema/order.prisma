@@ -66,6 +66,9 @@ model Order {
   pickupLocation     String?
   trackingNumber     String?
   courierName        String?
+  terminalRateId     String?
+  terminalShipmentId String?
+  trackingUrl        String?
   estimatedDelivery  DateTime?
   fulfilledAt        DateTime?
 
@@ -82,6 +85,7 @@ model Order {
   items              OrderItem[]
   fulfillments       OrderFulfillment[]
   transactions       PaymentTransaction[]
+  logisticsEntries   LogisticsLedgerEntry[]
 
   @@unique([id, businessId])
   @@index([businessId])
@@ -143,11 +147,13 @@ model CheckoutSession {
 model OrderFulfillment {
   id             String            @id @default(cuid())
   orderId        String
-  status         FulfillmentStatus
-  trackingNumber String?
-  courierName    String?
-  notes          String?
-  notifiedBuyer  Boolean           @default(false)
+  status             FulfillmentStatus
+  trackingNumber     String?
+  courierName        String?
+  terminalShipmentId String?
+  trackingUrl        String?
+  notes              String?
+  notifiedBuyer      Boolean           @default(false)
   createdAt      DateTime          @default(now())
 
   order          Order             @relation(fields: [orderId], references: [id], onDelete: Cascade)

@@ -7,6 +7,7 @@ import { registerBroadcastWorker } from "./workers/broadcast.worker";
 import { registerCheckoutSessionCleanupWorker } from "./workers/checkout-session-cleanup.worker";
 import { registerEmailWorker } from "./workers/email.worker";
 import { registerInvoiceWorker } from "./workers/invoice.worker";
+import { registerLogisticsSweepWorker } from "./workers/logistics-sweep.worker";
 
 /**
  * Registers all background job workers.
@@ -24,6 +25,7 @@ export async function registerAllWorkers(boss: PgBoss): Promise<void> {
     registerBroadcastWorker(boss),
     registerBannerWorker(boss),
     registerCheckoutSessionCleanupWorker(boss),
+    registerLogisticsSweepWorker(boss),
   ]);
 
   // Global monitoring: Alert if any job fails permanently after all retries

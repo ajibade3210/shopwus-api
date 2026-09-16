@@ -3,7 +3,6 @@ import {
   serializeBusinessBilling,
   serializePaymentTransaction,
 } from "../../src/modules/billing/dto/billing.dto";
-import { serializeDeliveryZone } from "../../src/modules/delivery/dto/delivery.dto";
 import {
   serializeOrder,
   serializeOrderItem,
@@ -38,6 +37,8 @@ describe("E-commerce DTO Serializers & Financial Precision", () => {
         status: "ACTIVE" as const,
         isFeatured: true,
         attributes: null,
+        requiresShipping: true,
+        weightKg: new Prisma.Decimal(0.5),
         createdAt: now,
         updatedAt: now,
         category: {
@@ -136,6 +137,9 @@ describe("E-commerce DTO Serializers & Financial Precision", () => {
         pickupLocation: null,
         trackingNumber: null,
         courierName: null,
+        terminalRateId: null,
+        terminalShipmentId: null,
+        trackingUrl: null,
         estimatedDelivery: null,
         fulfilledAt: null,
         paymentReference: "ref_123",
@@ -160,26 +164,6 @@ describe("E-commerce DTO Serializers & Financial Precision", () => {
   });
 
   describe("Delivery & Billing DTOs", () => {
-    it("should serialize delivery zone", () => {
-      const now = new Date();
-      const zone = {
-        id: "zone_1",
-        businessId: "biz_1",
-        name: "Lagos Mainland",
-        states: ["Lagos"],
-        fee: new Prisma.Decimal(2500),
-        estimatedDays: "1-2 business days",
-        isActive: true,
-        createdAt: now,
-        updatedAt: now,
-      };
-
-      const zoneDto = serializeDeliveryZone(zone);
-      expect(zoneDto.fee).toBe(2500);
-      expect(zoneDto.feeKobo).toBe(250000);
-      expect(zoneDto.states).toEqual(["Lagos"]);
-    });
-
     it("should serialize billing and payment transactions", () => {
       const now = new Date();
       const billing = {

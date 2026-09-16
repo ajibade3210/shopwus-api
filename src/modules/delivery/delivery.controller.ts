@@ -1,76 +1,15 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
-import { serializeDeliveryZone } from "./dto/delivery.dto";
 import type {
-  DeliveryZoneInput,
+  ExecuteLogisticsSweepInput,
+  GetStorefrontDeliveryQuotesInput,
   UpdateDeliverySettingsInput,
-  UpdateDeliveryZoneInput,
 } from "./schema/delivery.schema";
 import {
-  createDeliveryZoneService,
-  deleteDeliveryZoneService,
   getDeliverySettingsService,
   getStorefrontDeliveryConfigService,
-  listDeliveryZonesService,
   updateDeliverySettingsService,
-  updateDeliveryZoneService,
 } from "./services/delivery.service";
-
-// ---------------------------------------------------------------------------
-// VENDOR DELIVERY ZONES
-// ---------------------------------------------------------------------------
-
-export async function listDeliveryZonesHandler(
-  request: FastifyRequest,
-  reply: FastifyReply,
-) {
-  const result = await listDeliveryZonesService(request.businessId);
-  return reply.success(
-    result.map(serializeDeliveryZone),
-    "Delivery zones retrieved",
-  );
-}
-
-export async function createDeliveryZoneHandler(
-  request: FastifyRequest<{ Body: DeliveryZoneInput }>,
-  reply: FastifyReply,
-) {
-  const result = await createDeliveryZoneService(
-    request.businessId,
-    request.body,
-  );
-  return reply.success(
-    serializeDeliveryZone(result),
-    "Delivery zone created",
-    201,
-  );
-}
-
-export async function updateDeliveryZoneHandler(
-  request: FastifyRequest<{
-    Params: { id: string };
-    Body: UpdateDeliveryZoneInput;
-  }>,
-  reply: FastifyReply,
-) {
-  const result = await updateDeliveryZoneService(
-    request.params.id,
-    request.businessId,
-    request.body,
-  );
-  return reply.success(serializeDeliveryZone(result), "Delivery zone updated");
-}
-
-export async function deleteDeliveryZoneHandler(
-  request: FastifyRequest<{ Params: { id: string } }>,
-  reply: FastifyReply,
-) {
-  await deleteDeliveryZoneService(request.params.id, request.businessId);
-  return reply.success(null, "Delivery zone deleted");
-}
-
-// ---------------------------------------------------------------------------
-// VENDOR DELIVERY SETTINGS
-// ---------------------------------------------------------------------------
+import { getStorefrontDeliveryQuotesService } from "./services/terminal.service";
 
 export async function getDeliverySettingsHandler(
   request: FastifyRequest,
@@ -91,10 +30,6 @@ export async function updateDeliverySettingsHandler(
   return reply.success(result, "Delivery settings updated");
 }
 
-// ---------------------------------------------------------------------------
-// PUBLIC STOREFRONT DELIVERY
-// ---------------------------------------------------------------------------
-
 export async function getStorefrontDeliveryConfigHandler(
   request: FastifyRequest<{ Params: { slug: string } }>,
   reply: FastifyReply,
@@ -102,3 +37,42 @@ export async function getStorefrontDeliveryConfigHandler(
   const result = await getStorefrontDeliveryConfigService(request.params.slug);
   return reply.success(result, "Storefront delivery config retrieved");
 }
+
+export async function getStorefrontDeliveryQuotesHandler(
+  request: FastifyRequest<{
+    Params: { slug: string };
+    Body: GetStorefrontDeliveryQuotesInput;
+  }>,
+  reply: FastifyReply,
+) {
+  const result = await getStorefrontDeliveryQuotesService(
+    request.params.slug,
+    request.body,
+  );
+  return reply.success(result, "Delivery quotes retrieved");
+}
+
+export async function getLogisticsSweepStatusHandler(
+  _request: FastifyRequest,
+  reply: FastifyReply,
+) {
+  const { getUnsettledLogisticsSummary } = await import(
+    "./services/logistics-sweep.service"
+  );
+  const result = await getUnsettledLogisticsSummary();
+  return reply.success(result, "Logistics sweep treasury status retrieved");
+}
+
+export async function executeLogisticsSweepHandler(
+  request: FastifyRequest,
+  reply: FastifyReply,
+) {
+  const { executeLogisticsSweep } = await import(
+    "./services/logistics-sweep.service"
+  );
+  const body = request.body as ExecuteLogisticsSweepInput | undefined;
+  const forceRecordOnly = Boolean(body?.recordOnly);
+  const result = await executeLogisticsSweep("MANUAL", forceRecordOnly);
+  return reply.success(result, result.message);
+}
+

@@ -111,6 +111,10 @@ export const listOrdersQuerySchema = z.object({
   sortOrder: z.enum(["asc", "desc"]).default("desc"),
 });
 
+export const getOrderBoardQuerySchema = z.object({
+  timeframeDays: z.coerce.number().int().positive().default(14),
+});
+
 export const orderIdParamsSchema = z.object({
   id: z.string().min(1, "Order ID is required"),
 });
@@ -153,5 +157,6 @@ export type SyncCheckoutSessionInput = z.infer<
   typeof syncCheckoutSessionSchema
 >;
 export type ListOrdersQuery = z.infer<typeof listOrdersQuerySchema>;
+export type GetOrderBoardQuery = z.infer<typeof getOrderBoardQuerySchema>;
 export type UpdateOrderStatusInput = z.infer<typeof updateOrderStatusSchema>;
 export type CreateManualOrderInput = z.infer<typeof createManualOrderSchema>;

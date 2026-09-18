@@ -4,6 +4,7 @@ import { serializeCheckoutSession, serializeOrder } from "./dto/order.dto";
 import type {
   CreateManualOrderInput,
   CreateStorefrontOrderInput,
+  GetOrderBoardQuery,
   ListOrdersQuery,
   SyncCheckoutSessionInput,
   UpdateOrderStatusInput,
@@ -11,6 +12,8 @@ import type {
 import {
   createManualOrderService,
   createStorefrontOrderService,
+  deleteOrderService,
+  getOrderBoardService,
   getOrderByIdService,
   getOrderSummaryService,
   listOrdersService,
@@ -103,6 +106,25 @@ export async function getOrderSummaryHandler(
   return reply.success(result, "Order summary retrieved");
 }
 
+export async function getOrderBoardHandler(
+  request: FastifyRequest<{ Querystring: GetOrderBoardQuery }>,
+  reply: FastifyReply,
+) {
+  const result = await getOrderBoardService(
+    request.businessId,
+    request.query?.timeframeDays,
+  );
+  return reply.success(
+    {
+      items: result.items.map((o) =>
+        serializeOrder(o as Parameters<typeof serializeOrder>[0]),
+      ),
+      deliveredMeta: result.deliveredMeta,
+    },
+    "Order board retrieved",
+  );
+}
+
 export async function getOrderHandler(
   request: FastifyRequest<{ Params: { id: string } }>,
   reply: FastifyReply,
@@ -141,4 +163,15 @@ export async function dispatchOrderHandler(
     serializeOrder(result),
     "Order dispatched with Terminal Africa courier successfully",
   );
+}
+
+export async function deleteOrderHandler(
+  request: FastifyRequest<{ Params: { id: string } }>,
+  reply: FastifyReply,
+) {
+  const result = await deleteOrderService(
+    request.params.id,
+    request.businessId,
+  );
+  return reply.success(result, "Order deleted successfully");
 }

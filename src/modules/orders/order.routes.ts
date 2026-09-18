@@ -54,6 +54,15 @@ export async function orderRoutes(app: FastifyInstance): Promise<void> {
   );
 
   typedApp.get(
+    "/board",
+    {
+      schema: { querystring: orderSchema.getOrderBoardQuerySchema },
+      preHandler: [authenticate, requireBusiness],
+    },
+    orderController.getOrderBoardHandler,
+  );
+
+  typedApp.get(
     "/",
     {
       schema: { querystring: orderSchema.listOrdersQuerySchema },
@@ -92,5 +101,16 @@ export async function orderRoutes(app: FastifyInstance): Promise<void> {
       preHandler: [authenticate, requireBusiness],
     },
     orderController.dispatchOrderHandler,
+  );
+
+  typedApp.delete(
+    "/:id",
+    {
+      schema: {
+        params: orderSchema.orderIdParamsSchema,
+      },
+      preHandler: [authenticate, requireBusiness],
+    },
+    orderController.deleteOrderHandler,
   );
 }

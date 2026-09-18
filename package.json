@@ -1,7 +1,7 @@
 {
-  "name": "fastify-api",
+  "name": "shopwus-api",
   "version": "1.0.0",
-  "description": "Fastify + Prisma + PostgreSQL API",
+  "description": "Shopwus API",
   "main": "dist/server.js",
   "private": true,
   "resolutions": {

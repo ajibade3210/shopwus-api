@@ -682,7 +682,6 @@ export async function listOrdersService(
   };
 
   if (tab === "unfulfilled") {
-    where.paymentStatus = "PAID";
     where.fulfillmentStatus = { notIn: ["DELIVERED", "CANCELLED"] };
   } else if (tab === "completed") {
     where.fulfillmentStatus = "DELIVERED";
@@ -738,7 +737,6 @@ export async function getOrderSummaryService(businessId: string) {
       prisma.order.count({
         where: {
           businessId,
-          paymentStatus: "PAID",
           fulfillmentStatus: { notIn: ["DELIVERED", "CANCELLED"] },
         },
       }),
@@ -768,6 +766,85 @@ export async function getOrderSummaryService(businessId: string) {
     abandonedCount,
     totalRevenue: revenueAgg._sum.total || 0,
     merchantEarnings: revenueAgg._sum.merchantEarnings || 0,
+  };
+}
+
+export async function getOrderBoardService(
+  businessId: string,
+  timeframeDays = 14,
+) {
+  const cutoffDate = new Date(
+    Date.now() - timeframeDays * 24 * 60 * 60 * 1000,
+  );
+
+  const [activeOrders, recentDelivered, totalDeliveredCount] =
+    await Promise.all([
+      // 1. All active open orders (uncapped, newest createdAt first, positive whitelist)
+      prisma.order.findMany({
+        where: {
+          businessId,
+          status: { not: OrderStatus.CANCELLED },
+          fulfillmentStatus: {
+            in: [
+              FulfillmentStatus.UNFULFILLED,
+              FulfillmentStatus.PROCESSING,
+              FulfillmentStatus.READY_FOR_PICKUP,
+              FulfillmentStatus.DISPATCHED,
+            ],
+          },
+        },
+        include: {
+          items: true,
+          customer: {
+            select: { id: true, name: true, email: true, phone: true },
+          },
+        },
+        orderBy: { createdAt: "desc" },
+      }),
+
+      // 2. Up to 50 most recent delivered orders (most recently fulfilled first)
+      prisma.order.findMany({
+        where: {
+          businessId,
+          status: { not: OrderStatus.CANCELLED },
+          fulfillmentStatus: FulfillmentStatus.DELIVERED,
+        },
+        include: {
+          items: true,
+          customer: {
+            select: { id: true, name: true, email: true, phone: true },
+          },
+        },
+        orderBy: { updatedAt: "desc" },
+        take: 50,
+      }),
+
+      // 3. Total delivered count for store
+      prisma.order.count({
+        where: {
+          businessId,
+          status: { not: OrderStatus.CANCELLED },
+          fulfillmentStatus: FulfillmentStatus.DELIVERED,
+        },
+      }),
+    ]);
+
+  // Apply "At least 10 or past 14 days" rule
+  const deliveredOrders = recentDelivered.filter((order, idx) => {
+    if (idx < 10) return true; // Always retain at least 10 orders for low-volume stores
+    const completedTime = order.fulfilledAt || order.updatedAt;
+    return completedTime >= cutoffDate;
+  });
+
+  return {
+    items: [...activeOrders, ...deliveredOrders],
+    deliveredMeta: {
+      totalDelivered: totalDeliveredCount,
+      showingCount: deliveredOrders.length,
+      hasOverflow: totalDeliveredCount > deliveredOrders.length,
+      overflowCount: Math.max(0, totalDeliveredCount - deliveredOrders.length),
+      timeframeDays,
+    },
   };
 }
 
@@ -869,4 +946,66 @@ export async function updateOrderStatusService(
   }
 
   return updatedOrder;
+}
+
+export async function deleteOrderService(id: string, businessId: string) {
+  const order = await prisma.order.findUnique({
+    where: { id },
+    include: {
+      items: true,
+    },
+  });
+
+  if (!order || order.businessId !== businessId) {
+    throw new NotFoundError("Order not found");
+  }
+
+  // Safety guardrail: Active paid orders must be cancelled/refunded first
+  if (
+    order.paymentStatus === PaymentStatus.PAID &&
+    order.status !== OrderStatus.CANCELLED
+  ) {
+    throw new BusinessRuleError(
+      "Cannot delete an active paid order. Please cancel the order first before permanently deleting.",
+    );
+  }
+
+  // Safety guardrail: Dispatched or active shipments cannot be deleted without cancellation
+  if (
+    order.terminalShipmentId &&
+    order.fulfillmentStatus !== FulfillmentStatus.CANCELLED
+  ) {
+    throw new BusinessRuleError(
+      "Cannot delete order with an active courier shipment. Please cancel the shipment or order first.",
+    );
+  }
+
+  // If order was OPEN, restore inventory for tracked items
+  if (order.status === OrderStatus.OPEN) {
+    for (const item of order.items) {
+      if (item.productId) {
+        if (item.variantId) {
+          await prisma.productVariant.updateMany({
+            where: { id: item.variantId },
+            data: { inventoryCount: { increment: item.quantity } },
+          });
+        } else {
+          await prisma.product.updateMany({
+            where: { id: item.productId, trackInventory: true },
+            data: { inventoryCount: { increment: item.quantity } },
+          });
+        }
+      }
+    }
+  }
+
+  // Void delivery fee if applicable
+  await voidDeliveryFee(id);
+
+  // Permanently delete order record (cascades to OrderItem, OrderFulfillment, PaymentTransaction)
+  await prisma.order.delete({
+    where: { id },
+  });
+
+  return { success: true, message: "Order deleted successfully" };
 }

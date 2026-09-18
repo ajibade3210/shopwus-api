@@ -112,7 +112,7 @@ Create multi-tenant, relational database models using modular Prisma schemas und
 ### Actions to Perform
 - Generate Prisma client: `pnpm prisma generate`
 - Create initial migration: `pnpm prisma migrate dev --name init_shopwus_core`
-- Create initial seeder in `prisma/seed.ts` (seeds default demo studio: Atelier Forma / Elena Vance).
+- Create initial seeder in `prisma/seed.ts` (seeds default demo studio: Shopwus Forma).
 
 > **Prompt to run Step 2**:  
 > *"Please execute Step 2: Implement the multi-tenant Prisma schemas and initial migration in `shopwus-api/prisma/schema/` covering User, Business/Studio, Leads, Customers, CustomerServices, Invoices, and Expenses, and update `prisma/seed.ts`."*

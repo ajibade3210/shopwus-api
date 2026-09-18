@@ -83,7 +83,18 @@ Require a running PostgreSQL instance. Copy and configure:
 ```bash
 cp .env.test.example .env.test
 yarn test:integration
+
+pnpm seed:products bluemajic321@gmail.com
+
+cd shopwus-api
+npx prisma migrate dev --name add_logistics_sweep_and_terminal_delivery
+
+# Point your DATABASE_URL in .env to your dev database, then run:
+npm run db:migrate
+# Or directly:
+npx prisma migrate deploy
 ```
 
 Integration tests use `app.inject()` — no HTTP port needed, full request lifecycle tested
 # shopwus-api
+

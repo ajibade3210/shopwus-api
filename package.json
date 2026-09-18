@@ -1,7 +1,7 @@
 {
-  "name": "fastify-api",
+  "name": "shopwus-api",
   "version": "1.0.0",
-  "description": "Fastify + Prisma + PostgreSQL API",
+  "description": "Shopwus API",
   "main": "dist/server.js",
   "private": true,
   "resolutions": {
@@ -19,6 +19,7 @@
     "db:generate": "prisma generate",
     "db:studio": "prisma studio",
     "db:seed": "ts-node prisma/seed.ts",
+    "seed:products": "ts-node prisma/seeds/seedProducts.ts",
     "format": "biome check --write .",
     "lint": "biome lint --write",
     "test": "jest --forceExit",

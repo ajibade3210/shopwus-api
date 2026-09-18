@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { JobPayloadMap } from "../types";
 
 export const JOB_NAMES = {
   SEND_EMAIL: "send-email",
@@ -6,7 +7,9 @@ export const JOB_NAMES = {
   GENERATE_INVOICE_PDF: "generate-invoice-pdf",
   SEND_BROADCAST_MESSAGE: "admin-send-broadcast-message",
   CLEANUP_EXPIRED_SESSIONS: "auth-cleanup-expired-sessions",
+  CLEANUP_CHECKOUT_SESSIONS: "cleanup-checkout-sessions",
   GENERATE_HEADER_BANNER: "generate-header-banner",
+  LOGISTICS_WEEKLY_SWEEP: "logistics-weekly-sweep",
 } as const;
 
 export type JobName = (typeof JOB_NAMES)[keyof typeof JOB_NAMES];
@@ -59,11 +62,5 @@ export type GenerateHeaderBannerPayload = z.infer<
   typeof generateHeaderBannerPayloadSchema
 >;
 
-export interface JobPayloadMap {
-  [JOB_NAMES.SEND_EMAIL]: SendEmailPayload;
-  [JOB_NAMES.SEND_WHATSAPP]: SendWhatsappPayload;
-  [JOB_NAMES.GENERATE_INVOICE_PDF]: GenerateInvoicePdfPayload;
-  [JOB_NAMES.SEND_BROADCAST_MESSAGE]: SendBroadcastMessagePayload;
-  [JOB_NAMES.CLEANUP_EXPIRED_SESSIONS]: Record<string, never>;
-  [JOB_NAMES.GENERATE_HEADER_BANNER]: GenerateHeaderBannerPayload;
-}
+// JobPayloadMap is defined in src/types/utils.ts, re-exported via src/types/index.ts
+export type { JobPayloadMap };

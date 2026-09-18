@@ -1,22 +1,10 @@
 import crypto from "node:crypto";
-import type { Prisma, PrismaClient } from "@prisma/client";
-import {
-  prisma as defaultPrisma,
-  type ExtendedPrismaClient,
-  type PrismaTransactionClient,
-} from "../lib/prisma";
+import { prisma as defaultPrisma } from "../lib/prisma";
+import type { SequenceDbClient, SequenceOptions } from "../types";
 
-export type SequenceDbClient =
-  | ExtendedPrismaClient
-  | PrismaTransactionClient
-  | PrismaClient
-  | Prisma.TransactionClient;
-
-export interface SequenceOptions {
-  type?: string;
-  year?: number;
-  client?: SequenceDbClient;
-}
+// SequenceDbClient and SequenceOptions are defined in src/types/utils.ts
+// Re-exported here for backwards compatibility
+export type { SequenceDbClient, SequenceOptions };
 
 /**
  * Format a sequence number with a standard prefix, year, and 0-padded digits.

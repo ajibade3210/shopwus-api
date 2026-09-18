@@ -7,7 +7,7 @@ This file provides development standards, architectural rules, and operational g
 # MANDATORY: Check When Done — NEVER SKIP THIS
 AFTER EVERY CODE CHANGE, WITHOUT EXCEPTION, YOU MUST:
 1. **No Magic Strings Allowed** — Define named constants, enums, or configuration maps in `src/config/constants/`.
-2. **Types & Schemas in Designated Sections** — Move DTOs and response interfaces to `dto/` or `src/types/`, and Zod schemas to `schema/`. Never declare inline types or ad-hoc interfaces in controllers or route definitions.
+2. **All Types & Interfaces in `src/types/`** — Every exported interface, type alias, or DTO must live in `src/types/` (or a module's `dto/` folder). This applies to **every file without exception** — including controllers, routes, services, schemas, and infrastructure/library files under `src/lib/`. Never declare exported interfaces inline in `src/lib/` files (e.g., `paystack.ts`, `mediaUpload.ts`). Private module-only shapes (unexported, single-file use) are the only acceptable inline types.
 3. **Scan Related Files** — Check route registrations, controller calls, service functions, DTO serializers, Zod schemas, sibling services, and background workers for anything missing, broken, or inconsistent with your change.
 4. **Briefly Explain Changes** — Provide a concise summary of the problem, the fix applied, and any important architectural considerations.
 5. **Call Out Breaking Changes** — Explicitly warn if a change impacts DB schema, Prisma migrations, API response contracts, job payload shapes, or authentication.
@@ -35,6 +35,7 @@ AFTER EVERY CODE CHANGE, WITHOUT EXCEPTION, YOU MUST:
   - **Core Infrastructure / Libraries** $\rightarrow$ `src/lib/{infrastructure}.ts` (Prisma client, error classes, logger, email, PDF, queue client)
   - **Configuration & Constants** $\rightarrow$ `src/config/` (`env.ts` for Zod env vars, `constants/` for static configuration maps)
   - **Background Jobs** $\rightarrow$ `src/jobs/` (job name constants & payload schemas in `job.types.ts`, queue workers in `workers/`)
+  - Remove all unnecessary comments or redundant comments. Keep code clean, lean, and self-documenting without redundant inline explanations or unnecessary JSDoc blocks.
 
 - **ZERO `any` POLICY (Strict TypeScript):**
   `any` is strictly prohibited anywhere in the codebase. Always use explicit types from `@prisma/client`, `src/types`, module DTOs, or Zod inferences (`z.infer<...>`). For unknown inputs or error catching, use `unknown` with explicit runtime type narrowing.

@@ -26,4 +26,5 @@ async function start() {
   }
 }
 
+// Server bootstrap entrypoint
 start();

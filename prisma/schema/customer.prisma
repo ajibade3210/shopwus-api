@@ -23,6 +23,8 @@ model Customer {
   services     CustomerService[]
   activities   CustomerActivity[]
   invoices     Invoice[]
+  orders       Order[]
+  addresses    CustomerAddress[]
 
   @@unique([id, businessId])
   @@unique([businessId, email])

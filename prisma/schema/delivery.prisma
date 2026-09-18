@@ -1,0 +1,58 @@
+model CustomerAddress {
+  id            String   @id @default(cuid())
+  customerId    String
+  recipientName String
+  phone         String
+  addressLine1  String
+  addressLine2  String?
+  city          String
+  state         String
+  postalCode    String?
+  country       String   @default("Nigeria")
+  isDefault     Boolean  @default(false)
+  deliveryNote  String?
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  customer      Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([customerId])
+}
+
+model LogisticsSweep {
+  id                   String                 @id @default(cuid())
+  amount               Decimal                @db.Decimal(12, 2)
+  ordersCount          Int
+  transferReference    String                 @unique
+  paystackTransferCode String?
+  mode                 String                 @default("RECORD_ONLY")
+  status               String                 @default("PENDING")
+  failureReason        String?
+  completedAt          DateTime?
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+
+  ledgerEntries        LogisticsLedgerEntry[]
+
+  @@index([status])
+  @@index([transferReference])
+}
+
+model LogisticsLedgerEntry {
+  id         String          @id @default(cuid())
+  orderId    String?
+  amount     Decimal         @db.Decimal(12, 2)
+  status     String          @default("PENDING")
+  sweepId    String?
+  settledAt  DateTime?
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  sweep      LogisticsSweep? @relation(fields: [sweepId], references: [id], onDelete: SetNull)
+  order      Order?          @relation(fields: [orderId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([orderId])
+  @@index([sweepId])
+}

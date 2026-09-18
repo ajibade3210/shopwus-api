@@ -1,0 +1,92 @@
+enum ProductStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  businessId  String
+  name        String
+  slug        String
+  description String?
+  imageUrl    String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  business    Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  products    Product[]
+
+  @@unique([businessId, slug])
+  @@unique([id, businessId])
+  @@index([businessId])
+}
+
+model Product {
+  id                String           @id @default(cuid())
+  businessId        String
+  categoryId        String?
+  name              String
+  slug              String
+  description       String?          @db.Text
+  sku               String?
+
+  // Pricing
+  price             Decimal          @db.Decimal(12, 2)
+  compareAtPrice    Decimal?         @db.Decimal(12, 2)
+  costPrice         Decimal?         @db.Decimal(12, 2)
+
+  // Inventory
+  trackInventory    Boolean          @default(true)
+  inventoryCount    Int              @default(0)
+  lowStockThreshold Int              @default(5)
+  allowBackorder    Boolean          @default(false)
+
+  // Variants & Options
+  hasVariants       Boolean          @default(false)
+  options           Json?            // e.g. [{ name: "Size", values: ["S", "M", "L"] }]
+  variants          ProductVariant[]
+
+  // Media & Metadata
+  images            String[]         @default([])
+  status            ProductStatus    @default(ACTIVE)
+  isFeatured        Boolean          @default(false)
+  attributes        Json?
+
+  // Shipping & Logistics
+  requiresShipping  Boolean          @default(true)
+  weightKg          Decimal?         @db.Decimal(8, 2)
+
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  business          Business         @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  category          Category?        @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  orderItems        OrderItem[]
+
+  @@unique([businessId, slug])
+  @@unique([id, businessId])
+  @@index([businessId])
+  @@index([businessId, status])
+  @@index([businessId, categoryId])
+}
+
+model ProductVariant {
+  id                String       @id @default(cuid())
+  productId         String
+  title             String       // e.g. "Large / Red" or "128GB / Space Gray"
+  sku               String?
+  price             Decimal      @db.Decimal(12, 2)
+  compareAtPrice    Decimal?     @db.Decimal(12, 2)
+  costPrice         Decimal?     @db.Decimal(12, 2)
+  inventoryCount    Int          @default(0)
+  options           Json         // e.g. { "Size": "Large", "Color": "Red" }
+  imageUrl          String?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  product           Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  orderItems        OrderItem[]
+
+  @@index([productId])
+}

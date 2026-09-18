@@ -1,7 +1,11 @@
 import argon2 from "argon2";
 import { EmailTemplateNames } from "../../../config/constants/emailTemplateInputs";
 import { env } from "../../../config/env";
-import { NotFoundError, UnauthorizedError, ValidationError } from "../../../lib/errors";
+import {
+  NotFoundError,
+  UnauthorizedError,
+  ValidationError,
+} from "../../../lib/errors";
 import { logger } from "../../../lib/logger";
 import { prisma } from "../../../lib/prisma";
 import { generateOtp, getDateTime, sendEmailHandler } from "../../../utils";

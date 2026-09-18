@@ -10,7 +10,11 @@ import {
   DEFAULT_VISIBILITY_SETTINGS,
 } from "../../../config/constants/studio";
 import { queueBannerGeneration } from "../../../jobs/workers/banner.worker";
-import { ConflictError, NotFoundError, ValidationError } from "../../../lib/errors";
+import {
+  ConflictError,
+  NotFoundError,
+  ValidationError,
+} from "../../../lib/errors";
 import { logger } from "../../../lib/logger";
 import { prisma } from "../../../lib/prisma";
 import {

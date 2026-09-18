@@ -109,7 +109,9 @@ const withHeaders = <T extends z.ZodTypeAny>(body: T) => ({
 export const signupRouteSchema = withHeaders(signupSchema);
 export const loginRouteSchema = withHeaders(loginSchema);
 export const verifyEmailRouteSchema = withHeaders(verifyEmailSchema);
-export const resendVerificationRouteSchema = withHeaders(resendVerificationSchema);
+export const resendVerificationRouteSchema = withHeaders(
+  resendVerificationSchema,
+);
 export const changePasswordRouteSchema = withHeaders(changePasswordSchema);
 export const socialSignInRouteSchema = withHeaders(socialSignInSchema);
 export const refreshRouteSchema = withHeaders(refreshSchema);

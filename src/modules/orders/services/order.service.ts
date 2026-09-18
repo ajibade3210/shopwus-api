@@ -773,9 +773,7 @@ export async function getOrderBoardService(
   businessId: string,
   timeframeDays = 14,
 ) {
-  const cutoffDate = new Date(
-    Date.now() - timeframeDays * 24 * 60 * 60 * 1000,
-  );
+  const cutoffDate = new Date(Date.now() - timeframeDays * 24 * 60 * 60 * 1000);
 
   const [activeOrders, recentDelivered, totalDeliveredCount] =
     await Promise.all([

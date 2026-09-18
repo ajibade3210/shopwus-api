@@ -10,27 +10,38 @@ import {
   DEFAULT_VISIBILITY_SETTINGS,
 } from "../../../config/constants/studio";
 import { queueBannerGeneration } from "../../../jobs/workers/banner.worker";
-import { ConflictError } from "../../../lib/errors";
+import { ConflictError, NotFoundError, ValidationError } from "../../../lib/errors";
 import { logger } from "../../../lib/logger";
 import { prisma } from "../../../lib/prisma";
-import { sendWelcomeEmail, slugify } from "../../../utils";
-import type { SignupInput } from "../schema/auth.schema";
+import {
+  generateOtp,
+  getDateTime,
+  sendVerificationOtpEmail,
+  sendWelcomeEmail,
+  slugify,
+} from "../../../utils";
+import type {
+  ResendVerificationInput,
+  SignupInput,
+  VerifyEmailInput,
+} from "../schema/auth.schema";
 import { issueAuthTokens } from "./session.service";
 
 export async function signupService(
   data: SignupInput,
-  ipAddress?: string,
-  userAgent?: string,
+  _ipAddress?: string,
+  _userAgent?: string,
 ) {
   const email = data.email.toLowerCase().trim();
 
   const existingUser = await prisma.user.findUnique({
     where: { email },
+    include: {
+      businessUsers: {
+        include: { business: true },
+      },
+    },
   });
-
-  if (existingUser) {
-    throw new ConflictError("An account with this email already exists.");
-  }
 
   // Parse name fields
   let firstName = data.firstName?.trim() || "";
@@ -40,6 +51,50 @@ export async function signupService(
     const parts = data.fullName.trim().split(" ");
     firstName = parts[0] || "Studio";
     lastName = parts.slice(1).join(" ") || "Director";
+  }
+
+  // Handle re-signup for unverified account (Abandoned OTP Recovery)
+  if (existingUser) {
+    if (existingUser.emailVerified) {
+      throw new ConflictError("An account with this email already exists.");
+    }
+
+    const passwordHash = await argon2.hash(data.password);
+    const otp = generateOtp(6);
+    const verificationExpires = getDateTime().plus({ minutes: 15 }).toJSDate();
+
+    await prisma.user.update({
+      where: { id: existingUser.id },
+      data: {
+        passwordHash,
+        verificationToken: otp,
+        verificationExpires,
+        ...(firstName ? { firstName } : {}),
+        ...(lastName ? { lastName } : {}),
+        ...(data.phone ? { phone: data.phone.trim() } : {}),
+      },
+    });
+
+    const primaryStudioName =
+      existingUser.businessUsers[0]?.business.name || data.studioName;
+
+    sendVerificationOtpEmail(
+      existingUser.email,
+      existingUser.firstName,
+      otp,
+      primaryStudioName,
+    ).catch((err) => {
+      logger.error(
+        { err, email: existingUser.email },
+        "Failed to dispatch verification OTP email on re-signup",
+      );
+    });
+
+    return {
+      requiresVerification: true,
+      email: existingUser.email,
+      message: "A verification code has been sent to your email.",
+    };
   }
 
   const rawSlug = data.slug || data.studioSlug || data.studioName;
@@ -56,6 +111,8 @@ export async function signupService(
   }
 
   const passwordHash = await argon2.hash(data.password);
+  const otp = generateOtp(6);
+  const verificationExpires = getDateTime().plus({ minutes: 15 }).toJSDate();
 
   const result = await prisma.$transaction(async (tx) => {
     const user = await tx.user.create({
@@ -67,6 +124,9 @@ export async function signupService(
         phone: data.phone?.trim(),
         role: "OWNER",
         isActive: true,
+        emailVerified: false,
+        verificationToken: otp,
+        verificationExpires,
       },
     });
 
@@ -76,7 +136,7 @@ export async function signupService(
         slug: resolvedSlug,
         email,
         phone: data.phone?.trim(),
-        businessType: DEFAULT_BUSINESS_TYPE,
+        businessType: data.businessType || DEFAULT_BUSINESS_TYPE,
         colors: DEFAULT_COLOR_SCHEME,
         buttonRadius: DEFAULT_BUTTON_RADIUS,
         showServices: DEFAULT_VISIBILITY_SETTINGS.showServices,
@@ -121,48 +181,218 @@ export async function signupService(
     );
   });
 
-  const { accessToken, refreshToken } = await issueAuthTokens({
-    userId: result.user.id,
-    email: result.user.email,
-    role: result.user.role,
-    businessId: result.business.id,
-    ipAddress,
-    userAgent,
-  });
-
-  // Async welcome email
-  sendWelcomeEmail(
+  // Async OTP verification email
+  sendVerificationOtpEmail(
     result.user.email,
     result.user.firstName,
+    otp,
     result.business.name,
   ).catch((err) => {
     logger.error(
       { err, email: result.user.email },
-      "Failed to dispatch welcome email",
+      "Failed to dispatch verification OTP email on signup",
     );
   });
+
+  return {
+    requiresVerification: true,
+    email: result.user.email,
+    studioSlug: result.business.slug,
+    message:
+      "Account created. Please enter the 6-digit verification code sent to your email.",
+  };
+}
+
+export async function verifyEmailService(
+  data: VerifyEmailInput,
+  ipAddress?: string,
+  userAgent?: string,
+) {
+  const email = data.email.toLowerCase().trim();
+  const code = data.code.trim();
+
+  const user = await prisma.user.findUnique({
+    where: { email },
+    include: {
+      businessUsers: {
+        include: { business: true },
+      },
+    },
+  });
+
+  if (!user) {
+    throw new NotFoundError("User not found");
+  }
+
+  // If already verified, issue tokens directly
+  if (user.emailVerified) {
+    const primaryBusinessUser = user.businessUsers[0];
+    const { accessToken, refreshToken } = await issueAuthTokens({
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+      businessId: primaryBusinessUser?.businessId,
+      ipAddress,
+      userAgent,
+    });
+
+    return {
+      token: accessToken,
+      accessToken,
+      refreshToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        name: `${user.firstName} ${user.lastName}`.trim(),
+        role: user.role,
+        avatarUrl: user.avatarUrl,
+        emailVerified: true,
+        studioId: primaryBusinessUser?.business.id,
+        studioName: primaryBusinessUser?.business.name,
+        studioSlug: primaryBusinessUser?.business.slug,
+      },
+      studio: primaryBusinessUser
+        ? {
+            id: primaryBusinessUser.business.id,
+            slug: primaryBusinessUser.business.slug,
+            name: primaryBusinessUser.business.name,
+            role: primaryBusinessUser.role,
+          }
+        : null,
+    };
+  }
+
+  if (!user.verificationToken || user.verificationToken !== code) {
+    throw new ValidationError(
+      "Invalid verification code. Please check your code or request a new one.",
+    );
+  }
+
+  if (!user.verificationExpires || user.verificationExpires < new Date()) {
+    throw new ValidationError(
+      "Verification code has expired. Please request a new code.",
+    );
+  }
+
+  const updatedUser = await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      emailVerified: true,
+      verificationToken: null,
+      verificationExpires: null,
+    },
+    include: {
+      businessUsers: {
+        include: { business: true },
+      },
+    },
+  });
+
+  const primaryBusinessUser = updatedUser.businessUsers[0];
+  const primaryBusiness = primaryBusinessUser?.business;
+
+  const { accessToken, refreshToken } = await issueAuthTokens({
+    userId: updatedUser.id,
+    email: updatedUser.email,
+    role: updatedUser.role,
+    businessId: primaryBusiness?.id,
+    ipAddress,
+    userAgent,
+  });
+
+  // Async welcome email now that user is verified
+  if (primaryBusiness) {
+    sendWelcomeEmail(
+      updatedUser.email,
+      updatedUser.firstName,
+      primaryBusiness.name,
+    ).catch((err) => {
+      logger.error(
+        { err, email: updatedUser.email },
+        "Failed to dispatch welcome email after verification",
+      );
+    });
+  }
 
   return {
     token: accessToken,
     accessToken,
     refreshToken,
     user: {
-      id: result.user.id,
-      email: result.user.email,
-      firstName: result.user.firstName,
-      lastName: result.user.lastName,
-      name: `${result.user.firstName} ${result.user.lastName}`.trim(),
-      role: result.user.role,
-      avatarUrl: result.user.avatarUrl,
-      studioId: result.business.id,
-      studioName: result.business.name,
-      studioSlug: result.business.slug,
+      id: updatedUser.id,
+      email: updatedUser.email,
+      firstName: updatedUser.firstName,
+      lastName: updatedUser.lastName,
+      name: `${updatedUser.firstName} ${updatedUser.lastName}`.trim(),
+      role: updatedUser.role,
+      avatarUrl: updatedUser.avatarUrl,
+      emailVerified: true,
+      studioId: primaryBusiness?.id,
+      studioName: primaryBusiness?.name,
+      studioSlug: primaryBusiness?.slug,
     },
-    studio: {
-      id: result.business.id,
-      slug: result.business.slug,
-      name: result.business.name,
-      role: result.businessUser.role,
+    studio: primaryBusinessUser
+      ? {
+          id: primaryBusinessUser.business.id,
+          slug: primaryBusinessUser.business.slug,
+          name: primaryBusinessUser.business.name,
+          role: primaryBusinessUser.role,
+        }
+      : null,
+  };
+}
+
+export async function resendVerificationService(data: ResendVerificationInput) {
+  const email = data.email.toLowerCase().trim();
+
+  const user = await prisma.user.findUnique({
+    where: { email },
+    include: {
+      businessUsers: {
+        include: { business: true },
+      },
     },
+  });
+
+  // Prevent user enumeration: return success even if user not found
+  if (!user) {
+    return {
+      message:
+        "If this email is registered, a new verification code has been sent.",
+    };
+  }
+
+  if (user.emailVerified) {
+    return {
+      message: "Email is already verified. You can log in directly.",
+    };
+  }
+
+  const otp = generateOtp(6);
+  const verificationExpires = getDateTime().plus({ minutes: 15 }).toJSDate();
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      verificationToken: otp,
+      verificationExpires,
+    },
+  });
+
+  const studioName = user.businessUsers[0]?.business.name;
+
+  sendVerificationOtpEmail(user.email, user.firstName, otp, studioName).catch(
+    (err) => {
+      logger.error(
+        { err, email: user.email },
+        "Failed to dispatch verification OTP email on resend",
+      );
+    },
+  );
+
+  return {
+    message: "A new verification code has been sent to your email.",
   };
 }

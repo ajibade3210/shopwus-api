@@ -7,14 +7,17 @@ import { DomainErrorCode } from "../../../config/constants/errors";
 import { env } from "../../../config/env";
 import { cacheStore } from "../../../lib/cache";
 import { ForbiddenError, UnauthorizedError } from "../../../lib/errors";
+import { logger } from "../../../lib/logger";
 import { prisma } from "../../../lib/prisma";
 import type { JwtPayload } from "../../../middlewares/auth";
 import {
+  generateOtp,
   generateRefreshToken,
   getCurrentDateInTimezone,
   getDateTime,
   hashToken,
   parseRefreshExpiryMs,
+  sendVerificationOtpEmail,
 } from "../../../utils";
 import type {
   LoginInput,
@@ -105,6 +108,35 @@ export async function loginService(
     throw new ForbiddenError(
       "Your account has been deactivated. Please contact support.",
       DomainErrorCode.DEACTIVATED_ACCOUNT,
+    );
+  }
+
+  if (!user.emailVerified) {
+    const otp = generateOtp(6);
+    const verificationExpires = getDateTime().plus({ minutes: 15 }).toJSDate();
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        verificationToken: otp,
+        verificationExpires,
+      },
+    });
+
+    const studioName = user.businessUsers[0]?.business.name;
+    sendVerificationOtpEmail(user.email, user.firstName, otp, studioName).catch(
+      (err) => {
+        logger.error(
+          { err, email: user.email },
+          "Failed to dispatch verification OTP on login",
+        );
+      },
+    );
+
+    throw new ForbiddenError(
+      "Your email is not verified yet. We have sent a 6-digit verification code to your email.",
+      "EMAIL_NOT_VERIFIED",
+      { requiresVerification: true, email: user.email },
     );
   }
 

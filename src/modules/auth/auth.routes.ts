@@ -18,6 +18,24 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
   );
 
   typedApp.post(
+    "/verify-email",
+    {
+      schema: authSchema.verifyEmailRouteSchema,
+      ...rateLimit(15, "15 minutes"),
+    },
+    authController.verifyEmail,
+  );
+
+  typedApp.post(
+    "/resend-verification",
+    {
+      schema: authSchema.resendVerificationRouteSchema,
+      ...rateLimit(5, "15 minutes"),
+    },
+    authController.resendVerification,
+  );
+
+  typedApp.post(
     "/login",
     {
       schema: authSchema.loginRouteSchema,
@@ -94,5 +112,15 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
       schema: authSchema.updateMeRouteSchema,
     },
     authController.updateMe,
+  );
+
+  typedApp.post(
+    "/change-password",
+    {
+      preHandler: [authenticate],
+      schema: authSchema.changePasswordRouteSchema,
+      ...rateLimit(10, "15 minutes"),
+    },
+    authController.changePassword,
   );
 }

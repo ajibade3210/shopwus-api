@@ -12,6 +12,7 @@ export const signupSchema = z
     studioName: z.string().min(1, "Studio name is required"),
     studioSlug: z.string().optional(),
     slug: z.string().optional(),
+    businessType: z.string().optional(),
   })
   .refine((data) => data.firstName || data.fullName, {
     message: "First name or full name is required",
@@ -24,6 +25,20 @@ export const loginSchema = z.object({
   rememberMe: z.boolean().optional().default(false),
   deviceId: z.string().optional(),
   deviceName: z.string().optional(),
+});
+
+export const verifyEmailSchema = z.object({
+  email: z.email("A valid email address is required"),
+  code: z.string().length(6, "Verification code must be 6 digits"),
+});
+
+export const resendVerificationSchema = z.object({
+  email: z.email("A valid email address is required"),
+});
+
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().optional(),
+  newPassword: z.string().min(6, "New password must be at least 6 characters"),
 });
 
 export const socialSignInSchema = z
@@ -76,6 +91,9 @@ export const updateMeSchema = z.object({
 
 export type SignupInput = z.infer<typeof signupSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
+export type VerifyEmailInput = z.infer<typeof verifyEmailSchema>;
+export type ResendVerificationInput = z.infer<typeof resendVerificationSchema>;
+export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
 export type SocialSignInInput = z.infer<typeof socialSignInSchema>;
 export type RefreshInput = z.infer<typeof refreshSchema>;
 export type LogoutInput = z.infer<typeof logoutSchema>;
@@ -90,6 +108,9 @@ const withHeaders = <T extends z.ZodTypeAny>(body: T) => ({
 
 export const signupRouteSchema = withHeaders(signupSchema);
 export const loginRouteSchema = withHeaders(loginSchema);
+export const verifyEmailRouteSchema = withHeaders(verifyEmailSchema);
+export const resendVerificationRouteSchema = withHeaders(resendVerificationSchema);
+export const changePasswordRouteSchema = withHeaders(changePasswordSchema);
 export const socialSignInRouteSchema = withHeaders(socialSignInSchema);
 export const refreshRouteSchema = withHeaders(refreshSchema);
 export const logoutRouteSchema = withHeaders(logoutSchema);

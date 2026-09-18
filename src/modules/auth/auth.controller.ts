@@ -2,14 +2,17 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 import type { ReqHeaders, TypedRequest } from "../../utils";
 import { clearAuthCookies, setAuthCookies } from "../../utils/cookie.utils";
 import type {
+  ChangePasswordInput,
   ForgotPasswordInput,
   LoginInput,
   LogoutInput,
   RefreshInput,
   ResetPasswordInput,
+  ResendVerificationInput,
   SignupInput,
   SocialSignInInput,
   UpdateMeInput,
+  VerifyEmailInput,
 } from "./schema/auth.schema";
 import * as authService from "./services";
 
@@ -18,6 +21,19 @@ export async function signup(
   reply: FastifyReply,
 ) {
   const result = await authService.signupService(
+    req.body,
+    req.ip,
+    req.headers["user-agent"],
+  );
+
+  return reply.success(result, result.message, 201);
+}
+
+export async function verifyEmail(
+  req: TypedRequest<VerifyEmailInput, unknown, unknown, ReqHeaders>,
+  reply: FastifyReply,
+) {
+  const result = await authService.verifyEmailService(
     req.body,
     req.ip,
     req.headers["user-agent"],
@@ -35,9 +51,17 @@ export async function signup(
       accessToken: result.accessToken,
       refreshToken: result.refreshToken,
     },
-    "Studio director registered successfully",
-    201,
+    "Email verified successfully",
+    200,
   );
+}
+
+export async function resendVerification(
+  req: TypedRequest<ResendVerificationInput, unknown, unknown, ReqHeaders>,
+  reply: FastifyReply,
+) {
+  const result = await authService.resendVerificationService(req.body);
+  return reply.success([], result.message);
 }
 
 export async function login(
@@ -192,4 +216,15 @@ export async function updateMe(
 ) {
   const result = await authService.updateMeService(req.user.userId, req.body);
   return reply.success(result, "User profile updated successfully");
+}
+
+export async function changePassword(
+  req: TypedRequest<ChangePasswordInput, unknown, unknown, ReqHeaders>,
+  reply: FastifyReply,
+) {
+  const result = await authService.changePasswordService(
+    req.user.userId,
+    req.body,
+  );
+  return reply.success([], result.message);
 }

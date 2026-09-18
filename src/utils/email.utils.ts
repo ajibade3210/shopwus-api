@@ -70,6 +70,26 @@ export async function sendWelcomeEmail(
   });
 }
 
+export async function sendVerificationOtpEmail(
+  to: string,
+  name: string,
+  otp: string,
+  studioName?: string,
+) {
+  return sendEmailHandler({
+    to,
+    subject: "Verify Your Shopwus Account",
+    template: EmailTemplateNames.WELCOME_OTP,
+    context: {
+      name,
+      email: to,
+      otp,
+      studioName,
+      expiryMinutes: 15,
+    },
+  });
+}
+
 export async function sendNewLeadNotificationEmail(
   options: SendNewLeadNotificationOptions,
 ) {
@@ -85,3 +105,4 @@ export async function sendNewLeadNotificationEmail(
     },
   });
 }
+

@@ -1,11 +1,12 @@
 import argon2 from "argon2";
 import { EmailTemplateNames } from "../../../config/constants/emailTemplateInputs";
 import { env } from "../../../config/env";
-import { NotFoundError, UnauthorizedError } from "../../../lib/errors";
+import { NotFoundError, UnauthorizedError, ValidationError } from "../../../lib/errors";
 import { logger } from "../../../lib/logger";
 import { prisma } from "../../../lib/prisma";
 import { generateOtp, getDateTime, sendEmailHandler } from "../../../utils";
 import type {
+  ChangePasswordInput,
   ForgotPasswordInput,
   ResetPasswordInput,
   UpdateMeInput,
@@ -75,6 +76,7 @@ export async function resetPasswordService(data: ResetPasswordInput) {
     where: { id: user.id },
     data: {
       passwordHash,
+      emailVerified: true,
       resetToken: null,
       resetExpiringAt: null,
     },
@@ -110,6 +112,9 @@ export async function meService(userId: string) {
       role: user.role,
       avatarUrl: user.avatarUrl,
       isActive: user.isActive,
+      emailVerified: user.emailVerified,
+      hasPassword: Boolean(user.passwordHash),
+      isGoogleConnected: Boolean(user.googleId),
       studioId: primaryBusinessUser?.business.id,
       studioName: primaryBusinessUser?.business.name,
       studioSlug: primaryBusinessUser?.business.slug,
@@ -176,6 +181,9 @@ export async function updateMeService(userId: string, data: UpdateMeInput) {
       role: updatedUser.role,
       avatarUrl: updatedUser.avatarUrl,
       isActive: updatedUser.isActive,
+      emailVerified: updatedUser.emailVerified,
+      hasPassword: Boolean(updatedUser.passwordHash),
+      isGoogleConnected: Boolean(updatedUser.googleId),
       studioId: primaryBusinessUser?.business.id,
       studioName: primaryBusinessUser?.business.name,
       studioSlug: primaryBusinessUser?.business.slug,
@@ -194,4 +202,44 @@ export async function updateMeService(userId: string, data: UpdateMeInput) {
         }
       : null,
   };
+}
+
+export async function changePasswordService(
+  userId: string,
+  data: ChangePasswordInput,
+) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+  });
+
+  if (!user) throw new NotFoundError("User not found");
+
+  // If user already has a password set, verify current password
+  if (user.passwordHash) {
+    if (!data.currentPassword) {
+      throw new ValidationError(
+        "Current password is required to change your password.",
+      );
+    }
+
+    const isMatch = await argon2.verify(
+      user.passwordHash,
+      data.currentPassword,
+    );
+    if (!isMatch) {
+      throw new ValidationError("Current password does not match.");
+    }
+  }
+
+  // Hash new password and update
+  const newHash = await argon2.hash(data.newPassword);
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: {
+      passwordHash: newHash,
+    },
+  });
+
+  return { message: "Password updated successfully." };
 }

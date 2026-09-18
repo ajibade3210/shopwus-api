@@ -93,6 +93,7 @@ export async function socialSignInService(
           googleId: profile.providerId,
           role: "OWNER",
           isActive: true,
+          emailVerified: true,
         },
       });
 
@@ -166,17 +167,29 @@ export async function socialSignInService(
         "Failed to dispatch Google sign-in welcome email",
       );
     });
-  } else if (!user.googleId) {
-    // Link googleId to existing user
-    user = await prisma.user.update({
-      where: { id: user.id },
-      data: { googleId: profile.providerId },
-      include: {
-        businessUsers: {
-          include: { business: true },
+  } else {
+    // If linking googleId or activating unverified user
+    const wasUnverified = !user.emailVerified;
+    const shouldUpdateGoogle = !user.googleId;
+
+    if (wasUnverified || shouldUpdateGoogle) {
+      user = await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          ...(shouldUpdateGoogle ? { googleId: profile.providerId } : {}),
+          emailVerified: true,
+          verificationToken: null,
+          verificationExpires: null,
+          // Pre-ATO defense: if account was unverified, wipe prior unverified password
+          ...(wasUnverified ? { passwordHash: null } : {}),
         },
-      },
-    });
+        include: {
+          businessUsers: {
+            include: { business: true },
+          },
+        },
+      });
+    }
   }
 
   if (!user.isActive) {

@@ -1,4 +1,4 @@
-import { type PrismaClient, Prisma } from "@prisma/client";
+import { Prisma, type PrismaClient } from "@prisma/client";
 import argon2 from "argon2";
 
 export async function seedBusiness(prisma: PrismaClient) {
@@ -713,15 +713,19 @@ export async function seedBusiness(prisma: PrismaClient) {
     },
     update: {
       name: "Brand Systems & Identity",
-      description: "Complete visual identity bibles, typography systems, and core marks.",
-      imageUrl: "https://images.unsplash.com/photo-1600132806370-bf17e65e942f?auto=format&fit=crop&w=800&q=80",
+      description:
+        "Complete visual identity bibles, typography systems, and core marks.",
+      imageUrl:
+        "https://images.unsplash.com/photo-1600132806370-bf17e65e942f?auto=format&fit=crop&w=800&q=80",
     },
     create: {
       businessId: business.id,
       name: "Brand Systems & Identity",
       slug: "brand-systems",
-      description: "Complete visual identity bibles, typography systems, and core marks.",
-      imageUrl: "https://images.unsplash.com/photo-1600132806370-bf17e65e942f?auto=format&fit=crop&w=800&q=80",
+      description:
+        "Complete visual identity bibles, typography systems, and core marks.",
+      imageUrl:
+        "https://images.unsplash.com/photo-1600132806370-bf17e65e942f?auto=format&fit=crop&w=800&q=80",
     },
   });
 
@@ -731,15 +735,19 @@ export async function seedBusiness(prisma: PrismaClient) {
     },
     update: {
       name: "Editorial & Monograph Books",
-      description: "Hardcover monographs, exposed Swiss-bound art books, and layout systems.",
-      imageUrl: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=800&q=80",
+      description:
+        "Hardcover monographs, exposed Swiss-bound art books, and layout systems.",
+      imageUrl:
+        "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=800&q=80",
     },
     create: {
       businessId: business.id,
       name: "Editorial & Monograph Books",
       slug: "editorial-books",
-      description: "Hardcover monographs, exposed Swiss-bound art books, and layout systems.",
-      imageUrl: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=800&q=80",
+      description:
+        "Hardcover monographs, exposed Swiss-bound art books, and layout systems.",
+      imageUrl:
+        "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=800&q=80",
     },
   });
 
@@ -749,15 +757,19 @@ export async function seedBusiness(prisma: PrismaClient) {
     },
     update: {
       name: "Digital Design & UI Tokens",
-      description: "High-contrast design systems, tokenized mobile interfaces, and Figma component libraries.",
-      imageUrl: "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=800&q=80",
+      description:
+        "High-contrast design systems, tokenized mobile interfaces, and Figma component libraries.",
+      imageUrl:
+        "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=800&q=80",
     },
     create: {
       businessId: business.id,
       name: "Digital Design & UI Tokens",
       slug: "digital-tokens",
-      description: "High-contrast design systems, tokenized mobile interfaces, and Figma component libraries.",
-      imageUrl: "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=800&q=80",
+      description:
+        "High-contrast design systems, tokenized mobile interfaces, and Figma component libraries.",
+      imageUrl:
+        "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=800&q=80",
     },
   });
 
@@ -767,15 +779,19 @@ export async function seedBusiness(prisma: PrismaClient) {
     },
     update: {
       name: "Packaging & Spatial Objects",
-      description: "Bespoke unboxing boxes, foil stamp dies, and physical design artifacts.",
-      imageUrl: "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=800&q=80",
+      description:
+        "Bespoke unboxing boxes, foil stamp dies, and physical design artifacts.",
+      imageUrl:
+        "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=800&q=80",
     },
     create: {
       businessId: business.id,
       name: "Packaging & Spatial Objects",
       slug: "packaging-objects",
-      description: "Bespoke unboxing boxes, foil stamp dies, and physical design artifacts.",
-      imageUrl: "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=800&q=80",
+      description:
+        "Bespoke unboxing boxes, foil stamp dies, and physical design artifacts.",
+      imageUrl:
+        "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=800&q=80",
     },
   });
 
@@ -785,7 +801,8 @@ export async function seedBusiness(prisma: PrismaClient) {
       name: "Aethel Heritage Monograph & Foil Box Edition",
       slug: "aethel-heritage-monograph",
       categoryId: categoryEditorial.id,
-      description: "Limited hardcover architectural publication with custom blind debossed linen and foiled collector slipcase.",
+      description:
+        "Limited hardcover architectural publication with custom blind debossed linen and foiled collector slipcase.",
       sku: "ATH-MONO-01",
       price: new Prisma.Decimal(185000),
       compareAtPrice: new Prisma.Decimal(220000),
@@ -802,7 +819,8 @@ export async function seedBusiness(prisma: PrismaClient) {
       name: "Sora Protocol Dark-Mode UI/UX Token Library",
       slug: "sora-protocol-tokens",
       categoryId: categoryDigital.id,
-      description: "140+ pixel-perfect tokenized dashboard components, iOS layout grids, and dark-aesthetic animations.",
+      description:
+        "140+ pixel-perfect tokenized dashboard components, iOS layout grids, and dark-aesthetic animations.",
       sku: "SRA-TOK-02",
       price: new Prisma.Decimal(95000),
       compareAtPrice: new Prisma.Decimal(120000),
@@ -819,7 +837,8 @@ export async function seedBusiness(prisma: PrismaClient) {
       name: "Atelier Forma Complete Brand Identity Bible",
       slug: "brand-identity-bible",
       categoryId: categoryBrand.id,
-      description: "Comprehensive 48-page brand architecture guidelines, typography tokens, and monogram vector suite.",
+      description:
+        "Comprehensive 48-page brand architecture guidelines, typography tokens, and monogram vector suite.",
       sku: "FORMA-BIB-03",
       price: new Prisma.Decimal(240000),
       compareAtPrice: new Prisma.Decimal(280000),
@@ -836,7 +855,8 @@ export async function seedBusiness(prisma: PrismaClient) {
       name: "Kanso Architecture Monograph No. 04",
       slug: "kanso-architecture-monograph-04",
       categoryId: categoryEditorial.id,
-      description: "Swiss-bound architectural hardcover monograph printed on warm duotone offset paper stock.",
+      description:
+        "Swiss-bound architectural hardcover monograph printed on warm duotone offset paper stock.",
       sku: "KNS-MONO-04",
       price: new Prisma.Decimal(145000),
       compareAtPrice: new Prisma.Decimal(165000),
@@ -853,7 +873,8 @@ export async function seedBusiness(prisma: PrismaClient) {
       name: "Bespoke Linen Presentation Box Suite",
       slug: "linen-presentation-box-suite",
       categoryId: categoryPackaging.id,
-      description: "Custom debossed luxury presentation box with magnetic enclosure and custom velvet interior trays.",
+      description:
+        "Custom debossed luxury presentation box with magnetic enclosure and custom velvet interior trays.",
       sku: "BOX-LINEN-05",
       price: new Prisma.Decimal(85000),
       compareAtPrice: new Prisma.Decimal(105000),
@@ -869,7 +890,8 @@ export async function seedBusiness(prisma: PrismaClient) {
       name: "Kinetic Serif Display Type Specimen",
       slug: "kinetic-serif-type-specimen",
       categoryId: categoryBrand.id,
-      description: "Desktop & Web typography specimen showcasing complete glyph alternates and OpenType ligature tables.",
+      description:
+        "Desktop & Web typography specimen showcasing complete glyph alternates and OpenType ligature tables.",
       sku: "FNT-SRF-06",
       price: new Prisma.Decimal(65000),
       compareAtPrice: new Prisma.Decimal(80000),
@@ -885,7 +907,8 @@ export async function seedBusiness(prisma: PrismaClient) {
       name: "Fintech Design System Token Architecture",
       slug: "fintech-token-architecture",
       categoryId: categoryDigital.id,
-      description: "High-scale multi-platform token design repository for responsive web and React Native apps.",
+      description:
+        "High-scale multi-platform token design repository for responsive web and React Native apps.",
       sku: "DS-FNT-07",
       price: new Prisma.Decimal(110000),
       compareAtPrice: new Prisma.Decimal(130000),
@@ -901,7 +924,8 @@ export async function seedBusiness(prisma: PrismaClient) {
       name: "Blind Debossed Stationery Suite",
       slug: "blind-debossed-stationery-suite",
       categoryId: categoryPackaging.id,
-      description: "Letterpress business cards, blind debossed envelopes, and foiled luxury correspondence cards.",
+      description:
+        "Letterpress business cards, blind debossed envelopes, and foiled luxury correspondence cards.",
       sku: "STN-DEB-08",
       price: new Prisma.Decimal(55000),
       compareAtPrice: new Prisma.Decimal(70000),
@@ -917,7 +941,8 @@ export async function seedBusiness(prisma: PrismaClient) {
       name: "Swiss Grid Layout System Poster Folio",
       slug: "swiss-grid-layout-folio",
       categoryId: categoryEditorial.id,
-      description: "Set of 6 architectural format posters printed on 240gsm matte stock exploring rationalist layout grids.",
+      description:
+        "Set of 6 architectural format posters printed on 240gsm matte stock exploring rationalist layout grids.",
       sku: "PST-SWS-09",
       price: new Prisma.Decimal(42000),
       compareAtPrice: null,
@@ -934,7 +959,8 @@ export async function seedBusiness(prisma: PrismaClient) {
       name: "Private Studio Creative Consultation",
       slug: "private-studio-consultation",
       categoryId: null, // Demonstrates optional unassigned category support
-      description: "1-on-1 direct creative direction session with Elena Vance for brand transformation and publishing.",
+      description:
+        "1-on-1 direct creative direction session with Elena Vance for brand transformation and publishing.",
       sku: "CON-DIR-10",
       price: new Prisma.Decimal(75000),
       compareAtPrice: null,
@@ -951,7 +977,8 @@ export async function seedBusiness(prisma: PrismaClient) {
       name: "Monochrome Serif Type Family (Desktop & Web)",
       slug: "monochrome-serif-type-family",
       categoryId: categoryBrand.id,
-      description: "Complete 18-weight serif family with extensive Latin language support and mathematical glyphs.",
+      description:
+        "Complete 18-weight serif family with extensive Latin language support and mathematical glyphs.",
       sku: "FNT-MONO-11",
       price: new Prisma.Decimal(120000),
       compareAtPrice: new Prisma.Decimal(150000),
@@ -968,7 +995,8 @@ export async function seedBusiness(prisma: PrismaClient) {
       name: "Architectural Duotone Offset Print No. 01",
       slug: "duotone-offset-print-01",
       categoryId: categoryEditorial.id,
-      description: "Archival giclée print on 310gsm German etching rag exploring brutalist elevation profiles.",
+      description:
+        "Archival giclée print on 310gsm German etching rag exploring brutalist elevation profiles.",
       sku: "PRT-BRUT-12",
       price: new Prisma.Decimal(38000),
       compareAtPrice: new Prisma.Decimal(48000),
@@ -985,7 +1013,8 @@ export async function seedBusiness(prisma: PrismaClient) {
       name: "Minimalist iOS Design System & SwiftUI Tokens",
       slug: "minimalist-ios-tokens",
       categoryId: categoryDigital.id,
-      description: "Native iOS 18 SwiftUI token architecture, haptic feedback patterns, and fluid animations.",
+      description:
+        "Native iOS 18 SwiftUI token architecture, haptic feedback patterns, and fluid animations.",
       sku: "DS-IOS-13",
       price: new Prisma.Decimal(88000),
       compareAtPrice: new Prisma.Decimal(115000),
@@ -1002,7 +1031,8 @@ export async function seedBusiness(prisma: PrismaClient) {
       name: "Hand-Crafted Acrylic Paperweight Block",
       slug: "acrylic-paperweight-block",
       categoryId: categoryPackaging.id,
-      description: "Polished optical crystal cube with laser-etched typographic coordinate grid.",
+      description:
+        "Polished optical crystal cube with laser-etched typographic coordinate grid.",
       sku: "OBJ-CRY-14",
       price: new Prisma.Decimal(48000),
       compareAtPrice: new Prisma.Decimal(60000),
@@ -1019,7 +1049,8 @@ export async function seedBusiness(prisma: PrismaClient) {
       name: "Editorial Layout Grid Template Bundle",
       slug: "editorial-grid-template-bundle",
       categoryId: categoryEditorial.id,
-      description: "InDesign and Figma editorial layout kits for coffee table books, lookbooks, and annual reports.",
+      description:
+        "InDesign and Figma editorial layout kits for coffee table books, lookbooks, and annual reports.",
       sku: "TMP-EDT-15",
       price: new Prisma.Decimal(58000),
       compareAtPrice: new Prisma.Decimal(75000),
@@ -1036,7 +1067,8 @@ export async function seedBusiness(prisma: PrismaClient) {
       name: "Luxury Foil Stamped Certificate Suite",
       slug: "foil-stamped-certificate-suite",
       categoryId: categoryPackaging.id,
-      description: "Set of 50 heavy parchment certificates with hot foil stamping and blind embossed seal.",
+      description:
+        "Set of 50 heavy parchment certificates with hot foil stamping and blind embossed seal.",
       sku: "STN-CRT-16",
       price: new Prisma.Decimal(68000),
       compareAtPrice: new Prisma.Decimal(85000),
@@ -1053,7 +1085,8 @@ export async function seedBusiness(prisma: PrismaClient) {
       name: "E-Commerce Micro-Interactions & Motion Kit",
       slug: "ecommerce-motion-kit",
       categoryId: categoryDigital.id,
-      description: "Production-ready Framer Motion and CSS keyframe recipes for luxury boutique shopping carts.",
+      description:
+        "Production-ready Framer Motion and CSS keyframe recipes for luxury boutique shopping carts.",
       sku: "DS-MOT-17",
       price: new Prisma.Decimal(78000),
       compareAtPrice: new Prisma.Decimal(95000),
@@ -1070,7 +1103,8 @@ export async function seedBusiness(prisma: PrismaClient) {
       name: "Atelier Heritage Monogram Wax Seal Kit",
       slug: "monogram-wax-seal-kit",
       categoryId: categoryPackaging.id,
-      description: "Solid brass seal die with turned walnut handle, wickless wax sticks, and melting spoon.",
+      description:
+        "Solid brass seal die with turned walnut handle, wickless wax sticks, and melting spoon.",
       sku: "OBJ-WAX-18",
       price: new Prisma.Decimal(35000),
       compareAtPrice: null,
@@ -1087,7 +1121,8 @@ export async function seedBusiness(prisma: PrismaClient) {
       name: "Artisanal Japanese Binding Monograph",
       slug: "japanese-binding-monograph",
       categoryId: categoryEditorial.id,
-      description: "Four-hole stab binding monograph bound in hand-dyed indigo washi paper with raw silk thread.",
+      description:
+        "Four-hole stab binding monograph bound in hand-dyed indigo washi paper with raw silk thread.",
       sku: "BOK-JAP-19",
       price: new Prisma.Decimal(160000),
       compareAtPrice: new Prisma.Decimal(190000),
@@ -1104,7 +1139,8 @@ export async function seedBusiness(prisma: PrismaClient) {
       name: "Corporate Visual Identity Audit & Benchmark Kit",
       slug: "visual-identity-audit-kit",
       categoryId: categoryBrand.id,
-      description: "Comprehensive methodology framework, scorecard spreadsheets, and stakeholder interview decks.",
+      description:
+        "Comprehensive methodology framework, scorecard spreadsheets, and stakeholder interview decks.",
       sku: "ID-AUD-20",
       price: new Prisma.Decimal(90000),
       compareAtPrice: new Prisma.Decimal(110000),
@@ -1121,7 +1157,8 @@ export async function seedBusiness(prisma: PrismaClient) {
       name: "Kinetic Typography Motion Title Pack",
       slug: "kinetic-motion-title-pack",
       categoryId: categoryDigital.id,
-      description: "After Effects and Premiere Pro kinetic typography presets tailored for editorial campaigns.",
+      description:
+        "After Effects and Premiere Pro kinetic typography presets tailored for editorial campaigns.",
       sku: "MOT-TYP-21",
       price: new Prisma.Decimal(62000),
       compareAtPrice: new Prisma.Decimal(80000),
@@ -1138,7 +1175,8 @@ export async function seedBusiness(prisma: PrismaClient) {
       name: "Studio Portfolio Advisory & Positioning Session",
       slug: "studio-portfolio-advisory-session",
       categoryId: null, // 2nd null category product (maintaining ~91% categorized)
-      description: "60-minute intensive portfolio critique and agency positioning guidance with our senior design partners.",
+      description:
+        "60-minute intensive portfolio critique and agency positioning guidance with our senior design partners.",
       sku: "CON-ADV-22",
       price: new Prisma.Decimal(65000),
       compareAtPrice: null,
@@ -1171,5 +1209,7 @@ export async function seedBusiness(prisma: PrismaClient) {
     });
   }
 
-  console.info("✨ Demo Studio 'Atelier Forma' seeded successfully with 4 categories and 22 products (~91% categorized)!");
+  console.info(
+    "✨ Demo Studio 'Atelier Forma' seeded successfully with 4 categories and 22 products (~91% categorized)!",
+  );
 }

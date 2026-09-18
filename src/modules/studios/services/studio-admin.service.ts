@@ -178,47 +178,66 @@ export async function updateStudioMeService(
     dataToUpdate.portfolioCategories = input.portfolioCategories;
 
   // Storefront Banner & Sales Customizations
-  if (input.showStorefrontBanner !== undefined && input.showStorefrontBanner !== null) {
+  if (
+    input.showStorefrontBanner !== undefined &&
+    input.showStorefrontBanner !== null
+  ) {
     dataToUpdate.showStorefrontBanner = input.showStorefrontBanner;
   }
   if (input.storefrontBannerUrl !== undefined) {
-    dataToUpdate.storefrontBannerUrl = input.storefrontBannerUrl?.trim() || null;
+    dataToUpdate.storefrontBannerUrl =
+      input.storefrontBannerUrl?.trim() || null;
   }
   if (input.storefrontBannerHeader !== undefined) {
-    dataToUpdate.storefrontBannerHeader = input.storefrontBannerHeader?.trim() || null;
+    dataToUpdate.storefrontBannerHeader =
+      input.storefrontBannerHeader?.trim() || null;
   }
   if (input.storefrontBannerBody !== undefined) {
-    dataToUpdate.storefrontBannerBody = input.storefrontBannerBody?.trim() || null;
+    dataToUpdate.storefrontBannerBody =
+      input.storefrontBannerBody?.trim() || null;
   }
   if (input.storefrontBannerTextColor !== undefined) {
-    dataToUpdate.storefrontBannerTextColor = input.storefrontBannerTextColor?.trim() || null;
+    dataToUpdate.storefrontBannerTextColor =
+      input.storefrontBannerTextColor?.trim() || null;
   }
   if (input.storefrontBannerBgColor !== undefined) {
-    dataToUpdate.storefrontBannerBgColor = input.storefrontBannerBgColor?.trim() || null;
+    dataToUpdate.storefrontBannerBgColor =
+      input.storefrontBannerBgColor?.trim() || null;
   }
-  if (input.showStorefrontSales !== undefined && input.showStorefrontSales !== null) {
+  if (
+    input.showStorefrontSales !== undefined &&
+    input.showStorefrontSales !== null
+  ) {
     dataToUpdate.showStorefrontSales = input.showStorefrontSales;
   }
-  if (input.storefrontSalesPosition !== undefined && input.storefrontSalesPosition !== null) {
+  if (
+    input.storefrontSalesPosition !== undefined &&
+    input.storefrontSalesPosition !== null
+  ) {
     dataToUpdate.storefrontSalesPosition = input.storefrontSalesPosition;
   }
   if (input.storefrontSalesUrl !== undefined) {
     dataToUpdate.storefrontSalesUrl = input.storefrontSalesUrl?.trim() || null;
   }
   if (input.storefrontSalesHeader !== undefined) {
-    dataToUpdate.storefrontSalesHeader = input.storefrontSalesHeader?.trim() || null;
+    dataToUpdate.storefrontSalesHeader =
+      input.storefrontSalesHeader?.trim() || null;
   }
   if (input.storefrontSalesBody !== undefined) {
-    dataToUpdate.storefrontSalesBody = input.storefrontSalesBody?.trim() || null;
+    dataToUpdate.storefrontSalesBody =
+      input.storefrontSalesBody?.trim() || null;
   }
   if (input.storefrontSalesBtnText !== undefined) {
-    dataToUpdate.storefrontSalesBtnText = input.storefrontSalesBtnText?.trim() || null;
+    dataToUpdate.storefrontSalesBtnText =
+      input.storefrontSalesBtnText?.trim() || null;
   }
   if (input.storefrontSalesBtnUrl !== undefined) {
-    dataToUpdate.storefrontSalesBtnUrl = input.storefrontSalesBtnUrl?.trim() || null;
+    dataToUpdate.storefrontSalesBtnUrl =
+      input.storefrontSalesBtnUrl?.trim() || null;
   }
   if (input.storefrontSalesLinkType !== undefined) {
-    dataToUpdate.storefrontSalesLinkType = input.storefrontSalesLinkType?.trim() || null;
+    dataToUpdate.storefrontSalesLinkType =
+      input.storefrontSalesLinkType?.trim() || null;
   }
 
   await prisma.$transaction(async (tx) => {

@@ -93,7 +93,7 @@ export async function calculatePublicValuationService(
       name: "Net Assets",
       value: "Balance Sheet",
       impact: netAssets > 0 ? "positive" : "neutral",
-      detail: "Tangible studio assets, inventory, and equipment",
+      detail: "Tangible business assets, inventory, and equipment",
     },
     {
       id: "retention",

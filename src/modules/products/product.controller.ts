@@ -151,6 +151,7 @@ export async function getStorefrontProductsHandler(
   return reply.success(
     {
       items: result.items.map(serializeProduct),
+      categories: result.categories,
       meta: result.meta,
     },
     "Storefront products retrieved",

@@ -47,6 +47,23 @@ model Business {
   footerDescription   String?
   googleReviewsLink   String?
   portfolioCategories String[]           @default([])
+
+  // Storefront Customization
+  showStorefrontBanner       Boolean            @default(true)
+  storefrontBannerUrl         String?
+  storefrontBannerHeader      String?
+  storefrontBannerBody        String?
+  storefrontBannerTextColor   String?
+  storefrontBannerBgColor     String?
+  showStorefrontSales         Boolean            @default(false)
+  storefrontSalesPosition     String             @default("bottom")
+  storefrontSalesUrl          String?
+  storefrontSalesHeader       String?
+  storefrontSalesBody         String?
+  storefrontSalesBtnText      String?
+  storefrontSalesBtnUrl       String?
+  storefrontSalesLinkType     String?
+
   isPublished         Boolean            @default(false)
   isVerified          Boolean            @default(true)
   createdAt           DateTime           @default(now())

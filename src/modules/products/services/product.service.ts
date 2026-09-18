@@ -524,7 +524,7 @@ export async function getStorefrontProductsService(
 ) {
   const business = await prisma.business.findUnique({
     where: { slug: studioSlug },
-    select: { id: true },
+    select: { id: true, businessType: true },
   });
 
   if (!business) {
@@ -534,6 +534,111 @@ export async function getStorefrontProductsService(
   const { page, limit, search, categorySlug, isFeatured, sortBy, sortOrder } =
     query;
   const skip = (page - 1) * limit;
+
+  // Check if business has active products
+  const productCount = await prisma.product.count({
+    where: { businessId: business.id, status: "ACTIVE" },
+  });
+
+  // Fallback for businesses with zero products that offer services
+  if (productCount === 0) {
+    const totalServicesCount = await prisma.service.count({
+      where: { businessId: business.id },
+    });
+
+    if (totalServicesCount > 0) {
+      const serviceWhere: Prisma.ServiceWhereInput = {
+        businessId: business.id,
+      };
+
+    if (isFeatured !== undefined) {
+      serviceWhere.isFeatured = isFeatured;
+    }
+
+    if (categorySlug) {
+      // Decode slug to match case/spaces loosely
+      const normalizedCategory = categorySlug.replace(/-/g, " ");
+      serviceWhere.category = { contains: normalizedCategory, mode: "insensitive" };
+    }
+
+    if (search) {
+      const term = search.trim();
+      serviceWhere.OR = [
+        { name: { contains: term, mode: "insensitive" } },
+        { description: { contains: term, mode: "insensitive" } },
+        { category: { contains: term, mode: "insensitive" } },
+      ];
+    }
+
+    const [services, totalServices, categories] = await Promise.all([
+      prisma.service.findMany({
+        where: serviceWhere,
+        skip,
+        take: limit,
+        orderBy: sortBy === "price" ? { price: sortOrder } : { createdAt: sortOrder },
+      }),
+      prisma.service.count({ where: serviceWhere }),
+      prisma.category.findMany({
+        where: { businessId: business.id },
+        select: { id: true, name: true, slug: true, imageUrl: true },
+        orderBy: { name: "asc" },
+      }),
+    ]);
+
+    // Map Service items into Product-compatible catalog items
+    const items = services.map((s) => ({
+      id: s.id,
+      businessId: s.businessId,
+      categoryId: null,
+      name: s.name,
+      slug: s.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""),
+      description: s.description,
+      sku: null,
+      price: new Prisma.Decimal(s.price ? Number(s.price) : s.minPrice ? Number(s.minPrice) : 0),
+      compareAtPrice: null,
+      costPrice: null,
+      trackInventory: false,
+      inventoryCount: 999,
+      lowStockThreshold: 0,
+      allowBackorder: true,
+      hasVariants: false,
+      options: {} as Prisma.JsonValue,
+      images: [] as string[],
+      status: "ACTIVE" as const,
+      isFeatured: s.isFeatured,
+      attributes: {
+        priceType: s.priceType,
+        minPrice: s.minPrice ? Number(s.minPrice) : null,
+        maxPrice: s.maxPrice ? Number(s.maxPrice) : null,
+        isService: true,
+      } as Prisma.JsonValue,
+      requiresShipping: false,
+      weightKg: null,
+      createdAt: s.createdAt,
+      updatedAt: s.updatedAt,
+      category: s.category
+        ? {
+            id: `svc-cat-${s.category}`,
+            name: s.category,
+            slug: s.category.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""),
+          }
+        : null,
+      variants: [],
+    }));
+
+    return {
+      items,
+      categories,
+      meta: {
+        total: totalServices,
+        page,
+        limit,
+        totalPages: Math.ceil(totalServices / limit),
+        hasMore: skip + items.length < totalServices,
+      },
+    };
+    }
+  }
 
   const where: Prisma.ProductWhereInput = {
     businessId: business.id,
@@ -555,6 +660,7 @@ export async function getStorefrontProductsService(
     where.OR = [
       { name: { contains: term, mode: "insensitive" } },
       { description: { contains: term, mode: "insensitive" } },
+      { category: { name: { contains: term, mode: "insensitive" } } },
     ];
   }
 

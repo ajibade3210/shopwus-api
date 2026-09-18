@@ -1,4 +1,4 @@
-import type { PrismaClient } from "@prisma/client";
+import { type PrismaClient, Prisma } from "@prisma/client";
 import argon2 from "argon2";
 
 export async function seedBusiness(prisma: PrismaClient) {
@@ -29,68 +29,99 @@ export async function seedBusiness(prisma: PrismaClient) {
     },
   });
 
-  // 2. Create or update Studio Business
+  // 2. Create or update Studio Business with all preferences populated
+  const businessData = {
+    slug: "atelier-forma",
+    name: "Atelier Forma",
+    tagline: "Graphic Design, Brand Architecture & Visual Identity Atelier",
+    description:
+      "We partner with visionary founders, luxury ateliers, and technology pioneers to craft timeless visual identities, editorial publications, and high-conversion digital experiences.",
+    location: "Victoria Island, Lagos & Mayfair, London",
+    website: "https://atelierforma.design",
+    email: "studio@atelierforma.design",
+    phone: "+234 800 FORMA VIP",
+    whatsAppNumber: "+2348055966944",
+    operatingHours: "Mon–Fri",
+    timeFrom: "09:00 AM",
+    timeTo: "06:00 PM",
+    byAppointmentOnly: false,
+    logoUrl:
+      "https://cdn.accessa.ng/test/accessa/louis-dike-ayskyj/images/c95e52aa48bf676ed0d53f36bb957b81.png",
+    bannerUrl:
+      "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1600&q=80",
+    emailHeaderUrl:
+      "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1600&q=80",
+    headerType: "IMAGE",
+    includeHeaderInInvoice: true,
+    includeHeaderInEmail: true,
+    businessType: "sales",
+    currency: "NGN",
+    bankName: "Access Bank",
+    accountName: "Atelier Forma Limited",
+    accountNumber: "0123456789",
+    addressLine1: "14 Ahmadu Bello Way",
+    addressLine2: "Suite 5B, Victoria Island",
+    city: "Lagos",
+    state: "Lagos",
+    postalCode: "101241",
+    country: "Nigeria",
+    senderPhone: "+2348055966944",
+    enableStorePickup: true,
+    pickupInstructions:
+      "Pick up available Monday to Friday, 10am to 5pm at our Victoria Island design studio.",
+    enableHomeDelivery: true,
+    freeDeliveryThreshold: 150000,
+    fallbackShippingFee: 3500,
+    colors: {
+      primary: "#000000",
+      secondary: "#0058BE",
+      button: "#000000",
+      pageBackground: "#faf8f5",
+      cardBackground: "#faf6f0",
+      text: "#191C1D",
+    },
+    buttonRadius: "8px",
+    showServices: true,
+    showPortfolio: true,
+    showReviews: true,
+    showFooterCta: true,
+    footerEyebrow: "COMMISSION AN EDITORIAL WORK",
+    footerTitle: "Let's craft something timeless together",
+    footerDescription:
+      "Direct consultations open for Q3/Q4 brand transformations and bespoke publications.",
+    googleReviewsLink: "https://g.page/r/atelierforma/review",
+    portfolioCategories: [
+      "Brand Identity",
+      "UI/UX & Product",
+      "Packaging & Print",
+    ],
+    // Storefront Customization Preferences (All configured)
+    showStorefrontBanner: true,
+    storefrontBannerUrl:
+      "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=1600&q=80",
+    storefrontBannerHeader: "THE ARCHIVE COLLECTION",
+    storefrontBannerBody:
+      "Limited-run publications, bespoke type specimens, and collectible design artifacts crafted for collectors worldwide.",
+    storefrontBannerTextColor: "#FFFFFF",
+    storefrontBannerBgColor: "#0D1117",
+    showStorefrontSales: true,
+    storefrontSalesPosition: "bottom",
+    storefrontSalesUrl:
+      "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=1200&q=80",
+    storefrontSalesHeader: "Mid-Season Archive Acquisition",
+    storefrontSalesBody:
+      "Complimentary express global delivery and signed bookplates with all limited-edition volumes this week.",
+    storefrontSalesBtnText: "Explore The Collection",
+    storefrontSalesBtnUrl: "/atelier-forma?category=luxury-totes",
+    storefrontSalesLinkType: "category",
+    isPublished: true,
+    isVerified: true,
+  };
+
   const business = await prisma.business.upsert({
     where: { slug: "atelier-forma" },
-    update: {
-      name: "Atelier Forma",
-      tagline: "Graphic Design, Brand Architecture & Visual Identity Atelier",
-      description:
-        "We partner with visionary founders, luxury ateliers, and technology pioneers to craft timeless visual identities, editorial publications, and high-conversion digital experiences.",
-      location: "Victoria Island, Lagos & Mayfair, London",
-      website: "https://atelierforma.design",
-      email: "studio@atelierforma.design",
-      phone: "+234 800 FORMA VIP",
-      whatsAppNumber: "+2348055966944",
-      operatingHours: "Mon–Fri",
-      timeFrom: "09:00 AM",
-      timeTo: "06:00 PM",
-      byAppointmentOnly: false,
-      logoUrl:
-        "https://cdn.accessa.ng/test/accessa/louis-dike-ayskyj/images/c95e52aa48bf676ed0d53f36bb957b81.png",
-      businessType: "sales",
-      currency: "NGN",
-      colors: {
-        primary: "#000000",
-        secondary: "#0058BE",
-        button: "#000000",
-        pageBackground: "#faf8f5",
-        cardBackground: "#faf6f0",
-        text: "#191C1D",
-      },
-      buttonRadius: "8px",
-      isPublished: true,
-    },
-    create: {
-      slug: "atelier-forma",
-      name: "Atelier Forma",
-      tagline: "Graphic Design, Brand Architecture & Visual Identity Atelier",
-      description:
-        "We partner with visionary founders, luxury ateliers, and technology pioneers to craft timeless visual identities, editorial publications, and high-conversion digital experiences.",
-      location: "Victoria Island, Lagos & Mayfair, London",
-      website: "https://atelierforma.design",
-      email: "studio@atelierforma.design",
-      phone: "+234 800 FORMA VIP",
-      whatsAppNumber: "+2348055966944",
-      operatingHours: "Mon–Fri",
-      timeFrom: "09:00 AM",
-      timeTo: "06:00 PM",
-      byAppointmentOnly: false,
-      logoUrl:
-        "https://cdn.accessa.ng/test/accessa/louis-dike-ayskyj/images/c95e52aa48bf676ed0d53f36bb957b81.png",
-      businessType: "sales",
-      currency: "NGN",
-      colors: {
-        primary: "#000000",
-        secondary: "#0058BE",
-        button: "#000000",
-        pageBackground: "#faf8f5",
-        cardBackground: "#faf6f0",
-        text: "#191C1D",
-      },
-      buttonRadius: "8px",
-      isPublished: true,
-    },
+    update: businessData,
+    create: businessData,
   });
 
   // 3. Link User to Business
@@ -675,5 +706,470 @@ export async function seedBusiness(prisma: PrismaClient) {
     });
   }
 
-  console.info("✨ Demo Studio 'Atelier Forma' seeded successfully!");
+  // 15. Storefront Categories
+  const categoryBrand = await prisma.category.upsert({
+    where: {
+      businessId_slug: { businessId: business.id, slug: "brand-systems" },
+    },
+    update: {
+      name: "Brand Systems & Identity",
+      description: "Complete visual identity bibles, typography systems, and core marks.",
+      imageUrl: "https://images.unsplash.com/photo-1600132806370-bf17e65e942f?auto=format&fit=crop&w=800&q=80",
+    },
+    create: {
+      businessId: business.id,
+      name: "Brand Systems & Identity",
+      slug: "brand-systems",
+      description: "Complete visual identity bibles, typography systems, and core marks.",
+      imageUrl: "https://images.unsplash.com/photo-1600132806370-bf17e65e942f?auto=format&fit=crop&w=800&q=80",
+    },
+  });
+
+  const categoryEditorial = await prisma.category.upsert({
+    where: {
+      businessId_slug: { businessId: business.id, slug: "editorial-books" },
+    },
+    update: {
+      name: "Editorial & Monograph Books",
+      description: "Hardcover monographs, exposed Swiss-bound art books, and layout systems.",
+      imageUrl: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=800&q=80",
+    },
+    create: {
+      businessId: business.id,
+      name: "Editorial & Monograph Books",
+      slug: "editorial-books",
+      description: "Hardcover monographs, exposed Swiss-bound art books, and layout systems.",
+      imageUrl: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=800&q=80",
+    },
+  });
+
+  const categoryDigital = await prisma.category.upsert({
+    where: {
+      businessId_slug: { businessId: business.id, slug: "digital-tokens" },
+    },
+    update: {
+      name: "Digital Design & UI Tokens",
+      description: "High-contrast design systems, tokenized mobile interfaces, and Figma component libraries.",
+      imageUrl: "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=800&q=80",
+    },
+    create: {
+      businessId: business.id,
+      name: "Digital Design & UI Tokens",
+      slug: "digital-tokens",
+      description: "High-contrast design systems, tokenized mobile interfaces, and Figma component libraries.",
+      imageUrl: "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=800&q=80",
+    },
+  });
+
+  const categoryPackaging = await prisma.category.upsert({
+    where: {
+      businessId_slug: { businessId: business.id, slug: "packaging-objects" },
+    },
+    update: {
+      name: "Packaging & Spatial Objects",
+      description: "Bespoke unboxing boxes, foil stamp dies, and physical design artifacts.",
+      imageUrl: "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=800&q=80",
+    },
+    create: {
+      businessId: business.id,
+      name: "Packaging & Spatial Objects",
+      slug: "packaging-objects",
+      description: "Bespoke unboxing boxes, foil stamp dies, and physical design artifacts.",
+      imageUrl: "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=800&q=80",
+    },
+  });
+
+  // 16. Products (10 items: 9 with categories = 90%, 1 with null category = 10%)
+  const productsData = [
+    {
+      name: "Aethel Heritage Monograph & Foil Box Edition",
+      slug: "aethel-heritage-monograph",
+      categoryId: categoryEditorial.id,
+      description: "Limited hardcover architectural publication with custom blind debossed linen and foiled collector slipcase.",
+      sku: "ATH-MONO-01",
+      price: new Prisma.Decimal(185000),
+      compareAtPrice: new Prisma.Decimal(220000),
+      costPrice: new Prisma.Decimal(95000),
+      trackInventory: true,
+      inventoryCount: 14,
+      isFeatured: true,
+      images: [
+        "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=800&q=80",
+      ],
+    },
+    {
+      name: "Sora Protocol Dark-Mode UI/UX Token Library",
+      slug: "sora-protocol-tokens",
+      categoryId: categoryDigital.id,
+      description: "140+ pixel-perfect tokenized dashboard components, iOS layout grids, and dark-aesthetic animations.",
+      sku: "SRA-TOK-02",
+      price: new Prisma.Decimal(95000),
+      compareAtPrice: new Prisma.Decimal(120000),
+      costPrice: new Prisma.Decimal(30000),
+      trackInventory: false,
+      inventoryCount: 999,
+      isFeatured: true,
+      images: [
+        "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80",
+      ],
+    },
+    {
+      name: "Atelier Forma Complete Brand Identity Bible",
+      slug: "brand-identity-bible",
+      categoryId: categoryBrand.id,
+      description: "Comprehensive 48-page brand architecture guidelines, typography tokens, and monogram vector suite.",
+      sku: "FORMA-BIB-03",
+      price: new Prisma.Decimal(240000),
+      compareAtPrice: new Prisma.Decimal(280000),
+      costPrice: new Prisma.Decimal(110000),
+      trackInventory: true,
+      inventoryCount: 9,
+      isFeatured: true,
+      images: [
+        "https://images.unsplash.com/photo-1600132806370-bf17e65e942f?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=800&q=80",
+      ],
+    },
+    {
+      name: "Kanso Architecture Monograph No. 04",
+      slug: "kanso-architecture-monograph-04",
+      categoryId: categoryEditorial.id,
+      description: "Swiss-bound architectural hardcover monograph printed on warm duotone offset paper stock.",
+      sku: "KNS-MONO-04",
+      price: new Prisma.Decimal(145000),
+      compareAtPrice: new Prisma.Decimal(165000),
+      costPrice: new Prisma.Decimal(65000),
+      trackInventory: true,
+      inventoryCount: 18,
+      isFeatured: true,
+      images: [
+        "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=800&q=80",
+      ],
+    },
+    {
+      name: "Bespoke Linen Presentation Box Suite",
+      slug: "linen-presentation-box-suite",
+      categoryId: categoryPackaging.id,
+      description: "Custom debossed luxury presentation box with magnetic enclosure and custom velvet interior trays.",
+      sku: "BOX-LINEN-05",
+      price: new Prisma.Decimal(85000),
+      compareAtPrice: new Prisma.Decimal(105000),
+      costPrice: new Prisma.Decimal(35000),
+      trackInventory: true,
+      inventoryCount: 12,
+      isFeatured: false,
+      images: [
+        "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=800&q=80",
+      ],
+    },
+    {
+      name: "Kinetic Serif Display Type Specimen",
+      slug: "kinetic-serif-type-specimen",
+      categoryId: categoryBrand.id,
+      description: "Desktop & Web typography specimen showcasing complete glyph alternates and OpenType ligature tables.",
+      sku: "FNT-SRF-06",
+      price: new Prisma.Decimal(65000),
+      compareAtPrice: new Prisma.Decimal(80000),
+      costPrice: new Prisma.Decimal(15000),
+      trackInventory: false,
+      inventoryCount: 999,
+      isFeatured: false,
+      images: [
+        "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=800&q=80",
+      ],
+    },
+    {
+      name: "Fintech Design System Token Architecture",
+      slug: "fintech-token-architecture",
+      categoryId: categoryDigital.id,
+      description: "High-scale multi-platform token design repository for responsive web and React Native apps.",
+      sku: "DS-FNT-07",
+      price: new Prisma.Decimal(110000),
+      compareAtPrice: new Prisma.Decimal(130000),
+      costPrice: new Prisma.Decimal(40000),
+      trackInventory: false,
+      inventoryCount: 999,
+      isFeatured: false,
+      images: [
+        "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80",
+      ],
+    },
+    {
+      name: "Blind Debossed Stationery Suite",
+      slug: "blind-debossed-stationery-suite",
+      categoryId: categoryPackaging.id,
+      description: "Letterpress business cards, blind debossed envelopes, and foiled luxury correspondence cards.",
+      sku: "STN-DEB-08",
+      price: new Prisma.Decimal(55000),
+      compareAtPrice: new Prisma.Decimal(70000),
+      costPrice: new Prisma.Decimal(22000),
+      trackInventory: true,
+      inventoryCount: 25,
+      isFeatured: false,
+      images: [
+        "https://images.unsplash.com/photo-1600132806370-bf17e65e942f?auto=format&fit=crop&w=800&q=80",
+      ],
+    },
+    {
+      name: "Swiss Grid Layout System Poster Folio",
+      slug: "swiss-grid-layout-folio",
+      categoryId: categoryEditorial.id,
+      description: "Set of 6 architectural format posters printed on 240gsm matte stock exploring rationalist layout grids.",
+      sku: "PST-SWS-09",
+      price: new Prisma.Decimal(42000),
+      compareAtPrice: null,
+      costPrice: new Prisma.Decimal(16000),
+      trackInventory: true,
+      inventoryCount: 30,
+      isFeatured: false,
+      images: [
+        "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=800&q=80",
+      ],
+    },
+    // Product 10: UNASSIGNED CATEGORY (categoryId is null)
+    {
+      name: "Private Studio Creative Consultation",
+      slug: "private-studio-consultation",
+      categoryId: null, // Demonstrates optional unassigned category support
+      description: "1-on-1 direct creative direction session with Elena Vance for brand transformation and publishing.",
+      sku: "CON-DIR-10",
+      price: new Prisma.Decimal(75000),
+      compareAtPrice: null,
+      costPrice: new Prisma.Decimal(0),
+      trackInventory: false,
+      inventoryCount: 50,
+      isFeatured: false,
+      images: [
+        "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80",
+      ],
+    },
+    // Product 11: Brand Systems
+    {
+      name: "Monochrome Serif Type Family (Desktop & Web)",
+      slug: "monochrome-serif-type-family",
+      categoryId: categoryBrand.id,
+      description: "Complete 18-weight serif family with extensive Latin language support and mathematical glyphs.",
+      sku: "FNT-MONO-11",
+      price: new Prisma.Decimal(120000),
+      compareAtPrice: new Prisma.Decimal(150000),
+      costPrice: new Prisma.Decimal(25000),
+      trackInventory: false,
+      inventoryCount: 999,
+      isFeatured: false,
+      images: [
+        "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=800&q=80",
+      ],
+    },
+    // Product 12: Editorial Books
+    {
+      name: "Architectural Duotone Offset Print No. 01",
+      slug: "duotone-offset-print-01",
+      categoryId: categoryEditorial.id,
+      description: "Archival giclée print on 310gsm German etching rag exploring brutalist elevation profiles.",
+      sku: "PRT-BRUT-12",
+      price: new Prisma.Decimal(38000),
+      compareAtPrice: new Prisma.Decimal(48000),
+      costPrice: new Prisma.Decimal(14000),
+      trackInventory: true,
+      inventoryCount: 22,
+      isFeatured: false,
+      images: [
+        "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=800&q=80",
+      ],
+    },
+    // Product 13: Digital Tokens
+    {
+      name: "Minimalist iOS Design System & SwiftUI Tokens",
+      slug: "minimalist-ios-tokens",
+      categoryId: categoryDigital.id,
+      description: "Native iOS 18 SwiftUI token architecture, haptic feedback patterns, and fluid animations.",
+      sku: "DS-IOS-13",
+      price: new Prisma.Decimal(88000),
+      compareAtPrice: new Prisma.Decimal(115000),
+      costPrice: new Prisma.Decimal(20000),
+      trackInventory: false,
+      inventoryCount: 999,
+      isFeatured: false,
+      images: [
+        "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=800&q=80",
+      ],
+    },
+    // Product 14: Packaging Objects
+    {
+      name: "Hand-Crafted Acrylic Paperweight Block",
+      slug: "acrylic-paperweight-block",
+      categoryId: categoryPackaging.id,
+      description: "Polished optical crystal cube with laser-etched typographic coordinate grid.",
+      sku: "OBJ-CRY-14",
+      price: new Prisma.Decimal(48000),
+      compareAtPrice: new Prisma.Decimal(60000),
+      costPrice: new Prisma.Decimal(19000),
+      trackInventory: true,
+      inventoryCount: 16,
+      isFeatured: false,
+      images: [
+        "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=800&q=80",
+      ],
+    },
+    // Product 15: Editorial Books
+    {
+      name: "Editorial Layout Grid Template Bundle",
+      slug: "editorial-grid-template-bundle",
+      categoryId: categoryEditorial.id,
+      description: "InDesign and Figma editorial layout kits for coffee table books, lookbooks, and annual reports.",
+      sku: "TMP-EDT-15",
+      price: new Prisma.Decimal(58000),
+      compareAtPrice: new Prisma.Decimal(75000),
+      costPrice: new Prisma.Decimal(12000),
+      trackInventory: false,
+      inventoryCount: 999,
+      isFeatured: false,
+      images: [
+        "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=800&q=80",
+      ],
+    },
+    // Product 16: Packaging Objects
+    {
+      name: "Luxury Foil Stamped Certificate Suite",
+      slug: "foil-stamped-certificate-suite",
+      categoryId: categoryPackaging.id,
+      description: "Set of 50 heavy parchment certificates with hot foil stamping and blind embossed seal.",
+      sku: "STN-CRT-16",
+      price: new Prisma.Decimal(68000),
+      compareAtPrice: new Prisma.Decimal(85000),
+      costPrice: new Prisma.Decimal(28000),
+      trackInventory: true,
+      inventoryCount: 19,
+      isFeatured: false,
+      images: [
+        "https://images.unsplash.com/photo-1600132806370-bf17e65e942f?auto=format&fit=crop&w=800&q=80",
+      ],
+    },
+    // Product 17: Digital Tokens
+    {
+      name: "E-Commerce Micro-Interactions & Motion Kit",
+      slug: "ecommerce-motion-kit",
+      categoryId: categoryDigital.id,
+      description: "Production-ready Framer Motion and CSS keyframe recipes for luxury boutique shopping carts.",
+      sku: "DS-MOT-17",
+      price: new Prisma.Decimal(78000),
+      compareAtPrice: new Prisma.Decimal(95000),
+      costPrice: new Prisma.Decimal(18000),
+      trackInventory: false,
+      inventoryCount: 999,
+      isFeatured: false,
+      images: [
+        "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80",
+      ],
+    },
+    // Product 18: Packaging Objects
+    {
+      name: "Atelier Heritage Monogram Wax Seal Kit",
+      slug: "monogram-wax-seal-kit",
+      categoryId: categoryPackaging.id,
+      description: "Solid brass seal die with turned walnut handle, wickless wax sticks, and melting spoon.",
+      sku: "OBJ-WAX-18",
+      price: new Prisma.Decimal(35000),
+      compareAtPrice: null,
+      costPrice: new Prisma.Decimal(15000),
+      trackInventory: true,
+      inventoryCount: 40,
+      isFeatured: false,
+      images: [
+        "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=800&q=80",
+      ],
+    },
+    // Product 19: Editorial Books
+    {
+      name: "Artisanal Japanese Binding Monograph",
+      slug: "japanese-binding-monograph",
+      categoryId: categoryEditorial.id,
+      description: "Four-hole stab binding monograph bound in hand-dyed indigo washi paper with raw silk thread.",
+      sku: "BOK-JAP-19",
+      price: new Prisma.Decimal(160000),
+      compareAtPrice: new Prisma.Decimal(190000),
+      costPrice: new Prisma.Decimal(70000),
+      trackInventory: true,
+      inventoryCount: 11,
+      isFeatured: false,
+      images: [
+        "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=800&q=80",
+      ],
+    },
+    // Product 20: Brand Systems
+    {
+      name: "Corporate Visual Identity Audit & Benchmark Kit",
+      slug: "visual-identity-audit-kit",
+      categoryId: categoryBrand.id,
+      description: "Comprehensive methodology framework, scorecard spreadsheets, and stakeholder interview decks.",
+      sku: "ID-AUD-20",
+      price: new Prisma.Decimal(90000),
+      compareAtPrice: new Prisma.Decimal(110000),
+      costPrice: new Prisma.Decimal(25000),
+      trackInventory: false,
+      inventoryCount: 999,
+      isFeatured: false,
+      images: [
+        "https://images.unsplash.com/photo-1600132806370-bf17e65e942f?auto=format&fit=crop&w=800&q=80",
+      ],
+    },
+    // Product 21: Digital Tokens
+    {
+      name: "Kinetic Typography Motion Title Pack",
+      slug: "kinetic-motion-title-pack",
+      categoryId: categoryDigital.id,
+      description: "After Effects and Premiere Pro kinetic typography presets tailored for editorial campaigns.",
+      sku: "MOT-TYP-21",
+      price: new Prisma.Decimal(62000),
+      compareAtPrice: new Prisma.Decimal(80000),
+      costPrice: new Prisma.Decimal(15000),
+      trackInventory: false,
+      inventoryCount: 999,
+      isFeatured: false,
+      images: [
+        "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=800&q=80",
+      ],
+    },
+    // Product 22: UNASSIGNED CATEGORY (categoryId is null)
+    {
+      name: "Studio Portfolio Advisory & Positioning Session",
+      slug: "studio-portfolio-advisory-session",
+      categoryId: null, // 2nd null category product (maintaining ~91% categorized)
+      description: "60-minute intensive portfolio critique and agency positioning guidance with our senior design partners.",
+      sku: "CON-ADV-22",
+      price: new Prisma.Decimal(65000),
+      compareAtPrice: null,
+      costPrice: new Prisma.Decimal(0),
+      trackInventory: false,
+      inventoryCount: 30,
+      isFeatured: false,
+      images: [
+        "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80",
+      ],
+    },
+  ];
+
+  for (const prod of productsData) {
+    await prisma.product.upsert({
+      where: {
+        businessId_slug: { businessId: business.id, slug: prod.slug },
+      },
+      update: {
+        ...prod,
+        status: "ACTIVE",
+        requiresShipping: prod.categoryId !== null,
+      },
+      create: {
+        businessId: business.id,
+        ...prod,
+        status: "ACTIVE",
+        requiresShipping: prod.categoryId !== null,
+      },
+    });
+  }
+
+  console.info("✨ Demo Studio 'Atelier Forma' seeded successfully with 4 categories and 22 products (~91% categorized)!");
 }

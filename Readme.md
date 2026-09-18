@@ -89,10 +89,18 @@ pnpm seed:products bluemajic321@gmail.com
 cd shopwus-api
 npx prisma migrate dev --name add_logistics_sweep_and_terminal_delivery
 
+npx prisma generate
+# or using pnpm:
+pnpm db:generate
+
 # Point your DATABASE_URL in .env to your dev database, then run:
 npm run db:migrate
 # Or directly:
 npx prisma migrate deploy
+
+npx prisma db seed
+# or using pnpm:
+pnpm db:seed
 ```
 
 Integration tests use `app.inject()` — no HTTP port needed, full request lifecycle tested

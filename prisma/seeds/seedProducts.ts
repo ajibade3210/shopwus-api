@@ -12,7 +12,9 @@ import { basePrisma as prisma } from "../../src/lib/prisma";
 dotenv.config();
 
 export async function seedProductsForEmail(targetEmail: string) {
-  console.info(`\n👜 Seeding Designer Catalog, Variants & Orders for: ${targetEmail}`);
+  console.info(
+    `\n👜 Seeding Designer Catalog, Variants & Orders for: ${targetEmail}`,
+  );
 
   // 1. Lookup user by email
   const user = await prisma.user.findUnique({
@@ -140,7 +142,10 @@ export async function seedProductsForEmail(targetEmail: string) {
   const satchelOptions = [
     { name: "Color", values: ["Onyx Black", "Cognac Tan", "Emerald Forest"] },
     { name: "Size", values: ["Medium (28cm)", "Grand (35cm)"] },
-    { name: "Hardware Finish", values: ["24k Polished Gold", "Brushed Palladium"] },
+    {
+      name: "Hardware Finish",
+      values: ["24k Polished Gold", "Brushed Palladium"],
+    },
   ];
 
   const satchelVariants = [
@@ -150,7 +155,11 @@ export async function seedProductsForEmail(targetEmail: string) {
       price: new Prisma.Decimal(185000),
       compareAtPrice: new Prisma.Decimal(210000),
       inventoryCount: 8,
-      options: { Color: "Onyx Black", Size: "Medium (28cm)", "Hardware Finish": "24k Polished Gold" },
+      options: {
+        Color: "Onyx Black",
+        Size: "Medium (28cm)",
+        "Hardware Finish": "24k Polished Gold",
+      },
       imageUrl:
         "https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=800&q=80",
     },
@@ -160,7 +169,11 @@ export async function seedProductsForEmail(targetEmail: string) {
       price: new Prisma.Decimal(185000),
       compareAtPrice: new Prisma.Decimal(210000),
       inventoryCount: 6,
-      options: { Color: "Onyx Black", Size: "Medium (28cm)", "Hardware Finish": "Brushed Palladium" },
+      options: {
+        Color: "Onyx Black",
+        Size: "Medium (28cm)",
+        "Hardware Finish": "Brushed Palladium",
+      },
       imageUrl:
         "https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=800&q=80",
     },
@@ -170,7 +183,11 @@ export async function seedProductsForEmail(targetEmail: string) {
       price: new Prisma.Decimal(225000),
       compareAtPrice: new Prisma.Decimal(250000),
       inventoryCount: 5,
-      options: { Color: "Onyx Black", Size: "Grand (35cm)", "Hardware Finish": "24k Polished Gold" },
+      options: {
+        Color: "Onyx Black",
+        Size: "Grand (35cm)",
+        "Hardware Finish": "24k Polished Gold",
+      },
       imageUrl:
         "https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=800&q=80",
     },
@@ -180,7 +197,11 @@ export async function seedProductsForEmail(targetEmail: string) {
       price: new Prisma.Decimal(185000),
       compareAtPrice: new Prisma.Decimal(210000),
       inventoryCount: 7,
-      options: { Color: "Cognac Tan", Size: "Medium (28cm)", "Hardware Finish": "24k Polished Gold" },
+      options: {
+        Color: "Cognac Tan",
+        Size: "Medium (28cm)",
+        "Hardware Finish": "24k Polished Gold",
+      },
       imageUrl:
         "https://images.unsplash.com/photo-1591561954557-26941169b49e?auto=format&fit=crop&w=800&q=80",
     },
@@ -190,7 +211,11 @@ export async function seedProductsForEmail(targetEmail: string) {
       price: new Prisma.Decimal(225000),
       compareAtPrice: new Prisma.Decimal(250000),
       inventoryCount: 4,
-      options: { Color: "Cognac Tan", Size: "Grand (35cm)", "Hardware Finish": "24k Polished Gold" },
+      options: {
+        Color: "Cognac Tan",
+        Size: "Grand (35cm)",
+        "Hardware Finish": "24k Polished Gold",
+      },
       imageUrl:
         "https://images.unsplash.com/photo-1591561954557-26941169b49e?auto=format&fit=crop&w=800&q=80",
     },
@@ -200,7 +225,11 @@ export async function seedProductsForEmail(targetEmail: string) {
       price: new Prisma.Decimal(195000),
       compareAtPrice: new Prisma.Decimal(220000),
       inventoryCount: 3,
-      options: { Color: "Emerald Forest", Size: "Medium (28cm)", "Hardware Finish": "24k Polished Gold" },
+      options: {
+        Color: "Emerald Forest",
+        Size: "Medium (28cm)",
+        "Hardware Finish": "24k Polished Gold",
+      },
       imageUrl:
         "https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?auto=format&fit=crop&w=800&q=80",
     },
@@ -210,23 +239,42 @@ export async function seedProductsForEmail(targetEmail: string) {
       price: new Prisma.Decimal(235000),
       compareAtPrice: new Prisma.Decimal(260000),
       inventoryCount: 2,
-      options: { Color: "Emerald Forest", Size: "Grand (35cm)", "Hardware Finish": "Brushed Palladium" },
+      options: {
+        Color: "Emerald Forest",
+        Size: "Grand (35cm)",
+        "Hardware Finish": "Brushed Palladium",
+      },
       imageUrl:
         "https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?auto=format&fit=crop&w=800&q=80",
     },
   ];
 
-  const satchelStock = satchelVariants.reduce((sum, v) => sum + v.inventoryCount, 0);
+  const satchelStock = satchelVariants.reduce(
+    (sum, v) => sum + v.inventoryCount,
+    0,
+  );
 
   const existingProd1 = await prisma.product.findUnique({
-    where: { businessId_slug: { businessId: business.id, slug: "the-saffiano-heritage-satchel" } },
+    where: {
+      businessId_slug: {
+        businessId: business.id,
+        slug: "the-saffiano-heritage-satchel",
+      },
+    },
   });
   if (existingProd1) {
-    await prisma.productVariant.deleteMany({ where: { productId: existingProd1.id } });
+    await prisma.productVariant.deleteMany({
+      where: { productId: existingProd1.id },
+    });
   }
 
   const prod1 = await prisma.product.upsert({
-    where: { businessId_slug: { businessId: business.id, slug: "the-saffiano-heritage-satchel" } },
+    where: {
+      businessId_slug: {
+        businessId: business.id,
+        slug: "the-saffiano-heritage-satchel",
+      },
+    },
     update: {
       name: "The Saffiano Heritage Satchel",
       categoryId: catShoulder.id,
@@ -274,7 +322,10 @@ export async function seedProductsForEmail(targetEmail: string) {
 
   // Product 2: Minimalist Structured Day Tote (Options: Material Finish, Size)
   const toteOptions = [
-    { name: "Material Finish", values: ["Smooth Italian Calfskin", "Pebble Grained Leather"] },
+    {
+      name: "Material Finish",
+      values: ["Smooth Italian Calfskin", "Pebble Grained Leather"],
+    },
     { name: "Size", values: ["Standard (14-inch)", "Executive (16-inch)"] },
   ];
 
@@ -285,7 +336,10 @@ export async function seedProductsForEmail(targetEmail: string) {
       price: new Prisma.Decimal(125000),
       compareAtPrice: new Prisma.Decimal(145000),
       inventoryCount: 10,
-      options: { "Material Finish": "Smooth Italian Calfskin", Size: "Standard (14-inch)" },
+      options: {
+        "Material Finish": "Smooth Italian Calfskin",
+        Size: "Standard (14-inch)",
+      },
       imageUrl:
         "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=800&q=80",
     },
@@ -295,7 +349,10 @@ export async function seedProductsForEmail(targetEmail: string) {
       price: new Prisma.Decimal(145000),
       compareAtPrice: new Prisma.Decimal(165000),
       inventoryCount: 6,
-      options: { "Material Finish": "Smooth Italian Calfskin", Size: "Executive (16-inch)" },
+      options: {
+        "Material Finish": "Smooth Italian Calfskin",
+        Size: "Executive (16-inch)",
+      },
       imageUrl:
         "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=800&q=80",
     },
@@ -305,7 +362,10 @@ export async function seedProductsForEmail(targetEmail: string) {
       price: new Prisma.Decimal(135000),
       compareAtPrice: new Prisma.Decimal(155000),
       inventoryCount: 8,
-      options: { "Material Finish": "Pebble Grained Leather", Size: "Standard (14-inch)" },
+      options: {
+        "Material Finish": "Pebble Grained Leather",
+        Size: "Standard (14-inch)",
+      },
       imageUrl:
         "https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=800&q=80",
     },
@@ -315,7 +375,10 @@ export async function seedProductsForEmail(targetEmail: string) {
       price: new Prisma.Decimal(155000),
       compareAtPrice: new Prisma.Decimal(175000),
       inventoryCount: 4,
-      options: { "Material Finish": "Pebble Grained Leather", Size: "Executive (16-inch)" },
+      options: {
+        "Material Finish": "Pebble Grained Leather",
+        Size: "Executive (16-inch)",
+      },
       imageUrl:
         "https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=800&q=80",
     },
@@ -324,14 +387,26 @@ export async function seedProductsForEmail(targetEmail: string) {
   const toteStock = toteVariants.reduce((sum, v) => sum + v.inventoryCount, 0);
 
   const existingProd2 = await prisma.product.findUnique({
-    where: { businessId_slug: { businessId: business.id, slug: "minimalist-structured-day-tote" } },
+    where: {
+      businessId_slug: {
+        businessId: business.id,
+        slug: "minimalist-structured-day-tote",
+      },
+    },
   });
   if (existingProd2) {
-    await prisma.productVariant.deleteMany({ where: { productId: existingProd2.id } });
+    await prisma.productVariant.deleteMany({
+      where: { productId: existingProd2.id },
+    });
   }
 
   const prod2 = await prisma.product.upsert({
-    where: { businessId_slug: { businessId: business.id, slug: "minimalist-structured-day-tote" } },
+    where: {
+      businessId_slug: {
+        businessId: business.id,
+        slug: "minimalist-structured-day-tote",
+      },
+    },
     update: {
       name: "Minimalist Structured Day Tote",
       categoryId: catTotes.id,
@@ -377,7 +452,10 @@ export async function seedProductsForEmail(targetEmail: string) {
 
   // Product 3: Croc-Embossed Baguette Shoulder Bag (Options: Color, Strap Style)
   const baguetteOptions = [
-    { name: "Color", values: ["Bordeaux Gloss", "Espresso Noir", "Alabaster Cream"] },
+    {
+      name: "Color",
+      values: ["Bordeaux Gloss", "Espresso Noir", "Alabaster Cream"],
+    },
     { name: "Strap Style", values: ["Gold Curb Chain", "Fine Leather Strap"] },
   ];
 
@@ -438,23 +516,41 @@ export async function seedProductsForEmail(targetEmail: string) {
       price: new Prisma.Decimal(90000),
       compareAtPrice: new Prisma.Decimal(110000),
       inventoryCount: 4,
-      options: { Color: "Alabaster Cream", "Strap Style": "Fine Leather Strap" },
+      options: {
+        Color: "Alabaster Cream",
+        "Strap Style": "Fine Leather Strap",
+      },
       imageUrl:
         "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=800&q=80",
     },
   ];
 
-  const baguetteStock = baguetteVariants.reduce((sum, v) => sum + v.inventoryCount, 0);
+  const baguetteStock = baguetteVariants.reduce(
+    (sum, v) => sum + v.inventoryCount,
+    0,
+  );
 
   const existingProd3 = await prisma.product.findUnique({
-    where: { businessId_slug: { businessId: business.id, slug: "croc-embossed-baguette-shoulder-bag" } },
+    where: {
+      businessId_slug: {
+        businessId: business.id,
+        slug: "croc-embossed-baguette-shoulder-bag",
+      },
+    },
   });
   if (existingProd3) {
-    await prisma.productVariant.deleteMany({ where: { productId: existingProd3.id } });
+    await prisma.productVariant.deleteMany({
+      where: { productId: existingProd3.id },
+    });
   }
 
-  const prod3 = await prisma.product.upsert({
-    where: { businessId_slug: { businessId: business.id, slug: "croc-embossed-baguette-shoulder-bag" } },
+  await prisma.product.upsert({
+    where: {
+      businessId_slug: {
+        businessId: business.id,
+        slug: "croc-embossed-baguette-shoulder-bag",
+      },
+    },
     update: {
       name: "Croc-Embossed Baguette Shoulder Bag",
       categoryId: catShoulder.id,
@@ -549,7 +645,10 @@ export async function seedProductsForEmail(targetEmail: string) {
   // Product 5: The Florentine Weekend Duffle (Options: Color, Hardware Finish)
   const duffleOptions = [
     { name: "Color", values: ["Tobacco Tan", "Midnight Black"] },
-    { name: "Hardware Finish", values: ["Antique Brass", "Polished Palladium"] },
+    {
+      name: "Hardware Finish",
+      values: ["Antique Brass", "Polished Palladium"],
+    },
   ];
 
   const duffleVariants = [
@@ -569,7 +668,10 @@ export async function seedProductsForEmail(targetEmail: string) {
       price: new Prisma.Decimal(210000),
       compareAtPrice: new Prisma.Decimal(240000),
       inventoryCount: 5,
-      options: { Color: "Tobacco Tan", "Hardware Finish": "Polished Palladium" },
+      options: {
+        Color: "Tobacco Tan",
+        "Hardware Finish": "Polished Palladium",
+      },
       imageUrl:
         "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=800&q=80",
     },
@@ -589,23 +691,41 @@ export async function seedProductsForEmail(targetEmail: string) {
       price: new Prisma.Decimal(210000),
       compareAtPrice: new Prisma.Decimal(240000),
       inventoryCount: 5,
-      options: { Color: "Midnight Black", "Hardware Finish": "Polished Palladium" },
+      options: {
+        Color: "Midnight Black",
+        "Hardware Finish": "Polished Palladium",
+      },
       imageUrl:
         "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=800&q=80",
     },
   ];
 
-  const duffleStock = duffleVariants.reduce((sum, v) => sum + v.inventoryCount, 0);
+  const duffleStock = duffleVariants.reduce(
+    (sum, v) => sum + v.inventoryCount,
+    0,
+  );
 
   const existingProd5 = await prisma.product.findUnique({
-    where: { businessId_slug: { businessId: business.id, slug: "the-florentine-weekend-duffle" } },
+    where: {
+      businessId_slug: {
+        businessId: business.id,
+        slug: "the-florentine-weekend-duffle",
+      },
+    },
   });
   if (existingProd5) {
-    await prisma.productVariant.deleteMany({ where: { productId: existingProd5.id } });
+    await prisma.productVariant.deleteMany({
+      where: { productId: existingProd5.id },
+    });
   }
 
-  const prod5 = await prisma.product.upsert({
-    where: { businessId_slug: { businessId: business.id, slug: "the-florentine-weekend-duffle" } },
+  await prisma.product.upsert({
+    where: {
+      businessId_slug: {
+        businessId: business.id,
+        slug: "the-florentine-weekend-duffle",
+      },
+    },
     update: {
       name: "The Florentine Weekend Duffle",
       categoryId: catTotes.id,
@@ -652,7 +772,10 @@ export async function seedProductsForEmail(targetEmail: string) {
   // Product 6: The Atelier Courier Saddle Bag (Options: Color, Strap Style)
   const saddleOptions = [
     { name: "Color", values: ["Sienna Rust", "Obsidian Black", "Olive Drab"] },
-    { name: "Strap Style", values: ["Woven Jacquard Strap", "Tonal Saddle Leather"] },
+    {
+      name: "Strap Style",
+      values: ["Woven Jacquard Strap", "Tonal Saddle Leather"],
+    },
   ];
 
   const saddleVariants = [
@@ -682,7 +805,10 @@ export async function seedProductsForEmail(targetEmail: string) {
       price: new Prisma.Decimal(115000),
       compareAtPrice: new Prisma.Decimal(135000),
       inventoryCount: 7,
-      options: { Color: "Obsidian Black", "Strap Style": "Woven Jacquard Strap" },
+      options: {
+        Color: "Obsidian Black",
+        "Strap Style": "Woven Jacquard Strap",
+      },
       imageUrl:
         "https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=800&q=80",
     },
@@ -692,7 +818,10 @@ export async function seedProductsForEmail(targetEmail: string) {
       price: new Prisma.Decimal(115000),
       compareAtPrice: new Prisma.Decimal(135000),
       inventoryCount: 6,
-      options: { Color: "Obsidian Black", "Strap Style": "Tonal Saddle Leather" },
+      options: {
+        Color: "Obsidian Black",
+        "Strap Style": "Tonal Saddle Leather",
+      },
       imageUrl:
         "https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=800&q=80",
     },
@@ -718,17 +847,32 @@ export async function seedProductsForEmail(targetEmail: string) {
     },
   ];
 
-  const saddleStock = saddleVariants.reduce((sum, v) => sum + v.inventoryCount, 0);
+  const saddleStock = saddleVariants.reduce(
+    (sum, v) => sum + v.inventoryCount,
+    0,
+  );
 
   const existingProd6 = await prisma.product.findUnique({
-    where: { businessId_slug: { businessId: business.id, slug: "the-atelier-courier-saddle-bag" } },
+    where: {
+      businessId_slug: {
+        businessId: business.id,
+        slug: "the-atelier-courier-saddle-bag",
+      },
+    },
   });
   if (existingProd6) {
-    await prisma.productVariant.deleteMany({ where: { productId: existingProd6.id } });
+    await prisma.productVariant.deleteMany({
+      where: { productId: existingProd6.id },
+    });
   }
 
   const prod6 = await prisma.product.upsert({
-    where: { businessId_slug: { businessId: business.id, slug: "the-atelier-courier-saddle-bag" } },
+    where: {
+      businessId_slug: {
+        businessId: business.id,
+        slug: "the-atelier-courier-saddle-bag",
+      },
+    },
     update: {
       name: "The Atelier Courier Saddle Bag",
       categoryId: catShoulder.id,
@@ -793,7 +937,9 @@ export async function seedProductsForEmail(targetEmail: string) {
     where: { orderNumber: "ORD-2026-0001" },
   });
   if (order1Existing) {
-    await prisma.orderItem.deleteMany({ where: { orderId: order1Existing.id } });
+    await prisma.orderItem.deleteMany({
+      where: { orderId: order1Existing.id },
+    });
     await prisma.order.delete({ where: { id: order1Existing.id } });
   }
 
@@ -839,7 +985,8 @@ export async function seedProductsForEmail(targetEmail: string) {
             productId: prod1.id,
             variantId: v1?.id,
             productName: prod1.name,
-            variantTitle: v1?.title || "Onyx Black / Medium (28cm) / 24k Polished Gold",
+            variantTitle:
+              v1?.title || "Onyx Black / Medium (28cm) / 24k Polished Gold",
             productSku: v1?.sku || "SAT-ONX-MED-GLD",
             productImage: v1?.imageUrl,
             unitPrice: new Prisma.Decimal(185000),
@@ -850,7 +997,8 @@ export async function seedProductsForEmail(targetEmail: string) {
             productId: prod2.id,
             variantId: v2?.id,
             productName: prod2.name,
-            variantTitle: v2?.title || "Smooth Italian Calfskin / Standard (14-inch)",
+            variantTitle:
+              v2?.title || "Smooth Italian Calfskin / Standard (14-inch)",
             productSku: v2?.sku || "TOTE-SMO-STD",
             productImage: v2?.imageUrl,
             unitPrice: new Prisma.Decimal(125000),
@@ -867,7 +1015,9 @@ export async function seedProductsForEmail(targetEmail: string) {
     where: { orderNumber: "ORD-2026-0002" },
   });
   if (order2Existing) {
-    await prisma.orderItem.deleteMany({ where: { orderId: order2Existing.id } });
+    await prisma.orderItem.deleteMany({
+      where: { orderId: order2Existing.id },
+    });
     await prisma.order.delete({ where: { id: order2Existing.id } });
   }
 
@@ -919,7 +1069,9 @@ export async function seedProductsForEmail(targetEmail: string) {
     where: { orderNumber: "ORD-2026-0003" },
   });
   if (order3Existing) {
-    await prisma.orderItem.deleteMany({ where: { orderId: order3Existing.id } });
+    await prisma.orderItem.deleteMany({
+      where: { orderId: order3Existing.id },
+    });
     await prisma.order.delete({ where: { id: order3Existing.id } });
   }
 
@@ -990,12 +1142,24 @@ export async function seedProductsForEmail(targetEmail: string) {
     `✅ Successfully seeded 6 designer products (with 27 total variants across 5 variant types) and 3 orders for "${business.name}"!\n`,
   );
   console.info("📦 Seeded Products Summary:");
-  console.info("  1. The Saffiano Heritage Satchel (Color, Size, Hardware Finish - 7 Variants)");
-  console.info("  2. Minimalist Structured Day Tote (Material Finish, Size - 4 Variants)");
-  console.info("  3. Croc-Embossed Baguette Shoulder Bag (Color, Strap Style - 6 Variants)");
-  console.info("  4. Limited Edition Hand-Woven Sculptural Bucket Bag (Numbered Series)");
-  console.info("  5. The Florentine Weekend Duffle (Color, Hardware Finish - 4 Variants)");
-  console.info("  6. The Atelier Courier Saddle Bag (Color, Strap Style - 6 Variants)");
+  console.info(
+    "  1. The Saffiano Heritage Satchel (Color, Size, Hardware Finish - 7 Variants)",
+  );
+  console.info(
+    "  2. Minimalist Structured Day Tote (Material Finish, Size - 4 Variants)",
+  );
+  console.info(
+    "  3. Croc-Embossed Baguette Shoulder Bag (Color, Strap Style - 6 Variants)",
+  );
+  console.info(
+    "  4. Limited Edition Hand-Woven Sculptural Bucket Bag (Numbered Series)",
+  );
+  console.info(
+    "  5. The Florentine Weekend Duffle (Color, Hardware Finish - 4 Variants)",
+  );
+  console.info(
+    "  6. The Atelier Courier Saddle Bag (Color, Strap Style - 6 Variants)",
+  );
   console.info("📋 Seeded Orders Summary:");
   console.info("  - ORD-2026-0001: ₦313,500 (Completed / Paid / Delivered)");
   console.info("  - ORD-2026-0002: ₦115,000 (Confirmed / Paid / Store Pickup)");

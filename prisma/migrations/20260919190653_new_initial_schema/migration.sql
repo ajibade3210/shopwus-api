@@ -603,6 +603,9 @@ CREATE TABLE "User" (
     "googleId" TEXT,
     "resetToken" TEXT,
     "resetExpiringAt" TIMESTAMP(3),
+    "verificationToken" TEXT,
+    "verificationExpires" TIMESTAMP(3),
+    "emailVerified" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 

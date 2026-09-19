@@ -4,12 +4,14 @@ import argon2 from "argon2";
 export async function seedBusiness(prisma: PrismaClient) {
   console.info("🎨 Seeding Elena Vance & Atelier Forma Studio...");
 
-  const passwordHash = await argon2.hash("Password123!");
+  const passwordHash = await argon2.hash("@Shopwus2026");
 
   // 1. Create or update Demo Studio Owner User
   const user = await prisma.user.upsert({
     where: { email: "elena@atelierforma.design" },
     update: {
+      passwordHash,
+      emailVerified: true,
       firstName: "Elena",
       lastName: "Vance",
       phone: "+2348003676284",
@@ -19,6 +21,7 @@ export async function seedBusiness(prisma: PrismaClient) {
     create: {
       email: "elena@atelierforma.design",
       passwordHash,
+      emailVerified: true,
       firstName: "Elena",
       lastName: "Vance",
       phone: "+2348003676284",
@@ -687,23 +690,37 @@ export async function seedBusiness(prisma: PrismaClient) {
     }
   }
 
-  // 14. Broadcast Campaign
-  const existingCampaign = await prisma.broadcastCampaign.findFirst({
-    where: {
-      businessId: business.id,
+  // 14. Broadcast Campaigns (at least 2 items)
+  const campaigns = [
+    {
       title: "Autumn 2026 Atelier Case Studies & Print Monograph Release",
+      channel: "EMAIL",
+      recipientCount: 420,
+      status: "COMPLETED",
     },
-  });
-  if (!existingCampaign) {
-    await prisma.broadcastCampaign.create({
-      data: {
+    {
+      title: "Exclusive VIP Atelier Preview: Handcrafted Leather Capsule",
+      channel: "EMAIL",
+      recipientCount: 650,
+      status: "COMPLETED",
+    },
+  ];
+
+  for (const camp of campaigns) {
+    const existing = await prisma.broadcastCampaign.findFirst({
+      where: {
         businessId: business.id,
-        title: "Autumn 2026 Atelier Case Studies & Print Monograph Release",
-        channel: "EMAIL",
-        recipientCount: 420,
-        status: "COMPLETED",
+        title: camp.title,
       },
     });
+    if (!existing) {
+      await prisma.broadcastCampaign.create({
+        data: {
+          ...camp,
+          businessId: business.id,
+        },
+      });
+    }
   }
 
   // 15. Storefront Categories

@@ -106,7 +106,7 @@ export const FEATURED_STUDIOS_SEED_DATA: FeaturedStudioSeedData[] = [
 export async function seedFeaturedStudios(prisma: PrismaClient): Promise<void> {
   console.info("🌟 Seeding Featured Showcase Studios...");
 
-  const defaultPasswordHash = await argon2.hash("Password123!");
+  const defaultPasswordHash = await argon2.hash("@Shopwus2026");
 
   for (const studio of FEATURED_STUDIOS_SEED_DATA) {
     // 1. Create or update the owner user
@@ -115,6 +115,8 @@ export async function seedFeaturedStudios(prisma: PrismaClient): Promise<void> {
       update: {
         firstName: studio.ownerName.first,
         lastName: studio.ownerName.last,
+        passwordHash: defaultPasswordHash,
+        emailVerified: true,
         role: "OWNER",
         isActive: true,
       },
@@ -124,6 +126,7 @@ export async function seedFeaturedStudios(prisma: PrismaClient): Promise<void> {
         firstName: studio.ownerName.first,
         lastName: studio.ownerName.last,
         role: "OWNER",
+        emailVerified: true,
         isActive: true,
       },
     });
@@ -133,6 +136,7 @@ export async function seedFeaturedStudios(prisma: PrismaClient): Promise<void> {
       where: { slug: studio.slug },
       update: {
         name: studio.name,
+        email: studio.ownerEmail,
         tagline: studio.tagline,
         description: studio.description,
         location: studio.location,
@@ -144,6 +148,7 @@ export async function seedFeaturedStudios(prisma: PrismaClient): Promise<void> {
       create: {
         slug: studio.slug,
         name: studio.name,
+        email: studio.ownerEmail,
         tagline: studio.tagline,
         description: studio.description,
         location: studio.location,
